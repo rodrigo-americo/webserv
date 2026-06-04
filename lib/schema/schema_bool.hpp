@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 17:25:06 by ighannam          #+#    #+#             */
-/*   Updated: 2026/05/29 19:19:41 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/03 15:42:13 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,18 @@ namespace schema
                 false_indicators.push_back("false");
             };
             ~schema_bool() {};
-            schema_bool& truthy(std::string msg = "")
+            schema_bool& truthy(const std::string& msg = "")
             {
                 struct functor_validator_true : public base::functor_validator
                 {
                     std::string _msg;
                     std::vector<std::string> _true_indicators;
-                    functor_validator_true(std::string& msg, std::vector<std::string> true_indicators) : _msg(msg), _true_indicators(true_indicators) {};
-                    std::string operator()(bool value)
+                    functor_validator_true(const std::string& msg, const std::vector<std::string>& true_indicators) : _msg(msg), _true_indicators(true_indicators) {};
+                    functor_validator* clone() const
+                    {
+                        return new functor_validator_true(*this);
+                    }
+                    std::string operator()(const bool& value)
                     {
                         if (!value)
                             return _msg.empty() ? utils::to_string(value) + " must be true." : _msg;
@@ -51,14 +55,18 @@ namespace schema
                 this->addValidator(new functor_validator_true(msg, true_indicators));
                 return *this;
             }
-            schema_bool& falsy(std::string msg = "")
+            schema_bool& falsy(const std::string& msg = "")
             {
                 struct functor_validator_false : public base::functor_validator
                 {
                     std::string _msg;
                     std::vector<std::string> _false_indicators;
-                    functor_validator_false(std::string& msg, std::vector<std::string> false_indicators) : _msg(msg), _false_indicators(false_indicators) {};
-                    std::string operator()(bool value)
+                    functor_validator_false(const std::string& msg, const std::vector<std::string>& false_indicators) : _msg(msg), _false_indicators(false_indicators) {};
+                    functor_validator* clone() const
+                    {
+                        return new functor_validator_false(*this);
+                    }
+                    std::string operator()(const bool& value)
                     {
                         if (value)
                             return _msg.empty() ? utils::to_string(value) + " must be false." : _msg;

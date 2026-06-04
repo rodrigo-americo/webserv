@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/28 19:11:32 by brunofer          #+#    #+#             */
-/*   Updated: 2026/05/29 17:18:44 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/03 13:10:21 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ namespace schema
 {		
 	namespace detail
 	{
-
 		struct error
 		{
 			std::string title;
@@ -66,12 +65,14 @@ namespace schema
 			public:
 				struct functor_validator
 				{
-					virtual std::string operator()(T value) = 0;
-					virtual ~functor_validator() {};
+					virtual std::string operator()(const T& value) = 0;
+					virtual functor_validator* clone() const = 0;
+					virtual ~functor_validator() { };
 				};
 				struct functor_refine
 				{
-					virtual bool operator()(T value, std::string msg) = 0;
+					virtual bool operator()(const T& value) = 0;
+					virtual functor_refine* clone() const = 0;
 					virtual ~functor_refine() {};
 				};
 			protected:
@@ -89,9 +90,8 @@ namespace schema
 					for (size_t i = 0; i < validators.size(); i++)
 					{
 						std::string msg = (*validators[i])(value);
-						delete validators[i];
 						if (!msg.empty())
-							errors.push_back(error(field_name, msg));		
+							errors.push_back(error(field_name, msg));	
 					}
 					if (errors.empty())
 						return result<T>::success(value);
@@ -105,21 +105,40 @@ namespace schema
 					struct functor_validator_refine: public functor_validator
 					{
 						std::string _msg;
-						functor_validator_refine(std::string& message) : _msg(message) {};
-						std::string operator()(T value)
+						functor_refine* _refine_validator;
+						functor_validator_refine(const std::string& message, functor_refine* refine_validator) : _msg(message), _refine_validator(refine_validator) {};
+						~functor_validator_refine() { delete _refine_validator; }
+						functor_validator* clone() const
 						{
-							bool item = (*refine_validator)(value, _msg);
-							delete refine_validator;
+							return new functor_validator_refine(_msg, _refine_validator->clone());
+						};
+						std::string operator()(const T& value)
+						{
+							bool item = (*_refine_validator)(value);
 							return item ? "" : _msg;
 						}
 					};
-					addValidator(new functor_validator_refine(msg));
+					addValidator(new functor_validator_refine(msg, refine_validator));
 					return static_cast<Derived&>(*this);
 				}
+				schema_base() {};
+				schema_base(const schema_base& other)
+				{
+					if (this != &other)
+					{
+						for (size_t i = 0; i < other.validators.size(); i++)
+							this->validators.push_back(other.validators[i]->clone());
+					}
+				}
+				virtual ~schema_base()
+				{
+					for (size_t i = 0; i < validators.size(); i++)
+					{
+						delete validators[i];
+					}
+					validators.clear();					
+				}
 		};
-
-
-		
 	}
 }
 
