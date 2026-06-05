@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 15:40:55 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/04 15:06:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/04 18:07:11 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,13 +184,7 @@ namespace schema
                 
                 schema_double& eps(double eps_) { _eps = eps_; return *this; };
         };
-    }
-    
-
-    
-    
+    }    
 }
-
-
 
 #endif
