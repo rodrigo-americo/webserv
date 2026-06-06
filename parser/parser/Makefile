@@ -35,6 +35,7 @@ fclean: clean
 re: fclean all
 
 valrind: re
-	valgrind --track-origins=yes --show-leak-kinds=all --leak-check=full ./$(NAME)
+	@clear
+	valgrind -q --track-origins=yes --show-leak-kinds=all --leak-check=full ./$(NAME) ../lexer/example.config
 
 .PHONY: all clean fclean re
