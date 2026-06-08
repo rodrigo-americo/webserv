@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 15:00:29 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/04 14:32:43 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/07 21:40:30 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,18 @@
 
 namespace utils
 {
-    template <typename T>
-    std::string to_string(T entry)
-    {
-        std::stringstream ss;
-        ss << std::boolalpha << entry;
-        return ss.str();
-    }
+	template <typename T>
+	std::string to_string(T entry)
+	{
+		std::stringstream ss;
+		ss << std::boolalpha << entry;
+		return ss.str();
+	}
+
+	std::string to_string(bool entry)
+	{
+		return entry ? "true" : "false";
+	}
 
     template <typename T>
     T abs(T entry)

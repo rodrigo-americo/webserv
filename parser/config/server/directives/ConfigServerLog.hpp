@@ -1,38 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   singleton.hpp                                      :+:      :+:    :+:   */
+/*   ConfigServerLog.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/06 14:58:01 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/08 01:15:13 by bruno-valer      ###   ########.fr       */
+/*   Created: 2026/06/07 19:20:10 by bruno-valer       #+#    #+#             */
+/*   Updated: 2026/06/07 19:33:07 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SINGLETON_HPP
-# define SINGLETON_HPP
+#ifndef CONFIG_SERVER_LOG_HPP
+# define CONFIG_SERVER_LOG_HPP
 
-namespace patterns
-{
-	template <typename Derived>
-	class singleton
-	{
-	protected:
-		singleton() {};
-		~singleton() {};
+# include <string>
 
-		singleton(const singleton &);
-		singleton	&operator=(const singleton &);
-
+class ConfigServerLog {
+	private:
+		std::string _path;
+		std::string _format; // "main", "combined", etc
 	public:
-
-		static Derived	&getInstance()
-		{
-			static Derived	instance;
-			return instance;
-		}
-	};
-}
+};
 
 #endif

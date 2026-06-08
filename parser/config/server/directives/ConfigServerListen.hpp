@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ServerListen.hpp                                   :+:      :+:    :+:   */
+/*   ConfigServerListen.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/06 13:39:21 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:50:12 by bruno-valer      ###   ########.fr       */
+/*   Created: 2026/06/07 19:19:58 by bruno-valer       #+#    #+#             */
+/*   Updated: 2026/06/08 01:12:27 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_LISTEN_HPP
-# define SERVER_LISTEN_HPP
+#ifndef CONFIG_SERVER_LISTEN_HPP
+# define CONFIG_SERVER_LISTEN_HPP
 
 # include <string>
 
-struct ServerListenKeepAlive
+struct ConfigServerListenKeepAlive
 {
 	enum type
 	{
@@ -26,8 +26,10 @@ struct ServerListenKeepAlive
 };
 
 
-class ServerListen
+class ConfigServerListen
 {
+	public:
+		typedef ConfigServerListenKeepAlive	KeepAlive;
 	protected:
 		/// Endereço IP onde o socket vai fazer bind.
 		/// Exemplos: "0.0.0.0" (todos IPv4), "::" (todos IPv6),
@@ -87,7 +89,7 @@ class ServerListen
 		bool _bind = false;
 
 		// ----------------------------------------------------------------
-		// Pares chave=valor — configurados via setsockopt antes de bind()
+		// Pares chave=valor — configurados void setsockopt antes de bind()
 		// salvo indicação contrária
 		// ----------------------------------------------------------------
 
@@ -109,13 +111,13 @@ class ServerListen
 		std::string _accept_filter;
 
 		// ----------------------------------------------------------------
-		// TCP Keepalive — aplicado após accept() via setsockopt
+		// TCP Keepalive — aplicado após accept() void setsockopt
 		// ----------------------------------------------------------------
 
 		/// Modo de operação do TCP keepalive.
 		/// OFF: desabilitado. ON: usa valores do kernel.
 		/// CUSTOM: usa os valores explícitos abaixo.
-		ServerListenKeepAlive::type _keepalive = ServerListenKeepAlive::OFF;
+		ConfigServerListenKeepAlive::type _keepalive = ConfigServerListenKeepAlive::OFF;
 
 		/// Tempo de ociosidade antes de iniciar os probes (TCP_KEEPIDLE).
 		/// Em segundos. Valor 0 indica uso do padrão do kernel.
@@ -136,65 +138,103 @@ class ServerListen
 		/// Retorna o endereço IP ou caminho unix onde o socket fará bind.
 		const std::string& address() const { return _address; }
 
+		void setAddress(const std::string &value) { _address = value; }
+
 		/// Retorna a porta onde o socket vai escutar.
 		/// Retorna 0 se for unix socket.
 		size_t port() const { return _port; }
 
+		void setPort(size_t value) { _port = value; }
+
 		/// Retorna true se for um unix domain socket (AF_UNIX).
 		bool is_unix() const { return _is_unix; }
+
+		void setIs_unix(bool value) { _is_unix = value; }
 
 		/// Retorna true se TLS deve ser aplicado após accept().
 		bool is_ssl() const { return _ssl; }
 
+		void setIs_ssl(bool value) { _ssl = value; }
+
 		/// Retorna true se HTTP/2 deve ser negociado via ALPN.
 		bool is_http2() const { return _http2; }
+
+		void setIs_http2(bool value) { _http2 = value; }
 
 		/// Retorna true se este listen é o virtual host padrão.
 		bool is_default_server() const { return _default_server; }
 
+		void setIs_default_server(bool value) { _default_server = value; }
+
 		/// Retorna true se SO_REUSEPORT deve ser ativado antes de bind().
 		bool is_reuseport() const { return _reuseport; }
+
+		void setIs_reuseport(bool value) { _reuseport = value; }
 
 		/// Retorna true se IPV6_V6ONLY deve ser ativado antes de bind().
 		bool is_ipv6only() const { return _ipv6only; }
 
+		void setIs_ipv6only(bool value) { _ipv6only = value; }
+
 		/// Retorna true se PROXY Protocol deve ser lido após accept().
 		bool is_proxy_protocol() const { return _proxy_protocol; }
+
+		void setIs_proxy_protocol(bool value) { _proxy_protocol = value; }
 
 		/// Retorna true se TCP_DEFER_ACCEPT deve ser ativado antes de listen().
 		bool is_deferred() const { return _deferred; }
 
+		void setIs_deferred(bool value) { _deferred = value; }
+
 		/// Retorna true se bind explícito deve ser forçado neste endereço.
 		bool is_bind() const { return _bind; }
 
+		void setIs_bind(bool value) { _bind = value; }
+
 		/// Retorna o tamanho da fila de conexões pendentes para listen().
 		int backlog() const { return _backlog; }
+
+		void setBacklog(int value) { _backlog = value; }
 
 		/// Retorna o tamanho do buffer de recepção em bytes (SO_RCVBUF).
 		/// Valor 0 indica uso do padrão do SO.
 		int rcvbuf() const { return _rcvbuf; }
 
+		void setRcvbuf(int value) { _rcvbuf = value; }
+
 		/// Retorna o tamanho do buffer de envio em bytes (SO_SNDBUF).
 		/// Valor 0 indica uso do padrão do SO.
 		int sndbuf() const { return _sndbuf; }
 
+		void setSndbuf(int value) { _sndbuf = value; }
+
 		/// Retorna o nome do accept filter (FreeBSD). String vazia = desabilitado.
 		const std::string& accept_filter() const { return _accept_filter; }
 
+		void setAccept_filter(const std::string &value) { _accept_filter = value; }
+
 		/// Retorna o modo de operação do TCP keepalive.
-		ServerListenKeepAlive::type keepalive() const { return _keepalive; }
+		ConfigServerListenKeepAlive::type keepalive() const { return _keepalive; }
+
+		void setKeepalive(ConfigServerListenKeepAlive::type type) { _keepalive = type; }
 
 		/// Retorna o tempo de ociosidade antes dos probes (TCP_KEEPIDLE).
 		/// Em segundos. Valor 0 = padrão do kernel. Só válido se keepalive = CUSTOM.
 		int keepalive_time() const { return _keepalive_time; }
 
+		void keepalive_time(int value) { _keepalive_time = value; }
+
 		/// Retorna o intervalo entre probes (TCP_KEEPINTVL).
 		/// Em segundos. Valor 0 = padrão do kernel. Só válido se keepalive = CUSTOM.
 		int keepalive_intvl() const { return _keepalive_intvl; }
 
+		void keepalive_intvl(int value) { _keepalive_intvl = value; }
+
 		/// Retorna o número de probes antes de encerrar a conexão (TCP_KEEPCNT).
 		/// Valor 0 = padrão do kernel. Só válido se keepalive = CUSTOM.
 		int keepalive_probes() const { return _keepalive_probes; }
+
+		void keepalive_probes(int value) { _keepalive_probes = value; }
 };
 
 #endif

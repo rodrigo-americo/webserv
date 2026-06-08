@@ -8,7 +8,7 @@
 
 int main(void){
 	struct pollfd fds[10];
-	int count = 0;	
+	int count = 0;
 	int listen_fd = socket(AF_INET, SOCK_STREAM,0);
 	if (listen_fd < 0){
 		std::cerr << "socket() falhou" << std::endl;
@@ -16,13 +16,13 @@ int main(void){
 	}
 	int opt = 1;
 	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-	
+
 	struct sockaddr_in addr;
 	std::memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(8080);
 	addr.sin_addr.s_addr = INADDR_ANY;
-	
+
 	if (bind(listen_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0){
 		std::cerr << "bind() falhou" << std::endl;
 		return (1);
@@ -32,7 +32,7 @@ int main(void){
 		std::cerr << "listen() falhou" << std::endl;
 		return (1);
 	}
-	
+
 	std::cout << "Servidor ouvindo na porta 8080..." << std::endl;
 	struct sockaddr_in client_addr;
 	fds[0].fd = listen_fd;

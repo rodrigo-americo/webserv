@@ -1,30 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   ConfigServerErrorPage.hpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/06 14:52:37 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:54:38 by bruno-valer      ###   ########.fr       */
+/*   Created: 2026/06/07 19:19:39 by bruno-valer       #+#    #+#             */
+/*   Updated: 2026/06/07 19:33:19 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-# define SERVER_HPP
 
+#ifndef CONFIG_SERVER_ERROR_PAGE_HPP
+# define CONFIG_SERVER_ERROR_PAGE_HPP
+
+# include <string>
 # include <vector>
 
-# include "ServerListen.hpp"
-
-class Server
-{
-private:
-	std::vector<ServerListen>	_listeners;
-
-public:
-	Server() {};
-	~Server() {};
+struct ConfigServerErrorPage {
+	private:
+		std::vector<int>	_codes;		// [404], [500, 502, 503]
+		std::string			_uri;		// "/404.html"
 };
 
 #endif
