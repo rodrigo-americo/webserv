@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 11:21:30 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/09 23:54:58 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/10 14:08:16 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,19 +51,31 @@ class Socket: public segregation::has_type<SocketType::type>
 		Socket(type _type, int fd): base(_type), _fd(fd), _addr(), _errors() {};
 		~Socket() { _close(); };
 
+		void	read(size_t bytes, std::string &buff) const
+		{
+			char buffer[bytes];
+			::bzero(buffer, bytes);
+			::read(_fd, buffer, bytes);
+			buff += buffer;
+		}
 
-	int		fd() const { return _fd; }
+		void	write(const std::string &data) const
+		{
+			::write(_fd, data.c_str(), data.size());
+		}
 
-	const SocketAddress	&addr() const { return _addr; }
-	SocketAddress	&addr() { return _addr; }
+		int		fd() const { return _fd; }
 
-	bool							hasErrors() const { return !_errors.empty(); }
-	const std::vector<std::string>	&errors() const { return _errors; }
-	void							printErrors() const
-	{
-		for (size_t i = 0; i < _errors.size(); i++)
-			std::cerr << _errors[i] << "\n";
-	}
+		const SocketAddress	&addr() const { return _addr; }
+		SocketAddress	&addr() { return _addr; }
+
+		bool							hasErrors() const { return !_errors.empty(); }
+		const std::vector<std::string>	&errors() const { return _errors; }
+		void							printErrors() const
+		{
+			for (size_t i = 0; i < _errors.size(); i++)
+				std::cerr << _errors[i] << "\n";
+		}
 };
 
 #endif

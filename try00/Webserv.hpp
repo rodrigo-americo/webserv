@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 00:53:35 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/09 11:18:46 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/10 21:45:45 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,28 +19,10 @@ ConfigServerListen	createTestListenner()
 {
 	ConfigServerListen	listenner;
 
-	listenner.setAddress("0.0.0.0");
-	listenner.setPort(8080);
-
-	listenner.setIs_unix(false);
-
-	listenner.setBacklog(10);
-
-	listenner.setIs_ssl(false);
-	listenner.setIs_http2(false);
-	listenner.setIs_default_server(false);
-
-	listenner.setIs_reuseport(false);
-	listenner.setIs_ipv6only(false);
-
-	listenner.setIs_proxy_protocol(false);
-	listenner.setIs_deferred(false);
-	listenner.setIs_bind(false);
-
-	listenner.setRcvbuf(0);
-	listenner.setSndbuf(0);
-
-	listenner.setKeepalive(ConfigServerListenKeepAlive::OFF);
+	listenner.address = "0.0.0.0";
+	listenner.port = 8080;
+	listenner.is_ipv4 = true;
+	listenner.backlog = 10;
 }
 
 class Webserv
