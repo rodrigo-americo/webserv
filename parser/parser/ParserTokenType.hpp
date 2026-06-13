@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:52:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:04:37 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:44:35 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,7 +172,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_BOOL_OFF",
 };
 
-std::ostream	&operator<<(std::ostream &os, ParserTokenType::type type)
+inline std::ostream	&operator<<(std::ostream &os, ParserTokenType::type type)
 {
 	os << ParserTokenTypeStr[type];
 	return os;

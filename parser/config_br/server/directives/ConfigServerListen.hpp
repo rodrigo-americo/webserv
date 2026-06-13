@@ -6,13 +6,14 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/07 19:19:58 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:27:18 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:44:09 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIG_SERVER_LISTEN_HPP
 # define CONFIG_SERVER_LISTEN_HPP
 
+# include "utils.hpp"
 # include <string>
 
 struct ConfigServerListenKeepAlive
@@ -147,7 +148,7 @@ struct ConfigServerListen
 		keepalive_intvl(0), keepalive_probes(0) {}
 };
 
-std::ostream	&operator<<(std::ostream &os, const ConfigServerListen &config)
+inline std::ostream	&operator<<(std::ostream &os, const ConfigServerListen &config)
 {
 	os << "address: " << utils::to_string(config.address) << "\n"
 		<< "port: " << utils::to_string(config.port) << "\n"

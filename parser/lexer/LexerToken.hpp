@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:44:53 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:00:28 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:44:23 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ class LexerToken: public BaseToken<LexerTokenType::type>
  * @param token Token a ser exibido.
  * @return Referência para a stream.
  */
-std::ostream	&operator<<(std::ostream &os, LexerToken token)
+inline std::ostream	&operator<<(std::ostream &os, LexerToken token)
 {
 	size_t		size = token.getContent().size();
 	bool		has_endl = token.getContent()[size - 1] == '\n';

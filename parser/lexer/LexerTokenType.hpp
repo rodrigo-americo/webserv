@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:51:17 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 13:58:07 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:44:29 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ static const char* LexerTokenTypeStr[] =
 	"END",
 };
 
-std::ostream	&operator<<(std::ostream &os, LexerTokenType::type type)
+inline std::ostream	&operator<<(std::ostream &os, LexerTokenType::type type)
 {
 	os << LexerTokenTypeStr[type];
 	return os;

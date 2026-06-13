@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:30:58 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:45:19 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -378,18 +378,18 @@ namespace utils
 
 }
 
-std::ostream	&operator<<(std::ostream &os, const utils::str &_str)
+inline std::ostream	&operator<<(std::ostream &os, const utils::str &_str)
 {
 	os << _str.string();
 	return os;
 }
 
-std::istream	&operator>>(std::istream &is, utils::str &_str)
+inline std::istream	&operator>>(std::istream &is, utils::str &_str)
 {
 	is >> _str.string();
 	return is;
 }
 
-std::string		operator+(const std::string &string, const utils::str &_str) { std::string copy(string); return copy += _str.string(); }
+inline std::string		operator+(const std::string &string, const utils::str &_str) { std::string copy(string); return copy += _str.string(); }
 
 #endif
