@@ -12,6 +12,7 @@ class ConfigNode: public segregation::has_name, public segregation::has_errors{
     public:
         ConfigNode() {}
         virtual ~ConfigNode(){};
+        void addError(const std::string& msg) { _collect(segregation::error("", msg)); }
 };
 
 class ConfigContainer : public ConfigNode{

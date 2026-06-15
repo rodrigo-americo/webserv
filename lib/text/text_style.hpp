@@ -36,7 +36,7 @@ namespace text
 			void	setColor(double r, double g, double b) { _color = {r, g, b}; }
 			void	setColor(std::array<double, 3> arr) { _color = std::move(arr); }
 
-			rgb	interpolate(const rgb &other, double factor) const { return rgb(utils::lerp(_color, other._color, factor)); }
+			rgb	interpolate(const rgb &other, double factor) const { return rgb(utils::lerp(_color[0], other._color[0], factor), utils::lerp(_color[1], other._color[1], factor), utils::lerp(_color[2], other._color[2], factor)); }
 
 			std::string	toAnsi() const
 			{

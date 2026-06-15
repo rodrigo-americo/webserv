@@ -169,7 +169,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_BOOL_OFF",
 };
 
-std::ostream	&operator<<(std::ostream &os, ParserTokenType type)
+inline std::ostream	&operator<<(std::ostream &os, ParserTokenType type)
 {
 	os << ParserTokenTypeStr[type];
 	return os;

@@ -12,6 +12,7 @@ class EventsConfig: public ConfigLeaf{
         IOMultiplexer _use;
         size_t _worker_connections;
     public:
+        EventsConfig() : _multi_accept(false), _use(IO_SELECT), _worker_connections(0) {}
         void setMultiAccept(bool multi_accept)           { _multi_accept = multi_accept; }
         void setUse(IOMultiplexer use)                   { _use = use; }
         void setWorkerConnections(size_t connections)    { _worker_connections = connections; }

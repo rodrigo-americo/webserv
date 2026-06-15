@@ -16,9 +16,10 @@ class WebServerConfig : public ConfigContainer {
 
         const GlobalConfig* getGlobal() const { return _global; }
 
-        std::list<ServerConfig*> getServers() const {
+        const std::list<ServerConfig*>& getServers() const {
+            static const std::list<ServerConfig*> empty;
             if (!_global || !_global->getHttp())
-                return std::list<ServerConfig*>();
+                return empty;
             return _global->getHttp()->getServers();
         }
 

@@ -109,6 +109,17 @@ public:
 	 * @param error Mensagem de erro.
 	 */
 	void	addError(const std::string &error) { _errors.push_back(error); }
+
+	/**
+	 * @brief Aplica um visitor externo na raiz da AST.
+	 *
+	 * @param visitor Visitor a ser executado.
+	 */
+	void	applyVisitor(ParserVisitorBase &visitor)
+	{
+		if (_root)
+			_root->accept(visitor);
+	}
 };
 
 #endif

@@ -17,11 +17,10 @@ enum LocationModifier{
 };
 
 enum IOMultiplexer{
-    //(Linux)
-    SELECT,
-    POLL,
-    EPOLL,
-    KQUEUE, // (macOS/BSD)
+    IO_SELECT,
+    IO_POLL,
+    IO_EPOLL,
+    IO_KQUEUE,
 };
 
 #endif
