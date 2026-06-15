@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserTokenType.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:52:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:44:35 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/15 13:42:12 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

@@ -15,7 +15,7 @@ void ConfigBuilderVisitor::visit(Block& block)
 
     switch (block.name.getType())
     {
-        case PT_MAIN:
+        case ParserTokenType::PT_MAIN:
         {
             WebServerConfig* ws = new WebServerConfig();
             GlobalConfig* gc = new GlobalConfig();
@@ -24,7 +24,7 @@ void ConfigBuilderVisitor::visit(Block& block)
             node = gc;
             break;
         }
-        case PT_HTTP:
+        case ParserTokenType::PT_HTTP:
         {
             HttpConfig* http = new HttpConfig();
             if (!_stack.empty())
@@ -32,7 +32,7 @@ void ConfigBuilderVisitor::visit(Block& block)
             node = http;
             break;
         }
-        case PT_EVENTS:
+        case ParserTokenType::PT_EVENTS:
         {
             EventsConfig* ec = new EventsConfig();
             if (!_stack.empty())
@@ -40,7 +40,7 @@ void ConfigBuilderVisitor::visit(Block& block)
             node = ec;
             break;
         }
-        case PT_LOCATION:
+        case ParserTokenType::PT_LOCATION:
         {
             LocationConfig* lc = new LocationConfig();
             // values[0] may be a modifier token or the path; values[1] is path if modifier present
@@ -51,11 +51,11 @@ void ConfigBuilderVisitor::visit(Block& block)
             }
             else if (block.values.size() >= 2)
             {
-                ParserTokenType mod = block.values[0].getType();
-                if (mod == PT_MOD_EXACT)       lc->setModifier(MOD_EXACT);
-                else if (mod == PT_MOD_PREFIX) lc->setModifier(MOD_PREFIX);
-                else if (mod == PT_MOD_REGEX)    lc->setModifier(MOD_REGEX);
-                else if (mod == PT_MOD_REGEX_CI) lc->setModifier(MOD_REGEX_CI);
+                ParserTokenType::type mod = block.values[0].getType();
+                if (mod == ParserTokenType::PT_MOD_EXACT)       lc->setModifier(MOD_EXACT);
+                else if (mod == ParserTokenType::PT_MOD_PREFIX) lc->setModifier(MOD_PREFIX);
+                else if (mod == ParserTokenType::PT_MOD_REGEX)    lc->setModifier(MOD_REGEX);
+                else if (mod == ParserTokenType::PT_MOD_REGEX_CI) lc->setModifier(MOD_REGEX_CI);
                 else                           lc->setModifier(MOD_NONE);
                 lc->setPath(block.values[1].getContent());
             }
@@ -64,7 +64,7 @@ void ConfigBuilderVisitor::visit(Block& block)
             node = lc;
             break;
         }
-        case PT_SERVER:
+        case ParserTokenType::PT_SERVER:
         {
             ServerConfig* serconfig = new ServerConfig();
             if (!_stack.empty())
@@ -72,7 +72,7 @@ void ConfigBuilderVisitor::visit(Block& block)
             node = serconfig;
             break;
         }
-        case PT_UPSTREAM:
+        case ParserTokenType::PT_UPSTREAM:
         {
             UpstreamConfig* upconfig = new UpstreamConfig();
             if (!_stack.empty())
@@ -106,21 +106,21 @@ void ConfigBuilderVisitor::visit(Directive& directive)
     switch (directive.name.getType())
     {
         // GlobalConfig
-        case PT_WORKER_PROCESSES:
+        case ParserTokenType::PT_WORKER_PROCESSES:
         {
             GlobalConfig* gc = dynamic_cast<GlobalConfig*>(top);
             if (gc)
                 gc->setWorkers(std::atoi(directive.values[0].getContent().c_str()));
             break;
         }
-        case PT_ERROR_LOG:
+        case ParserTokenType::PT_ERROR_LOG:
         {
             GlobalConfig* gc = dynamic_cast<GlobalConfig*>(top);
             if (gc)
                 gc->setErrorLog(directive.values[0].getContent());
             break;
         }
-        case PT_PID:
+        case ParserTokenType::PT_PID:
         {
             GlobalConfig* gc = dynamic_cast<GlobalConfig*>(top);
             if (gc)
@@ -129,21 +129,21 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
 
         // EventsConfig
-        case PT_WORKER_CONNECTIONS:
+        case ParserTokenType::PT_WORKER_CONNECTIONS:
         {
             EventsConfig* ec = dynamic_cast<EventsConfig*>(top);
             if (ec)
                 ec->setWorkerConnections(std::atoi(directive.values[0].getContent().c_str()));
             break;
         }
-        case MULTI_ACCEPT:
+        case ParserTokenType::MULTI_ACCEPT:
         {
             EventsConfig* ec = dynamic_cast<EventsConfig*>(top);
             if (ec)
-                ec->setMultiAccept(directive.values[0].getType() == PT_BOOL_ON);
+                ec->setMultiAccept(directive.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         }
-        case PT_USE:
+        case ParserTokenType::PT_USE:
         {
             EventsConfig* ec = dynamic_cast<EventsConfig*>(top);
             if (ec)
@@ -158,14 +158,14 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
 
         // HttpConfig
-        case PT_INCLUDE:
+        case ParserTokenType::PT_INCLUDE:
         {
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
             if (hc)
                 hc->setInclude(directive.values[0].getContent());
             break;
         }
-        case KEEPALIVE_TIMEOUT:
+        case ParserTokenType::KEEPALIVE_TIMEOUT:
         {
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
             if (hc)
@@ -174,7 +174,7 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
 
         // ServerConfig
-        case PT_LISTEN:
+        case ParserTokenType::PT_LISTEN:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
@@ -186,21 +186,21 @@ void ConfigBuilderVisitor::visit(Directive& directive)
             }
             break;
         }
-        case PT_ERROR_PAGE:
+        case ParserTokenType::PT_ERROR_PAGE:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc && directive.values.size() >= 2)
                 sc->addErrorPage(std::atoi(directive.values[0].getContent().c_str()), directive.values[1].getContent());
             break;
         }
-        case PT_CLIENT_MAX_BODY_SIZE:
+        case ParserTokenType::PT_CLIENT_MAX_BODY_SIZE:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
                 sc->setClientMaxBodySize(std::atoi(directive.values[0].getContent().c_str()));
             break;
         }
-        case PT_SERVER_NAME:
+        case ParserTokenType::PT_SERVER_NAME:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
@@ -212,21 +212,21 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
 
         // LocationConfig
-        case PT_ROOT:
+        case ParserTokenType::PT_ROOT:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->setRoot(directive.values[0].getContent());
             break;
         }
-        case PT_AUTOINDEX:
+        case ParserTokenType::PT_AUTOINDEX:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
-                lc->setAutoindex(directive.values[0].getType() == PT_BOOL_ON);
+                lc->setAutoindex(directive.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         }
-        case PT_INDEX:
+        case ParserTokenType::PT_INDEX:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
@@ -236,35 +236,35 @@ void ConfigBuilderVisitor::visit(Directive& directive)
             }
             break;
         }
-        case PT_RETURN:
+        case ParserTokenType::PT_RETURN:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->setRedirect(directive.values[0].getContent());
             break;
         }
-        case PT_FASTCGI_PASS:
+        case ParserTokenType::PT_FASTCGI_PASS:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->addCgi(std::make_pair(std::string("fastcgi_pass"), directive.values[0].getContent()));
             break;
         }
-        case PT_FASTCGI_PARAM:
+        case ParserTokenType::PT_FASTCGI_PARAM:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc && directive.values.size() >= 2)
                 lc->addCgi(std::make_pair(directive.values[0].getContent(), directive.values[1].getContent()));
             break;
         }
-        case PT_FASTCGI_INDEX:
+        case ParserTokenType::PT_FASTCGI_INDEX:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->setFastcgiIndex(directive.values[0].getContent());
             break;
         }
-        case PT_TRY_FILES:
+        case ParserTokenType::PT_TRY_FILES:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
@@ -274,35 +274,35 @@ void ConfigBuilderVisitor::visit(Directive& directive)
             }
             break;
         }
-        case PT_ADD_HEADER:
+        case ParserTokenType::PT_ADD_HEADER:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc && directive.values.size() >= 2)
                 lc->addAddHeader(directive.values[0].getContent(), directive.values[1].getContent());
             break;
         }
-        case PT_PROXY_PASS:
+        case ParserTokenType::PT_PROXY_PASS:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->setProxyPass(directive.values[0].getContent());
             break;
         }
-        case PT_PROXY_SET_HEADER:
+        case ParserTokenType::PT_PROXY_SET_HEADER:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc && directive.values.size() >= 2)
                 lc->addProxySetHeader(directive.values[0].getContent(), directive.values[1].getContent());
             break;
         }
-        case PT_PROXY_CACHE_BYPASS:
+        case ParserTokenType::PT_PROXY_CACHE_BYPASS:
         {
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
             if (lc)
                 lc->setProxyCacheBypass(directive.values[0].getContent());
             break;
         }
-        case PT_EXPIRES:
+        case ParserTokenType::PT_EXPIRES:
         {
             // pode aparecer tanto em http quanto em location
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
@@ -311,28 +311,28 @@ void ConfigBuilderVisitor::visit(Directive& directive)
             if (hc) hc->setExpires(directive.values[0].getContent());
             break;
         }
-        case SENDFILE:
+        case ParserTokenType::SENDFILE:
         {
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
             if (hc)
-                hc->setSendfile(directive.values[0].getType() == PT_BOOL_ON);
+                hc->setSendfile(directive.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         }
-        case DEFAULT_TYPE:
+        case ParserTokenType::DEFAULT_TYPE:
         {
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
             if (hc)
                 hc->setDefaultType(directive.values[0].getContent());
             break;
         }
-        case PT_LOG_FORMAT:
+        case ParserTokenType::PT_LOG_FORMAT:
         {
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
             if (hc)
                 hc->setLogFormat(directive.values[0].getContent());
             break;
         }
-        case PT_ACCESS_LOG:
+        case ParserTokenType::PT_ACCESS_LOG:
         {
             // pode aparecer em http ou server
             HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
@@ -341,35 +341,35 @@ void ConfigBuilderVisitor::visit(Directive& directive)
             if (sc) sc->setAccessLog(directive.values[0].getContent());
             break;
         }
-        case PT_SSL_CERTIFICATE:
+        case ParserTokenType::PT_SSL_CERTIFICATE:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
                 sc->setSslCertificate(directive.values[0].getContent());
             break;
         }
-        case PT_SSL_CERTIFICATE_KEY:
+        case ParserTokenType::PT_SSL_CERTIFICATE_KEY:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
                 sc->setSslCertificateKey(directive.values[0].getContent());
             break;
         }
-        case PT_SSL_PROTOCOLS:
+        case ParserTokenType::PT_SSL_PROTOCOLS:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
                 sc->setSslProtocols(directive.values[0].getContent());
             break;
         }
-        case PT_SSL_CIPHERS:
+        case ParserTokenType::PT_SSL_CIPHERS:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
             if (sc)
                 sc->setSslCiphers(directive.values[0].getContent());
             break;
         }
-        case PT_SERVER_DIRECTIVE:
+        case ParserTokenType::PT_SERVER_DIRECTIVE:
         {
             UpstreamConfig* uc = dynamic_cast<UpstreamConfig*>(top);
             if (uc && !directive.values.empty())
