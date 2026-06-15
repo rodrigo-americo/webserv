@@ -39,7 +39,7 @@ namespace utils
         return abs(value_one - value_two) <= eps;
     }
 
-    bool fequal(float value_one, float value_two, double eps = 1e-4)
+    inline bool fequal(float value_one, float value_two, double eps = 1e-4)
     {
         return fequal<float>(value_one, value_two, eps);
     }

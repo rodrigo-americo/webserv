@@ -1,0 +1,17 @@
+# Compiled objects and binaries
+*.o
+*.a
+*.so
+
+# Executables (no extension on Linux/macOS)
+webserver
+parser/lexer/lexer
+parser/parser/parser
+
+# Temporary and debug files
+*.txt
+*.core
+core
+
+# Claude memory
+.claude/

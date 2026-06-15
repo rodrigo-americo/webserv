@@ -41,7 +41,7 @@ static const char* LexerTokenTypeStr[] =
 	"END",
 };
 
-std::ostream	&operator<<(std::ostream &os, LexerTokenType type)
+inline std::ostream	&operator<<(std::ostream &os, LexerTokenType type)
 {
 	os << LexerTokenTypeStr[type];
 	return os;

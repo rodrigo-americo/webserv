@@ -189,7 +189,7 @@ class LexerToken: public BaseToken<LexerTokenType>
  * @param token Token a ser exibido.
  * @return Referência para a stream.
  */
-std::ostream	&operator<<(std::ostream &os, LexerToken token)
+inline std::ostream	&operator<<(std::ostream &os, LexerToken token)
 {
 	size_t		size = token.getContent().size();
 	bool		has_endl = token.getContent()[size - 1] == '\n';
