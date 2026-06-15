@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 11:11:34 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/05/23 17:29:54 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/11 17:10:45 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,17 +23,12 @@ namespace segregation
 		std::string	_name;
 	public:
 		has_name(): _name() {}
-		has_name(std::string name): _name(std::move(name)) {}
-		~has_name() = default;
+		has_name(std::string &name): _name(name) {}
+		~has_name() {};
 
 		bool	operator==(const has_name &other) const
 		{
 			if (this == &other) return true;
-			return _name == other._name;
-		}
-
-		bool	operator==(has_name &&other) const
-		{
 			return _name == other._name;
 		}
 

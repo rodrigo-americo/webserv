@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:44:53 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:59:21 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 00:44:23 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,9 +129,9 @@ public:
  * Representa uma unidade identificada pelo lexer antes da
  * interpretação sintática realizada pelo parser.
  */
-class LexerToken: public BaseToken<LexerTokenType>
+class LexerToken: public BaseToken<LexerTokenType::type>
 {
-	typedef BaseToken<LexerTokenType>	base; // @brief Alias para a classe base.
+	typedef BaseToken<LexerTokenType::type>	base; // @brief Alias para a classe base.
 
 	public:
 		/**
@@ -175,7 +175,7 @@ class LexerToken: public BaseToken<LexerTokenType>
 				_type |= quote[i] << (size * 8);
 				size--;
 			}
-			return LexerToken(file_name, line, line_col, content, static_cast<LexerTokenType>(_type));
+			return LexerToken(file_name, line, line_col, content, static_cast<LexerTokenType::type>(_type));
 		}
 };
 

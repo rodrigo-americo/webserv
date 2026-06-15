@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 14:50:32 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/05/22 17:06:34 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/11 17:08:04 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ namespace segregation
 
 	public:
 		has_id(size_t id): _id(id) {};
-		~has_id() = default;
+		~has_id() {};
 
 		size_t	getId() const { return _id; }
 	};
@@ -37,7 +37,7 @@ namespace segregation
 
 	public:
 		has_incremental_id(): has_id(_current_id++) {};
-		~has_incremental_id() = default;
+		~has_incremental_id() {};
 
 		size_t	getId() const { return _id; }
 	};

@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:13:01 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/05/23 13:41:37 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/11 17:30:11 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ namespace text
 				bool		has_style;
 
 				segment():	text(), style(), has_style(false) {};
-				segment(std::string _text):	text(std::move(_text)), style(), has_style(false) {};
-				segment(std::string _text, text_style _style):	text(std::move(_text)), style(std::move(_style)), has_style(true) {};
-				~segment() = default;
+				segment(const std::string &_text):	text(_text), style(), has_style(false) {};
+				segment(const std::string &_text, const text_style &_style):	text(_text), style(_style), has_style(true) {};
+				~segment() {};
 
 				std::string	apply() const
 				{
@@ -46,27 +46,27 @@ namespace text
 		private:
 			std::vector<segment>	_segments;
 		public:
-			text_builder(std::string text): _segments(1, segment(std::move(text))) {};
-			text_builder(text_style style, std::string text): _segments(1, segment(std::move(text), std::move(style))) {};
-			~text_builder() = default;
+			text_builder(std::string &text): _segments(1, segment(text)) {};
+			text_builder(text_style &style, std::string &text): _segments(1, segment(text, style)) {};
+			~text_builder() {};
 
-			text_builder	&add(std::string text)
+			text_builder	&add(const std::string &text)
 			{
-				_segments.emplace_back(std::move(text));
+				_segments.push_back(segment(text));
 				return *this;
 			}
 
-			text_builder	&add(text_style style, std::string text)
+			text_builder	&add(text_style &style, std::string &text)
 			{
-				_segments.emplace_back(std::move(text), std::move(style));
+				_segments.push_back(segment(text, style));
 				return *this;
 			}
 
 			std::string		build() const
 			{
 				std::string	result;
-				for (const segment &seg : _segments)
-					result += seg.apply();
+				for (size_t i = 0; i < _segments.size(); i++)
+					result += _segments[i].apply();
 				return result;
 			}
 		};

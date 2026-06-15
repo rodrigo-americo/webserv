@@ -32,7 +32,7 @@ Struct que representa um bloco `location` interpretado:
 | `client_max_body_size` | `size_t` | herdado do server se ausente |
 | `try_files` | `std::vector<std::string>` | `try_files` |
 
-### 2. `webserv/config/ServerConfig.hpp`
+### 2. `webserv/config/ConfigServerConfig.hpp`
 
 Struct que representa um bloco `server` interpretado:
 
@@ -47,12 +47,12 @@ Struct que representa um bloco `server` interpretado:
 
 ### 3. `webserv/config/ConfigReader.hpp`
 
-Visitor concreto que herda de `ParserVisitorBase` e percorre a AST para preencher um `std::vector<ServerConfig>`.
+Visitor concreto que herda de `ParserVisitorBase` e percorre a AST para preencher um `std::vector<ConfigServerConfig>`.
 
 **Fluxo de travessia:**
 ```
 AST root (PT_MAIN)
-  └─ Block PT_SERVER → cria ServerConfig, visita filhos
+  └─ Block PT_SERVER → cria ConfigServerConfig, visita filhos
         ├─ Directive PT_LISTEN                → listen[]
         ├─ Directive PT_SERVER_NAME           → server_names[]
         ├─ Directive PT_ROOT                  → root
@@ -78,7 +78,7 @@ Método público `void walkWith(ParserVisitorBase&)` que chama `_root->accept(vi
 ```
 Webserv (singleton C++98)
 ├── _instance: static Webserv*
-├── _configs: std::vector<ServerConfig>
+├── _configs: std::vector<ConfigServerConfig>
 ├── _poll_fds: std::vector<struct pollfd>
 ├── _server_fds: std::map<int, size_t>   (fd → índice em _configs)
 ├── _running: bool
@@ -120,7 +120,7 @@ Webserv (singleton C++98)
 webserv/
 ├── Webserv.hpp
 └── config/
-    ├── ServerConfig.hpp
+    ├── ConfigServerConfig.hpp
     ├── LocationConfig.hpp
     └── ConfigReader.hpp
 ```
@@ -131,7 +131,7 @@ webserv/
 
 1. Compilar com `c++ -std=c++98 -Wall -Wextra -Werror`
 2. Executar `./webserv parser/lexer/example.config`
-3. `ConfigReader` deve produzir 2 `ServerConfig` (porta 80 e 443) com seus `LocationConfig` preenchidos
+3. `ConfigReader` deve produzir 2 `ConfigServerConfig` (porta 80 e 443) com seus `LocationConfig` preenchidos
 4. `Webserv::run()` deve iniciar o loop `poll()` ouvindo nas portas configuradas
 5. Verificar com `ss -tlnp` ou `netstat` que as portas estão abertas
 6. Conectar com `curl` e receber resposta

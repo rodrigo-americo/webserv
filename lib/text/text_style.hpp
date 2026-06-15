@@ -6,14 +6,14 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 11:24:44 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/05/23 16:04:33 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/11 17:40:04 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RGB_HPP
 #define RGB_HPP
 
-# include <array>
+# include <vector>
 # include <string>
 # include <sstream>
 
@@ -26,15 +26,26 @@ namespace text
 		class rgb
 		{
 		private:
-			std::array<double, 3>	_color;
+			std::vector<double>	_color;
 		public:
 			rgb(): _color() {};
-			rgb(double r, double g, double b): _color({r, g, b}) {};
-			rgb(std::array<double, 3> arr): _color(std::move(arr)) {};
-			~rgb() = default;
+			rgb(double r, double g, double b): _color()
+			{
+				_color.resize(3);
+				setColor(r, g, b);
+			};
 
-			void	setColor(double r, double g, double b) { _color = {r, g, b}; }
-			void	setColor(std::array<double, 3> arr) { _color = std::move(arr); }
+			rgb(const std::vector<double> &arr): _color(arr) {};
+			~rgb() {};
+
+			void	setColor(double r, double g, double b)
+			{
+				_color[0] = r;
+				_color[1] = g;
+				_color[2] = b;
+			}
+
+			void	setColor(std::vector<double> &arr) { _color = arr; }
 
 			rgb	interpolate(const rgb &other, double factor) const { return rgb(utils::lerp(_color[0], other._color[0], factor), utils::lerp(_color[1], other._color[1], factor), utils::lerp(_color[2], other._color[2], factor)); }
 
@@ -51,14 +62,14 @@ namespace text
 
 		namespace ansi
 		{
-			constexpr const char *reset = "\033[0m";
-			constexpr const char *bold = "\033[1m";
-			constexpr const char *faint = "\033[2m";
-			constexpr const char *italic = "\033[3m";
-			constexpr const char *underline = "\033[4m";
-			constexpr const char *invert = "\033[7m";
-			constexpr const char *hidden = "\033[8m";
-			constexpr const char *strikethrough = "\033[9m";
+			static const char *reset = "\033[0m";
+			static const char *bold = "\033[1m";
+			static const char *faint = "\033[2m";
+			static const char *italic = "\033[3m";
+			static const char *underline = "\033[4m";
+			static const char *invert = "\033[7m";
+			static const char *hidden = "\033[8m";
+			static const char *strikethrough = "\033[9m";
 		}
 
 		class text_style
@@ -80,7 +91,7 @@ namespace text
 					: _bold(false), _faint(false), _italic(false), _underline(false),
 						_invert(false), _hidden(false), _strikethrough(false), _color(255, 255, 255),
 						_has_gradient(false), _gradient_to(), _gradient_factor(1.0) {};
-				~text_style() = default;
+				~text_style() {};
 
 				text_style	&bold() { _bold = true; return *this; }
 				text_style	&faint() { _faint = true; return *this; }
@@ -90,15 +101,15 @@ namespace text
 				text_style	&hidden() { _hidden = true; return *this; }
 				text_style	&strikethrough() { _strikethrough = true; return *this; }
 
-				text_style	&color(rgb color) { _color = std::move(color); return *this; }
-				text_style	&color(double r, double g, double b) { _color = {r, g, b}; return *this; }
-				text_style	&color(std::array<double, 3> arr) { _color = std::move(arr); return *this; }
+				text_style	&color(rgb &color) { _color = color; return *this; }
+				text_style	&color(double r, double g, double b) { _color = text::detail::rgb(r, g, b); return *this; }
+				text_style	&color(std::vector<double> &arr) { _color = arr; return *this; }
 
-				text_style	&interpolate(rgb color, double factor) { _color = _color.interpolate(std::move(color), factor); return *this; }
-				text_style	&gradient(rgb color, double factor = 1.0)
+				text_style	&interpolate(rgb &color, double factor) { _color = _color.interpolate(color, factor); return *this; }
+				text_style	&gradient(rgb &color, double factor = 1.0)
 				{
 					_has_gradient = true;
-					_gradient_to = std::move(color);
+					_gradient_to = color;
 					_gradient_factor = factor;
 					return *this;
 				}

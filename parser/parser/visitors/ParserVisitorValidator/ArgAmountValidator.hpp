@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 19:59:52 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 18:23:28 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:09:34 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ private:
 	 * Associa um tipo de token ao schema responsável por validar
 	 * sua quantidade de argumentos.
 	 */
-	typedef std::map<ParserTokenType, schema_unsigned_int > Validations;
-	std::map<ParserTokenType, schema_unsigned_int >	_validations; // @brief Regras de validação cadastradas.
+	typedef std::map<ParserTokenType::type, schema_unsigned_int > Validations;
+	std::map<ParserTokenType::type, schema_unsigned_int >	_validations; // @brief Regras de validação cadastradas.
 	std::vector<std::string>	_errors; // @brief Lista de erros encontrados durante a validação.
 public:
 	// @brief Constrói um validador vazio.
@@ -82,7 +82,7 @@ public:
 	 * @param type Tipo do nó.
 	 * @param validation Schema responsável pela validação.
 	 */
-	void	addValidation(ParserTokenType type, schema::detail::schema_int<unsigned> validation)
+	void	addValidation(ParserTokenType::type type, schema::detail::schema_int<unsigned> validation)
 	{
 		this->_validations[type] = validation;
 	}
@@ -173,47 +173,47 @@ public:
 	ArgAmountValidatorBuilder	&withDefaultValidations()
 	{
 		static unsigned int	unlimited = std::numeric_limits<unsigned>::max();
-		return add(PT_HTTP, schema::unsigned_integer().between(0, 0).name("http args amount"))
-		.add(PT_EVENTS, schema::unsigned_integer().between(0, 0).name("events args amount"))
-		.add(PT_SERVER, schema::unsigned_integer().between(0, 0).name("server args amount"))
-		.add(PT_UPSTREAM, schema::unsigned_integer().between(1, 1).name("upstream args amount"))
-		.add(PT_LOCATION, schema::unsigned_integer().between(1, 2).name("location args amount"))
-		.add(PT_WORKER_PROCESSES, schema::unsigned_integer().between(1, 1).name("worket_process args amount"))
-		.add(PT_WORKER_CONNECTIONS, schema::unsigned_integer().between(1, 1).name("worker_connections args amount"))
-		.add(PT_ERROR_LOG, schema::unsigned_integer().between(1, 2).name("error_log args amount"))
-		.add(PT_PID, schema::unsigned_integer().between(1, 1).name("pid args amount"))
-		.add(PT_LISTEN, schema::unsigned_integer().between(1, unlimited).name("listen args amount"))
-		.add(PT_SERVER_NAME, schema::unsigned_integer().between(1, unlimited).name("server_name args amount"))
-		.add(PT_ROOT, schema::unsigned_integer().between(1, 1).name("root args amount"))
-		.add(PT_INDEX, schema::unsigned_integer().between(1, unlimited).name("index args amount"))
-		.add(PT_TRY_FILES, schema::unsigned_integer().between(2, unlimited).name("try_files args amount"))
-		.add(PT_PROXY_PASS, schema::unsigned_integer().between(1, 1).name("index args amount"))
-		.add(PT_PROXY_SET_HEADER, schema::unsigned_integer().between(2, 2).name("proxy_set_header args amount"))
-		.add(PT_FASTCGI_PASS, schema::unsigned_integer().between(1, 1).name("fast_cgi_pass args amount"))
-		.add(PT_FASTCGI_PARAM, schema::unsigned_integer().between(2, 2).name("fast_cgi_param args amount"))
-		.add(PT_ERROR_PAGE, schema::unsigned_integer().between(2, unlimited).name("error_page args amount"))
-		.add(PT_ADD_HEADER, schema::unsigned_integer().between(2, 3).name("add_header args amount"))
-		.add(PT_EXPIRES, schema::unsigned_integer().between(1, 1).name("expires args amount"))
-		.add(PT_SSL_CERTIFICATE, schema::unsigned_integer().between(1, 1).name("ssl_certificate args amount"))
-		.add(PT_SSL_CERTIFICATE_KEY, schema::unsigned_integer().between(1, 1).name("ssl_certificate_key args amount"))
-		.add(PT_SSL_PROTOCOLS, schema::unsigned_integer().between(1, unlimited).name("ssl_protocols args amount"))
-		.add(PT_SSL_CIPHERS, schema::unsigned_integer().between(1, 1).name("ssl_ciphers args amount"))
-		.add(PT_CLIENT_MAX_BODY_SIZE, schema::unsigned_integer().between(1, 1).name("client_max_body_size args amount"))
-		.add(PT_LOG_FORMAT, schema::unsigned_integer().between(2, unlimited).name("log_format args amount"))
-		.add(PT_ACCESS_LOG, schema::unsigned_integer().between(1, 2).name("access_log args amount"))
-		.add(PT_RETURN, schema::unsigned_integer().between(1, 2).name("return args amount"))
+		return add(ParserTokenType::PT_HTTP, schema::unsigned_integer().between(0, 0).name("http args amount"))
+		.add(ParserTokenType::PT_EVENTS, schema::unsigned_integer().between(0, 0).name("events args amount"))
+		.add(ParserTokenType::PT_SERVER, schema::unsigned_integer().between(0, 0).name("server args amount"))
+		.add(ParserTokenType::PT_UPSTREAM, schema::unsigned_integer().between(1, 1).name("upstream args amount"))
+		.add(ParserTokenType::PT_LOCATION, schema::unsigned_integer().between(1, 2).name("location args amount"))
+		.add(ParserTokenType::PT_WORKER_PROCESSES, schema::unsigned_integer().between(1, 1).name("worket_process args amount"))
+		.add(ParserTokenType::PT_WORKER_CONNECTIONS, schema::unsigned_integer().between(1, 1).name("worker_connections args amount"))
+		.add(ParserTokenType::PT_ERROR_LOG, schema::unsigned_integer().between(1, 2).name("error_log args amount"))
+		.add(ParserTokenType::PT_PID, schema::unsigned_integer().between(1, 1).name("pid args amount"))
+		.add(ParserTokenType::PT_LISTEN, schema::unsigned_integer().between(1, unlimited).name("listen args amount"))
+		.add(ParserTokenType::PT_SERVER_NAME, schema::unsigned_integer().between(1, unlimited).name("server_name args amount"))
+		.add(ParserTokenType::PT_ROOT, schema::unsigned_integer().between(1, 1).name("root args amount"))
+		.add(ParserTokenType::PT_INDEX, schema::unsigned_integer().between(1, unlimited).name("index args amount"))
+		.add(ParserTokenType::PT_TRY_FILES, schema::unsigned_integer().between(2, unlimited).name("try_files args amount"))
+		.add(ParserTokenType::PT_PROXY_PASS, schema::unsigned_integer().between(1, 1).name("index args amount"))
+		.add(ParserTokenType::PT_PROXY_SET_HEADER, schema::unsigned_integer().between(2, 2).name("proxy_set_header args amount"))
+		.add(ParserTokenType::PT_FASTCGI_PASS, schema::unsigned_integer().between(1, 1).name("fast_cgi_pass args amount"))
+		.add(ParserTokenType::PT_FASTCGI_PARAM, schema::unsigned_integer().between(2, 2).name("fast_cgi_param args amount"))
+		.add(ParserTokenType::PT_ERROR_PAGE, schema::unsigned_integer().between(2, unlimited).name("error_page args amount"))
+		.add(ParserTokenType::PT_ADD_HEADER, schema::unsigned_integer().between(2, 3).name("add_header args amount"))
+		.add(ParserTokenType::PT_EXPIRES, schema::unsigned_integer().between(1, 1).name("expires args amount"))
+		.add(ParserTokenType::PT_SSL_CERTIFICATE, schema::unsigned_integer().between(1, 1).name("ssl_certificate args amount"))
+		.add(ParserTokenType::PT_SSL_CERTIFICATE_KEY, schema::unsigned_integer().between(1, 1).name("ssl_certificate_key args amount"))
+		.add(ParserTokenType::PT_SSL_PROTOCOLS, schema::unsigned_integer().between(1, unlimited).name("ssl_protocols args amount"))
+		.add(ParserTokenType::PT_SSL_CIPHERS, schema::unsigned_integer().between(1, 1).name("ssl_ciphers args amount"))
+		.add(ParserTokenType::PT_CLIENT_MAX_BODY_SIZE, schema::unsigned_integer().between(1, 1).name("client_max_body_size args amount"))
+		.add(ParserTokenType::PT_LOG_FORMAT, schema::unsigned_integer().between(2, unlimited).name("log_format args amount"))
+		.add(ParserTokenType::PT_ACCESS_LOG, schema::unsigned_integer().between(1, 2).name("access_log args amount"))
+		.add(ParserTokenType::PT_RETURN, schema::unsigned_integer().between(1, 2).name("return args amount"))
 
-		.add(PT_USE, schema::unsigned_integer().between(1, 1).name("use args amount"))
-		.add(MULTI_ACCEPT, schema::unsigned_integer().between(1, 1).name("multi_accept args amount"))
-		.add(PT_INCLUDE, schema::unsigned_integer().between(1, unlimited).name("include args amount"))
-		.add(DEFAULT_TYPE, schema::unsigned_integer().between(1, 1).name("default_type args amount"))
-		.add(SENDFILE, schema::unsigned_integer().between(1, 1).name("sendfile args amount"))
-		.add(KEEPALIVE_TIMEOUT, schema::unsigned_integer().between(1, 2).name("keepalive_timeout args amount"))
-		.add(PT_SERVER_DIRECTIVE, schema::unsigned_integer().between(1, unlimited).name("upstream server args amount"))
-		.add(PT_AUTOINDEX, schema::unsigned_integer().between(1, 1).name("autoindex args amount"))
-		.add(PT_LOG_NOT_FOUND, schema::unsigned_integer().between(1, 1).name("log_not_found args amount"))
-		.add(PT_PROXY_CACHE_BYPASS, schema::unsigned_integer().between(1, unlimited).name("proxy_cache_bypass args amount"))
-		.add(PT_FASTCGI_INDEX, schema::unsigned_integer().between(1, 1).name("fastcgi_index args amount"));
+		.add(ParserTokenType::PT_USE, schema::unsigned_integer().between(1, 1).name("use args amount"))
+		.add(ParserTokenType::MULTI_ACCEPT, schema::unsigned_integer().between(1, 1).name("multi_accept args amount"))
+		.add(ParserTokenType::PT_INCLUDE, schema::unsigned_integer().between(1, unlimited).name("include args amount"))
+		.add(ParserTokenType::DEFAULT_TYPE, schema::unsigned_integer().between(1, 1).name("default_type args amount"))
+		.add(ParserTokenType::SENDFILE, schema::unsigned_integer().between(1, 1).name("sendfile args amount"))
+		.add(ParserTokenType::KEEPALIVE_TIMEOUT, schema::unsigned_integer().between(1, 2).name("keepalive_timeout args amount"))
+		.add(ParserTokenType::PT_SERVER_DIRECTIVE, schema::unsigned_integer().between(1, unlimited).name("upstream server args amount"))
+		.add(ParserTokenType::PT_AUTOINDEX, schema::unsigned_integer().between(1, 1).name("autoindex args amount"))
+		.add(ParserTokenType::PT_LOG_NOT_FOUND, schema::unsigned_integer().between(1, 1).name("log_not_found args amount"))
+		.add(ParserTokenType::PT_PROXY_CACHE_BYPASS, schema::unsigned_integer().between(1, unlimited).name("proxy_cache_bypass args amount"))
+		.add(ParserTokenType::PT_FASTCGI_INDEX, schema::unsigned_integer().between(1, 1).name("fastcgi_index args amount"));
 	}
 
 	/**
@@ -224,7 +224,7 @@ public:
 	 *
 	 * @return Referência para o builder.
 	 */
-	ArgAmountValidatorBuilder	&add(ParserTokenType type, schema::detail::schema_int<unsigned> validation)
+	ArgAmountValidatorBuilder	&add(ParserTokenType::type type, schema::detail::schema_int<unsigned> validation)
 	{
 		_validator.addValidation(type, validation);
 		return *this;

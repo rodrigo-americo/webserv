@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 15:00:29 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/04 14:32:43 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/12 20:06:26 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,45 +17,64 @@
 #include <sstream>
 #include <vector>
 
+# include "str.hpp"
+
 namespace utils
 {
-    template <typename T>
-    std::string to_string(T entry)
-    {
-        std::stringstream ss;
-        ss << std::boolalpha << entry;
-        return ss.str();
-    }
+	template <typename T>
+	::std::string to_string(T entry)
+	{
+		::std::stringstream ss;
+		ss << ::std::boolalpha << entry;
+		return ss.str();
+	}
 
-    template <typename T>
-    T abs(T entry)
-    {
-        return entry > 0 ? entry : -entry;
-    }
+	inline ::std::string to_string(bool entry)
+	{
+		return entry ? "true" : "false";
+	}
 
-    template <typename T>
-    bool fequal(T value_one, T value_two, double eps = 1e-9)
-    {
-        return abs(value_one - value_two) <= eps;
-    }
+	template <typename T>
+	T abs(T entry)
+	{
+		return entry > 0 ? entry : -entry;
+	}
 
-    inline bool fequal(float value_one, float value_two, double eps = 1e-4)
-    {
-        return fequal<float>(value_one, value_two, eps);
-    }
+	template <typename T>
+	bool fequal(T value_one, T value_two, double eps = 1e-9)
+	{
+		return abs(value_one - value_two) <= eps;
+	}
 
-    template <typename T>
-    bool oneOf(const std::vector<T>& options, const T& value)
-    {
-        for (size_t i = 0; i < options.size(); i++)
-        {
-            if (options[i] == value)
-                return true;
-        }
-        return false;
-    }
+	inline bool fequal(float value_one, float value_two, double eps = 1e-4)
+	{
+		return fequal<float>(value_one, value_two, eps);
+	}
+
+	template <typename T>
+	bool oneOf(const ::std::vector<T>& options, const T& value)
+	{
+		for (size_t i = 0; i < options.size(); i++)
+		{
+			if (options[i] == value)
+				return true;
+		}
+		return false;
+	}
 
 	inline double	lerp(double n1, double n2, double factor) { return n1 + ((n2 - n1) * factor); }
+
+	inline ::std::vector<double>	lerp(::std::vector<double> vec1, ::std::vector<double> vec2, double factor)
+	{
+		::std::vector<double>	resp;
+		if (vec1.size() != vec2.size()) return resp;
+
+		for (size_t i = 0; i < vec1.size(); i++)
+			resp.push_back(lerp(vec1[0], vec2[0], factor));
+
+		return resp;
+	}
+
 }
 
 #endif

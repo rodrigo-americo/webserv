@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 14:09:14 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:46:43 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:11:18 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,19 +35,19 @@
 class Parser
 {
 private:
-	LexerBuilder							_lexer_builder; // @brief Builder utilizado para criar o lexer.
-	LexerIterator							_it; // @brief Iterador utilizado para percorrer os tokens.
-	std::map<std::string, ParserTokenType>	_block_keywords; // @brief Palavras-chave que representam blocos.
-	std::map<std::string, ParserTokenType>	_directive_keywords; // @brief Palavras-chave que representam diretivas.
-	std::map<std::string, ParserTokenType>	_modifiers; // @brief Modificadores especiais reconhecidos pelo parser.
-	std::vector<std::string>				_errors; // @brief Lista de erros encontrados durante a análise.
+	LexerBuilder									_lexer_builder; // @brief Builder utilizado para criar o lexer.
+	LexerIterator									_it; // @brief Iterador utilizado para percorrer os tokens.
+	std::map<std::string, ParserTokenType::type>	_block_keywords; // @brief Palavras-chave que representam blocos.
+	std::map<std::string, ParserTokenType::type>	_directive_keywords; // @brief Palavras-chave que representam diretivas.
+	std::map<std::string, ParserTokenType::type>	_modifiers; // @brief Modificadores especiais reconhecidos pelo parser.
+	std::vector<std::string>						_errors; // @brief Lista de erros encontrados durante a análise.
 
-	typedef	std::map<std::string, ParserTokenType>::iterator opts_iterator; // @brief Alias para iteradores dos mapas de palavras-chave.
+	typedef	std::map<std::string, ParserTokenType::type>::iterator opts_iterator; // @brief Alias para iteradores dos mapas de palavras-chave.
 
 	// @brief Ignora tokens de comentário consecutivos.
 	void	_skipComments()
 	{
-		while (_it && *_it == COMMENT)
+		while (_it && *_it == LexerTokenType::COMMENT)
 			++_it;
 	}
 
@@ -65,8 +65,8 @@ private:
 	 */
 	ParserToken	_convertToken(const LexerToken &token, bool after_location = false)
 	{
-		if (token == STRING_SINGLE) return ParserToken::fromLexerToken(token, PT_STRING_SINGLE);
-		if (token == STRING_DOUBLE) return ParserToken::fromLexerToken(token, PT_STRING_DOUBLE);
+		if (token == LexerTokenType::STRING_SINGLE) return ParserToken::fromLexerToken(token, ParserTokenType::PT_STRING_SINGLE);
+		if (token == LexerTokenType::STRING_DOUBLE) return ParserToken::fromLexerToken(token, ParserTokenType::PT_STRING_DOUBLE);
 
 		if (after_location)
 		{
@@ -83,9 +83,9 @@ private:
 		if (block_it != _block_keywords.end())
 			return ParserToken::fromLexerToken(token, block_it->second);
 
-		if (token == END) return ParserToken::fromLexerToken(token, PT_END);
+		if (token == LexerTokenType::END) return ParserToken::fromLexerToken(token, ParserTokenType::PT_END);
 
-		return ParserToken::fromLexerToken(token, PT_WORD);
+		return ParserToken::fromLexerToken(token, ParserTokenType::PT_WORD);
 	}
 
 	/**
@@ -102,43 +102,43 @@ private:
 		_skipComments();
 
 		ParserToken	name = _convertToken(*_it);
-		if (name == PT_WORD)
+		if (name == ParserTokenType::PT_WORD)
 			_errors.push_back((*_it).getLineAddress() + " Invalid node name!");
 		++_it;
 
-		bool	is_after_location = name == PT_LOCATION;
+		bool	is_after_location = name == ParserTokenType::PT_LOCATION;
 		std::vector<ParserToken>	values;
 		while (_it
-			&& *_it != COMMENT
-			&& *_it != LBRACE
-			&& *_it != SEMICOLON)
+			&& *_it != LexerTokenType::COMMENT
+			&& *_it != LexerTokenType::LBRACE
+			&& *_it != LexerTokenType::SEMICOLON)
 		{
-			if (*_it == RBRACE)
+			if (*_it == LexerTokenType::RBRACE)
 				_errors.push_back((*_it).getLineAddress() + " Closing an unopened scope!");
 			values.push_back(_convertToken(*_it, is_after_location));
 			is_after_location = false;
 			++_it;
 		}
-		if (*_it == LBRACE)
+		if (*_it == LexerTokenType::LBRACE)
 		{
 			LexerIterator::token	lbrace = *_it;
 			++_it; // consome { LBRACE
 			Block	*block = new Block(name, values);
-			while (_it && *_it != RBRACE)
+			while (_it && *_it != LexerTokenType::RBRACE)
 			{
 				_skipComments();
-				if (!_it || *_it == LBRACE)
+				if (!_it || *_it == LexerTokenType::LBRACE)
 					break;
 				block->children.push_back(parseStatement());
 			}
-			if (*_it != RBRACE)
+			if (*_it != LexerTokenType::RBRACE)
 				_errors.push_back(lbrace.getLineAddress() + " Unclosed scope");
 			++_it; // consome } RBRACE
 			return block;
 		}
 		++_it; // consome ; SEMICOLON
-		if (name == PT_SERVER)
-			name.setType(PT_SERVER_DIRECTIVE);
+		if (name == ParserTokenType::PT_SERVER)
+			name.setType(ParserTokenType::PT_SERVER_DIRECTIVE);
 		Directive	*directive = new Directive(name, values);
 		return directive;
 	}
@@ -162,7 +162,7 @@ public:
 	 * @param content Texto da palavra-chave.
 	 * @param type Tipo sintático associado.
 	 */
-	void	addBlockKeyword(const std::string &content, ParserTokenType type) { _block_keywords[content] = type; }
+	void	addBlockKeyword(const std::string &content, ParserTokenType::type type) { _block_keywords[content] = type; }
 
 	/**
 	 * @brief Registra uma palavra-chave de diretiva.
@@ -172,7 +172,7 @@ public:
 	 * @param content Texto da palavra-chave.
 	 * @param type Tipo sintático associado.
 	 */
-	void	addDirectiveKeyword(const std::string &content, ParserTokenType type) { _directive_keywords[content] = type; }
+	void	addDirectiveKeyword(const std::string &content, ParserTokenType::type type) { _directive_keywords[content] = type; }
 
 	/**
 	 * @brief Registra um modificador especial.
@@ -182,7 +182,7 @@ public:
 	 * @param content Texto do modificador.
 	 * @param type Tipo sintático associado.
 	 */
-	void	addModifier(const std::string &content, ParserTokenType type) { _modifiers[content] = type; }
+	void	addModifier(const std::string &content, ParserTokenType::type type) { _modifiers[content] = type; }
 
 	/**
 	 * @brief Define o lexer utilizado pelo parser.
@@ -205,7 +205,7 @@ public:
 		ParserAst	ast;
 		if (!_it.error().empty())
 			ast.addError(_it.error());
-		Block	*root = new Block(ParserToken("root", 0, 0, "root", PT_MAIN));
+		Block	*root = new Block(ParserToken("root", 0, 0, "root", ParserTokenType::PT_MAIN));
 		while (_it)
 		{
 			_skipComments();

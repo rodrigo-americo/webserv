@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 18:46:01 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 18:05:00 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 11:53:49 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include "ParserComposite.hpp"
 # include "ParserVisitorPrinter.hpp"
 # include "ParserVisitorValidator.hpp"
+# include "ParserVisitorFreeAst.hpp"
 
 /**
  * @brief Representa a árvore sintática abstrata (AST) produzida pelo parser.
@@ -40,7 +41,14 @@ public:
 	ParserAst(Block *root): _root(root) {};
 	// @brief Constrói uma AST vazia.
 	ParserAst(): _root(NULL) {};
-	~ParserAst() { if (_root) delete _root; };
+	~ParserAst()
+	{
+		if (_root)
+		{
+			ParserVisitorFreeAst	free_ast;
+			_root->accept(free_ast);
+		}
+	};
 
 	/**
 	 * @brief Exibe a árvore sintática.

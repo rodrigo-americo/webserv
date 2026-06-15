@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/30 09:50:53 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:23:27 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:01:49 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 class Lexer
 {
 	public:
-		typedef LexerTokenType					token_type; // @brief Alias para o tipo do token.
+		typedef LexerTokenType::type			token_type; // @brief Alias para o tipo do token.
 		typedef LexerToken						token; // @brief Alias para a classe de token.
 	private:
 	typedef	std::pair<std::string, token_type>	delimitter; // @brief Associação entre um delimitador textual e seu tipo de token.
@@ -153,7 +153,7 @@ class Lexer
 			}
 			std::string e_header = _file.name()+":"+utils::to_string(quote_start_line)+":"+utils::to_string(quote_start_line_col)+" -> ";
 			_error = e_header + "quote open '"+_temp_quote+"'.";
-			return token(_file.name(), _file.line(), _file.lineColumn(), "", ERROR);
+			return token(_file.name(), _file.line(), _file.lineColumn(), "", LexerTokenType::ERROR);
 		}
 
 		/**
@@ -181,7 +181,7 @@ class Lexer
 			size_t	comment_start_cursor		= _file.cursor();
 			while (*_file && *_file != '\n')
 				++_file;
-			return	token(_file.name(), _file.line(), _file.lineColumn(), _file.substr_back(comment_start_cursor), COMMENT);
+			return	token(_file.name(), _file.line(), _file.lineColumn(), _file.substr_back(comment_start_cursor), LexerTokenType::COMMENT);
 		}
 
 		/**
@@ -195,11 +195,11 @@ class Lexer
 		token	_readWord()
 		{
 			if (!_file)
-				return token(_file.name(), _file.line(), _file.lineColumn(), "", END);
+				return token(_file.name(), _file.line(), _file.lineColumn(), "", LexerTokenType::END);
 			size_t	word_start_cursor		= _file.cursor();
 			while (*_file && !std::isspace(*_file) && !_isDelimitter() && !_isQuote())
 				++_file;
-			return token(_file.name(), _file.line(), _file.lineColumn(), _file.substr(word_start_cursor, _file.cursor() - word_start_cursor), WORD);
+			return token(_file.name(), _file.line(), _file.lineColumn(), _file.substr(word_start_cursor, _file.cursor() - word_start_cursor), LexerTokenType::WORD);
 		}
 
 	public:

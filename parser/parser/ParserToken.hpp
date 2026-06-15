@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:02:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:55:03 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:05:32 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@
  * de BaseToken, permite alterar o tipo do token durante o processo
  * de análise.
  */
-class ParserToken: public BaseToken<ParserTokenType>
+class ParserToken: public BaseToken<ParserTokenType::type>
 {
-	typedef BaseToken<ParserTokenType>	base; // @brief Alias para a classe base.
+	typedef BaseToken<ParserTokenType::type>	base; // @brief Alias para a classe base.
 public:
 	/**
 	 * @brief Constrói um token sintático completo.
@@ -40,7 +40,7 @@ public:
 	 * @param content Conteúdo textual do token.
 	 * @param type Tipo sintático do token.
 	 */
-	ParserToken(const std::string &file_name, size_t line, size_t line_col, const std::string &content, ParserTokenType type)
+	ParserToken(const std::string &file_name, size_t line, size_t line_col, const std::string &content, ParserTokenType::type type)
 		: base(file_name, line, line_col, content, type) {};
 	/**
 	 * @brief Constrói um token sem tipo definido.
@@ -67,7 +67,7 @@ public:
 	 *
 	 * @return Novo ParserToken.
 	 */
-	static ParserToken	fromLexerToken(const LexerToken &token, ParserTokenType type)
+	static ParserToken	fromLexerToken(const LexerToken &token, ParserTokenType::type type)
 	{
 		return ParserToken(token.getFileName(), token.getLine(), token.getLineColumn(), token.getContent(), type);
 	}
@@ -77,7 +77,7 @@ public:
 	 *
 	 * @param type Novo tipo sintático.
 	 */
-	void				setType(ParserTokenType type) { _type = type; }
+	void				setType(ParserTokenType::type type) { _type = type; }
 
 	/**
 	 * @brief Atribui diretamente um tipo ao token.
@@ -88,7 +88,7 @@ public:
 	 *
 	 * @return Referência para o token.
 	 */
-	ParserToken	&operator=(ParserTokenType type) { _type = type; return *this; }
+	ParserToken	&operator=(ParserTokenType::type type) { _type = type; return *this; }
 };
 
 #endif

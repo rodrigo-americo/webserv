@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 11:57:50 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/05/24 14:44:14 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/11 17:33:09 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ namespace segregation
 
 		error(): field(), message() {};
 		error(std::string _field, std::string _msg): field(_field), message(_msg) {};
-		~error() = default;
+		~error() {};
 
 		std::string	format() const
 		{
@@ -37,22 +37,22 @@ namespace segregation
 		}
 	};
 
-	using errors_vector = std::vector<error>;
+	typedef std::vector<error> errors_vector;
 
 	class has_errors
 	{
 		protected:
 			errors_vector	_errors;
 
-			void	_collect(const errors_vector &errors, std::string field_name = "", std::string prefix = "")
+			void	_collect(const errors_vector &errors, const std::string &field_name = "", const std::string &prefix = "")
 			{
-				for (const auto &error : errors)
-					_collect(error, std::move(field_name), std::move(prefix));
+				for (size_t i = 0; i < errors.size(); i++)
+					_collect(errors[i], field_name, prefix);
 			}
 
 			void	_collect(const error &_error, std::string field_name = "", std::string prefix = "")
 			{
-				error	err = field_name.empty() ? _error : error(std::move(field_name), _error.format());
+				error	err = field_name.empty() ? _error : error(field_name, _error.format());
 				err.message = (prefix + err.message);
 				_errors.push_back(err);
 			}
@@ -63,8 +63,8 @@ namespace segregation
 			std::string					formatErrors() const
 			{
 				std::string	errors;
-				for (const auto &err: _errors)
-					errors += err.format() + "\n";
+				for (size_t i = 0; i < _errors.size(); i++)
+					errors += _errors[i].format() + "\n";
 				return errors;
 			}
 	};

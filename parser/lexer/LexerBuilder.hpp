@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 00:29:16 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:26:43 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:03:18 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,9 @@ public:
 	 */
 	LexerBuilder	&withDefaultTokens() {
 		_lexer.addComment("#");
-		_lexer.addDelimitter("{", LBRACE);
-		_lexer.addDelimitter("}", RBRACE);
-		_lexer.addDelimitter(";", SEMICOLON);
+		_lexer.addDelimitter("{", LexerTokenType::LBRACE);
+		_lexer.addDelimitter("}", LexerTokenType::RBRACE);
+		_lexer.addDelimitter(";", LexerTokenType::SEMICOLON);
 		_lexer.addQuote("\"");
 		_lexer.addQuote("'");
 		return *this;
@@ -85,7 +85,7 @@ public:
 	 * @param type Tipo associado ao token.
 	 * @return Referência para o builder.
 	 */
-	LexerBuilder	&withKeyword(const std::string &keyword, LexerTokenType type) { _lexer.addDelimitter(keyword, type); return *this; }
+	LexerBuilder	&withKeyword(const std::string &keyword, LexerTokenType::type type) { _lexer.addDelimitter(keyword, type); return *this; }
 
 	/**
 	 * @brief Finaliza a configuração e executa o lexer.

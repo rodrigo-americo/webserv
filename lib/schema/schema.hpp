@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   schema.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:28:43 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/02 16:29:27 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/12 17:31:48 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,13 @@ typedef schema::detail::result<bool> schema_result_bool;
 
 namespace schema
 {
-    inline schema_string          string() { schema_string str; return str; }
-    inline schema_int          integer() { schema_int _int; return _int; }
-    inline schema_unsigned_int unsigned_integer() { schema_unsigned_int _unsigned_int; return _unsigned_int; }
-    inline schema_size_t      sizet() { schema_size_t _size_t; return _size_t; }
-    inline schema_bool  boolean() { schema_bool _bool; return _bool; }
-    inline schema_double  dbl() { schema_double _double; return _double; }
-    inline schema_float  flt() { schema_float _float; return _float; }
+	inline schema_string				string() { schema_string str; return str; }
+	inline schema_int					integer() { schema_int _int; return _int; }
+	inline schema_unsigned_int			unsigned_integer() { schema_unsigned_int _unsigned_int; return _unsigned_int; }
+	inline schema_size_t				sizet() { schema_size_t _size_t; return _size_t; }
+	inline schema_bool					boolean() { schema_bool _bool; return _bool; }
+	inline schema_double				dbl() { schema_double _double; return _double; }
+	inline schema_float					flt() { schema_float _float; return _float; }
 }
 
 

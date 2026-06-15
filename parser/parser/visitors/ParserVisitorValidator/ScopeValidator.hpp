@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 16:47:55 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 18:16:51 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:07:35 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,15 +39,15 @@ class ScopeValidator
 		 *
 		 * O último elemento representa o escopo atual.
 		 */
-		std::vector<ParserTokenType>	_curr_scopes;
+		std::vector<ParserTokenType::type>	_curr_scopes;
 		/**
 		 * @brief Tipo utilizado para armazenar regras de validação.
 		 *
 		 * Mapeia um token para a lista de escopos onde ele é permitido.
 		 */
-		typedef std::map<ParserTokenType, std::vector<ParserTokenType> > Validations;
-		std::map<ParserTokenType, std::vector<ParserTokenType> >	_directive_scope; // @brief Regras de escopo para diretivas.
-		std::map<ParserTokenType, std::vector<ParserTokenType> >	_block_scope; // @brief Regras de escopo para blocos.
+		typedef std::map<ParserTokenType::type, std::vector<ParserTokenType::type> > Validations;
+		std::map<ParserTokenType::type, std::vector<ParserTokenType::type> >	_directive_scope; // @brief Regras de escopo para diretivas.
+		std::map<ParserTokenType::type, std::vector<ParserTokenType::type> >	_block_scope; // @brief Regras de escopo para blocos.
 		std::vector<std::string>	_errors; // @brief Lista de erros encontrados durante a validação.
 
 		/**
@@ -58,7 +58,7 @@ class ScopeValidator
 		 * @param scopes Escopos permitidos.
 		 * @return Lista formatada dos escopos.
 		 */
-		static std::string	_getStringTypes(std::vector<ParserTokenType> scopes)
+		static std::string	_getStringTypes(std::vector<ParserTokenType::type> scopes)
 		{
 			std::string resp;
 			for (size_t i = 0; i < scopes.size(); i++)
@@ -81,7 +81,7 @@ class ScopeValidator
 		 */
 		void	_validateScopeFrom(ParserToken	&name, Validations &validator)
 		{
-			if (name == PT_END || name == PT_WORD) return;
+			if (name == ParserTokenType::PT_END || name == ParserTokenType::PT_WORD) return;
 			Validations::iterator validator_it = validator.find(name.getType());
 			if (validator_it == validator.end())
 			{
@@ -89,8 +89,8 @@ class ScopeValidator
 				_errors.push_back(msg);
 				return;
 			}
-			std::vector<ParserTokenType> &scopes = validator_it->second;
-			std::vector<ParserTokenType>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes[_curr_scopes.size() - 1]);
+			std::vector<ParserTokenType::type> &scopes = validator_it->second;
+			std::vector<ParserTokenType::type>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes[_curr_scopes.size() - 1]);
 			if (scope_it == scopes.end())
 			{
 				std::string msg = name.getLineAddress() + " " + name.getContent() + " in wrong context. Must be in scopes '" + _getStringTypes(scopes) + "'";
@@ -128,7 +128,7 @@ class ScopeValidator
 		 *
 		 * @param scope Escopo ativado.
 		 */
-		void	pushScope(ParserTokenType scope)	{ _curr_scopes.push_back(scope); }
+		void	pushScope(ParserTokenType::type scope)	{ _curr_scopes.push_back(scope); }
 
 		// @brief Remove o escopo atual da pilha.
 		void	popScope()							{ _curr_scopes.pop_back(); }
@@ -139,7 +139,7 @@ class ScopeValidator
 		 * @param directive Diretiva validada.
 		 * @param scope Escopo permitido.
 		 */
-		void addDirectiveScopeValidation(ParserTokenType directive, ParserTokenType scope)
+		void addDirectiveScopeValidation(ParserTokenType::type directive, ParserTokenType::type scope)
 		{
 			_directive_scope[directive].push_back(scope);
 		}
@@ -150,7 +150,7 @@ class ScopeValidator
 		 * @param block Bloco validado.
 		 * @param scope Escopo permitido.
 		 */
-		void addBlockScopeValidation(ParserTokenType block, ParserTokenType scope)
+		void addBlockScopeValidation(ParserTokenType::type block, ParserTokenType::type scope)
 		{
 			_block_scope[block].push_back(scope);
 		}
@@ -185,7 +185,7 @@ class ScopeValidatorBuilder
 		 *
 		 * Utilizado pelo método andOn().
 		 */
-		ParserTokenType	_last_scope_updated;
+		ParserTokenType::type	_last_scope_updated;
 		bool			_last_scope_updated_is_block; // @brief Indica se o último token configurado é um bloco.
 
 	public:
@@ -224,44 +224,44 @@ class ScopeValidatorBuilder
 		 */
 		ScopeValidatorBuilder	&withDefaultDirectiveScopes()
 		{
-			return withDirectiveOnScope(PT_WORKER_PROCESSES, PT_MAIN)
-				.withDirectiveOnScope(PT_PID, PT_MAIN)
-				.withDirectiveOnScope(PT_WORKER_PROCESSES, PT_MAIN)
-				.withDirectiveOnScope(PT_INCLUDE, PT_MAIN).andOn(PT_HTTP).andOn(PT_SERVER).andOn(PT_LOCATION).andOn(PT_UPSTREAM)
-					.andOn(PT_EVENTS).andOn(PT_STREAM).andOn(PT_GEO).andOn(PT_MAP).andOn(PT_TYPES).andOn(PT_LIMIT_EXCEPT)
-				.withDirectiveOnScope(DEFAULT_TYPE, PT_HTTP)
-				.withDirectiveOnScope(SENDFILE, PT_HTTP)
-				.withDirectiveOnScope(KEEPALIVE_TIMEOUT, PT_HTTP)
-				.withDirectiveOnScope(PT_LOG_FORMAT, PT_HTTP)
-				.withDirectiveOnScope(PT_ERROR_LOG, PT_MAIN).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_CLIENT_MAX_BODY_SIZE, PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_USE, PT_EVENTS)
-				.withDirectiveOnScope(MULTI_ACCEPT, PT_EVENTS)
-				.withDirectiveOnScope(PT_WORKER_CONNECTIONS, PT_EVENTS)
-				.withDirectiveOnScope(PT_SERVER_DIRECTIVE, PT_UPSTREAM)
-				.withDirectiveOnScope(PT_RETURN, PT_SERVER)
-				.withDirectiveOnScope(PT_REWRITE, PT_SERVER)
-				.withDirectiveOnScope(PT_LISTEN, PT_SERVER)
-				.withDirectiveOnScope(PT_SERVER_NAME, PT_SERVER)
-				.withDirectiveOnScope(PT_SSL_CERTIFICATE, PT_SERVER)
-				.withDirectiveOnScope(PT_SSL_CERTIFICATE_KEY, PT_SERVER)
-				.withDirectiveOnScope(PT_SSL_PROTOCOLS, PT_SERVER)
-				.withDirectiveOnScope(PT_SSL_CIPHERS, PT_SERVER)
-				.withDirectiveOnScope(PT_PROXY_PASS, PT_LOCATION)
-				.withDirectiveOnScope(PT_FASTCGI_PASS, PT_LOCATION)
-				.withDirectiveOnScope(PT_EXPIRES, PT_LOCATION)
-				.withDirectiveOnScope(PT_ROOT, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_INDEX, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_ACCESS_LOG, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_ERROR_PAGE, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_ADD_HEADER, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_AUTOINDEX, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_LOG_NOT_FOUND, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_PROXY_SET_HEADER, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_FASTCGI_INDEX, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_FASTCGI_PARAM, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_PROXY_CACHE_BYPASS, PT_LOCATION).andOn(PT_HTTP).andOn(PT_SERVER)
-				.withDirectiveOnScope(PT_TRY_FILES, PT_LOCATION).andOn(PT_SERVER);
+			return withDirectiveOnScope(ParserTokenType::PT_WORKER_PROCESSES, ParserTokenType::PT_MAIN)
+				.withDirectiveOnScope(ParserTokenType::PT_PID, ParserTokenType::PT_MAIN)
+				.withDirectiveOnScope(ParserTokenType::PT_WORKER_PROCESSES, ParserTokenType::PT_MAIN)
+				.withDirectiveOnScope(ParserTokenType::PT_INCLUDE, ParserTokenType::PT_MAIN).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER).andOn(ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_UPSTREAM)
+					.andOn(ParserTokenType::PT_EVENTS).andOn(ParserTokenType::PT_STREAM).andOn(ParserTokenType::PT_GEO).andOn(ParserTokenType::PT_MAP).andOn(ParserTokenType::PT_TYPES).andOn(ParserTokenType::PT_LIMIT_EXCEPT)
+				.withDirectiveOnScope(ParserTokenType::DEFAULT_TYPE, ParserTokenType::PT_HTTP)
+				.withDirectiveOnScope(ParserTokenType::SENDFILE, ParserTokenType::PT_HTTP)
+				.withDirectiveOnScope(ParserTokenType::KEEPALIVE_TIMEOUT, ParserTokenType::PT_HTTP)
+				.withDirectiveOnScope(ParserTokenType::PT_LOG_FORMAT, ParserTokenType::PT_HTTP)
+				.withDirectiveOnScope(ParserTokenType::PT_ERROR_LOG, ParserTokenType::PT_MAIN).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_CLIENT_MAX_BODY_SIZE, ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_USE, ParserTokenType::PT_EVENTS)
+				.withDirectiveOnScope(ParserTokenType::MULTI_ACCEPT, ParserTokenType::PT_EVENTS)
+				.withDirectiveOnScope(ParserTokenType::PT_WORKER_CONNECTIONS, ParserTokenType::PT_EVENTS)
+				.withDirectiveOnScope(ParserTokenType::PT_SERVER_DIRECTIVE, ParserTokenType::PT_UPSTREAM)
+				.withDirectiveOnScope(ParserTokenType::PT_RETURN, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_REWRITE, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_LISTEN, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_SERVER_NAME, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_SSL_CERTIFICATE, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_SSL_CERTIFICATE_KEY, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_SSL_PROTOCOLS, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_SSL_CIPHERS, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_PROXY_PASS, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PASS, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_EXPIRES, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_ROOT, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_ACCESS_LOG, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_ERROR_PAGE, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_ADD_HEADER, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_AUTOINDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_LOG_NOT_FOUND, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_PROXY_SET_HEADER, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PARAM, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_PROXY_CACHE_BYPASS, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER);
 		}
 
 		/**
@@ -271,11 +271,11 @@ class ScopeValidatorBuilder
 		 */
 		ScopeValidatorBuilder	&withDefaultBlockScopes()
 		{
-			return withBlockOnScope(PT_EVENTS, PT_MAIN)
-				.withBlockOnScope(PT_HTTP, PT_MAIN)
-				.withBlockOnScope(PT_UPSTREAM, PT_HTTP)
-				.withBlockOnScope(PT_SERVER, PT_HTTP)
-				.withBlockOnScope(PT_LOCATION, PT_SERVER).andOn(PT_LOCATION);
+			return withBlockOnScope(ParserTokenType::PT_EVENTS, ParserTokenType::PT_MAIN)
+				.withBlockOnScope(ParserTokenType::PT_HTTP, ParserTokenType::PT_MAIN)
+				.withBlockOnScope(ParserTokenType::PT_UPSTREAM, ParserTokenType::PT_HTTP)
+				.withBlockOnScope(ParserTokenType::PT_SERVER, ParserTokenType::PT_HTTP)
+				.withBlockOnScope(ParserTokenType::PT_LOCATION, ParserTokenType::PT_SERVER).andOn(ParserTokenType::PT_LOCATION);
 		}
 
 		/**
@@ -286,7 +286,7 @@ class ScopeValidatorBuilder
 		 *
 		 * @return Referência para o builder.
 		 */
-		ScopeValidatorBuilder	&withDirectiveOnScope(ParserTokenType directive, ParserTokenType scope)
+		ScopeValidatorBuilder	&withDirectiveOnScope(ParserTokenType::type directive, ParserTokenType::type scope)
 		{
 			_last_scope_updated = directive;
 			_last_scope_updated_is_block = false;
@@ -302,7 +302,7 @@ class ScopeValidatorBuilder
 		 *
 		 * @return Referência para o builder.
 		 */
-		ScopeValidatorBuilder	&withBlockOnScope(ParserTokenType block, ParserTokenType scope)
+		ScopeValidatorBuilder	&withBlockOnScope(ParserTokenType::type block, ParserTokenType::type scope)
 		{
 			_last_scope_updated = block;
 			_last_scope_updated_is_block = true;
@@ -316,16 +316,16 @@ class ScopeValidatorBuilder
 		 * Exemplo:
 		 *
 		 * @code
-		 * withDirectiveOnScope(PT_ROOT, PT_HTTP)
-		 *     .andOn(PT_SERVER)
-		 *     .andOn(PT_LOCATION);
+		 * withDirectiveOnScope(ParserTokenType::PT_ROOT, ParserTokenType::PT_HTTP)
+		 *     .andOn(ParserTokenType::PT_SERVER)
+		 *     .andOn(ParserTokenType::PT_LOCATION);
 		 * @endcode
 		 *
 		 * @param scope Novo escopo permitido.
 		 *
 		 * @return Referência para o builder.
 		 */
-		ScopeValidatorBuilder	&andOn(ParserTokenType scope)
+		ScopeValidatorBuilder	&andOn(ParserTokenType::type scope)
 		{
 			if (_last_scope_updated_is_block)
 				_scope_validator.addBlockScopeValidation(_last_scope_updated, scope);

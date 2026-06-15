@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 17:40:15 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:52:14 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:11:59 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,41 +79,41 @@ public:
 	 */
 	ParserBuilder	&withDefaultDirectives()
 	{
-		_parser.addDirectiveKeyword("worker_processes", PT_WORKER_PROCESSES);
-		_parser.addDirectiveKeyword("error_log", PT_ERROR_LOG);
-		_parser.addDirectiveKeyword("pid", PT_PID);
-		_parser.addDirectiveKeyword("use", PT_USE);
-		_parser.addDirectiveKeyword("multi_accept", MULTI_ACCEPT);
-		_parser.addDirectiveKeyword("default_type", DEFAULT_TYPE);
-		_parser.addDirectiveKeyword("sendfile", SENDFILE);
-		_parser.addDirectiveKeyword("keepalive_timeout", KEEPALIVE_TIMEOUT);
-		_parser.addDirectiveKeyword("log_format", PT_LOG_FORMAT);
-		_parser.addDirectiveKeyword("autoindex", PT_AUTOINDEX);
-		_parser.addDirectiveKeyword("client_max_body_size", PT_CLIENT_MAX_BODY_SIZE);
-		_parser.addDirectiveKeyword("log_not_found", PT_LOG_NOT_FOUND);
-		_parser.addDirectiveKeyword("proxy_set_header", PT_PROXY_SET_HEADER);
-		_parser.addDirectiveKeyword("proxy_cache_bypass", PT_PROXY_CACHE_BYPASS);
-		_parser.addDirectiveKeyword("fastcgi_index", PT_FASTCGI_INDEX);
-		_parser.addDirectiveKeyword("fastcgi_param", PT_FASTCGI_PARAM);
-		_parser.addDirectiveKeyword("worker_connections", PT_WORKER_CONNECTIONS);
-		_parser.addDirectiveKeyword("expires", PT_EXPIRES);
-		_parser.addDirectiveKeyword("access_log", PT_ACCESS_LOG);
-		_parser.addDirectiveKeyword("error_page", PT_ERROR_PAGE);
-		_parser.addDirectiveKeyword("try_files", PT_TRY_FILES);
-		_parser.addDirectiveKeyword("add_header", PT_ADD_HEADER);
-		_parser.addDirectiveKeyword("listen", PT_LISTEN);
-		_parser.addDirectiveKeyword("server_name", PT_SERVER_NAME);
-		_parser.addDirectiveKeyword("root", PT_ROOT);
-		_parser.addDirectiveKeyword("index", PT_INDEX);
-		_parser.addDirectiveKeyword("include", PT_INCLUDE);
-		_parser.addDirectiveKeyword("proxy_pass", PT_PROXY_PASS);
-		_parser.addDirectiveKeyword("fastcgi_pass", PT_FASTCGI_PASS);
-		_parser.addDirectiveKeyword("return", PT_RETURN);
-		_parser.addDirectiveKeyword("rewrite", PT_REWRITE);
-		_parser.addDirectiveKeyword("ssl_certificate", PT_SSL_CERTIFICATE);
-		_parser.addDirectiveKeyword("ssl_certificate_key", PT_SSL_CERTIFICATE_KEY);
-		_parser.addDirectiveKeyword("ssl_protocols", PT_SSL_PROTOCOLS);
-		_parser.addDirectiveKeyword("ssl_ciphers", PT_SSL_CIPHERS);
+		_parser.addDirectiveKeyword("worker_processes", ParserTokenType::PT_WORKER_PROCESSES);
+		_parser.addDirectiveKeyword("error_log", ParserTokenType::PT_ERROR_LOG);
+		_parser.addDirectiveKeyword("pid", ParserTokenType::PT_PID);
+		_parser.addDirectiveKeyword("use", ParserTokenType::PT_USE);
+		_parser.addDirectiveKeyword("multi_accept", ParserTokenType::MULTI_ACCEPT);
+		_parser.addDirectiveKeyword("default_type", ParserTokenType::DEFAULT_TYPE);
+		_parser.addDirectiveKeyword("sendfile", ParserTokenType::SENDFILE);
+		_parser.addDirectiveKeyword("keepalive_timeout", ParserTokenType::KEEPALIVE_TIMEOUT);
+		_parser.addDirectiveKeyword("log_format", ParserTokenType::PT_LOG_FORMAT);
+		_parser.addDirectiveKeyword("autoindex", ParserTokenType::PT_AUTOINDEX);
+		_parser.addDirectiveKeyword("client_max_body_size", ParserTokenType::PT_CLIENT_MAX_BODY_SIZE);
+		_parser.addDirectiveKeyword("log_not_found", ParserTokenType::PT_LOG_NOT_FOUND);
+		_parser.addDirectiveKeyword("proxy_set_header", ParserTokenType::PT_PROXY_SET_HEADER);
+		_parser.addDirectiveKeyword("proxy_cache_bypass", ParserTokenType::PT_PROXY_CACHE_BYPASS);
+		_parser.addDirectiveKeyword("fastcgi_index", ParserTokenType::PT_FASTCGI_INDEX);
+		_parser.addDirectiveKeyword("fastcgi_param", ParserTokenType::PT_FASTCGI_PARAM);
+		_parser.addDirectiveKeyword("worker_connections", ParserTokenType::PT_WORKER_CONNECTIONS);
+		_parser.addDirectiveKeyword("expires", ParserTokenType::PT_EXPIRES);
+		_parser.addDirectiveKeyword("access_log", ParserTokenType::PT_ACCESS_LOG);
+		_parser.addDirectiveKeyword("error_page", ParserTokenType::PT_ERROR_PAGE);
+		_parser.addDirectiveKeyword("try_files", ParserTokenType::PT_TRY_FILES);
+		_parser.addDirectiveKeyword("add_header", ParserTokenType::PT_ADD_HEADER);
+		_parser.addDirectiveKeyword("listen", ParserTokenType::PT_LISTEN);
+		_parser.addDirectiveKeyword("server_name", ParserTokenType::PT_SERVER_NAME);
+		_parser.addDirectiveKeyword("root", ParserTokenType::PT_ROOT);
+		_parser.addDirectiveKeyword("index", ParserTokenType::PT_INDEX);
+		_parser.addDirectiveKeyword("include", ParserTokenType::PT_INCLUDE);
+		_parser.addDirectiveKeyword("proxy_pass", ParserTokenType::PT_PROXY_PASS);
+		_parser.addDirectiveKeyword("fastcgi_pass", ParserTokenType::PT_FASTCGI_PASS);
+		_parser.addDirectiveKeyword("return", ParserTokenType::PT_RETURN);
+		_parser.addDirectiveKeyword("rewrite", ParserTokenType::PT_REWRITE);
+		_parser.addDirectiveKeyword("ssl_certificate", ParserTokenType::PT_SSL_CERTIFICATE);
+		_parser.addDirectiveKeyword("ssl_certificate_key", ParserTokenType::PT_SSL_CERTIFICATE_KEY);
+		_parser.addDirectiveKeyword("ssl_protocols", ParserTokenType::PT_SSL_PROTOCOLS);
+		_parser.addDirectiveKeyword("ssl_ciphers", ParserTokenType::PT_SSL_CIPHERS);
 		return *this;
 	}
 
@@ -134,16 +134,16 @@ public:
 	 */
 	ParserBuilder	&withDefaultBlocks()
 	{
-		_parser.addBlockKeyword("http", PT_HTTP);
-		_parser.addBlockKeyword("events", PT_EVENTS);
-		_parser.addBlockKeyword("server", PT_SERVER);
-		_parser.addBlockKeyword("location", PT_LOCATION);
-		_parser.addBlockKeyword("upstream", PT_UPSTREAM);
-		_parser.addBlockKeyword("geo", PT_GEO);
-		_parser.addBlockKeyword("map", PT_MAP);
-		_parser.addBlockKeyword("stream", PT_STREAM);
-		_parser.addBlockKeyword("types", PT_TYPES);
-		_parser.addBlockKeyword("limit_except", PT_LIMIT_EXCEPT);
+		_parser.addBlockKeyword("http", ParserTokenType::PT_HTTP);
+		_parser.addBlockKeyword("events", ParserTokenType::PT_EVENTS);
+		_parser.addBlockKeyword("server", ParserTokenType::PT_SERVER);
+		_parser.addBlockKeyword("location", ParserTokenType::PT_LOCATION);
+		_parser.addBlockKeyword("upstream", ParserTokenType::PT_UPSTREAM);
+		_parser.addBlockKeyword("geo", ParserTokenType::PT_GEO);
+		_parser.addBlockKeyword("map", ParserTokenType::PT_MAP);
+		_parser.addBlockKeyword("stream", ParserTokenType::PT_STREAM);
+		_parser.addBlockKeyword("types", ParserTokenType::PT_TYPES);
+		_parser.addBlockKeyword("limit_except", ParserTokenType::PT_LIMIT_EXCEPT);
 		return *this;
 	}
 
@@ -164,10 +164,10 @@ public:
 	 */
 	ParserBuilder	&withDefaultModifiers()
 	{
-		_parser.addModifier("=", PT_MOD_EXACT);
-		_parser.addModifier("~", PT_MOD_REGEX);
-		_parser.addModifier("~*", PT_MOD_REGEX_CI);
-		_parser.addModifier("^~", PT_MOD_PREFIX);
+		_parser.addModifier("=", ParserTokenType::PT_MOD_EXACT);
+		_parser.addModifier("~", ParserTokenType::PT_MOD_REGEX);
+		_parser.addModifier("~*", ParserTokenType::PT_MOD_REGEX_CI);
+		_parser.addModifier("^~", ParserTokenType::PT_MOD_PREFIX);
 		return *this;
 	}
 
@@ -179,7 +179,7 @@ public:
 	 *
 	 * @return Referência para o builder.
 	 */
-	ParserBuilder	&withDirective(const std::string &content, ParserTokenType type)
+	ParserBuilder	&withDirective(const std::string &content, ParserTokenType::type type)
 	{
 		_parser.addDirectiveKeyword(content, type);
 		return *this;
@@ -193,7 +193,7 @@ public:
 	 *
 	 * @return Referência para o builder.
 	 */
-	ParserBuilder	&withBlock(const std::string &content, ParserTokenType type)
+	ParserBuilder	&withBlock(const std::string &content, ParserTokenType::type type)
 	{
 		_parser.addBlockKeyword(content, type);
 		return *this;
@@ -207,7 +207,7 @@ public:
 	 *
 	 * @return Referência para o builder.
 	 */
-	ParserBuilder	&withModifier(const std::string &content, ParserTokenType type)
+	ParserBuilder	&withModifier(const std::string &content, ParserTokenType::type type)
 	{
 		_parser.addModifier(content, type);
 		return *this;

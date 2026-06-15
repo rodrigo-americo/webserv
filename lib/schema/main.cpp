@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:30:21 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/05 10:56:21 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/12 17:30:06 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,15 @@
 #include "schema_number.hpp"
 
 int main()
-{    
+{
     std::string str = "Isadora";
     schema_string name_schema =  schema::string().minLength(20).name("NAME");
     schema_result_string res = name_schema.parse(str);
     std::cout << res.format();
-    
+
     schema_result_int res_int = schema::integer().min(10).name("NAME INT").parse("2");
     std::cout << res_int.format();
-	
+
 	schema_result_int res_int2 = schema::integer().between(10, 20).name("NAME INT").parse("2");
     std::cout << res_int2.format();
 
@@ -35,6 +35,20 @@ int main()
     schema_bool bool_test = schema::boolean().name("BOOL").add_truthy("ok").truthy();
     schema_result_bool res_bool = bool_test.parse("False");
     std::cout << res_bool.format();
+
+	schema_size_t	sufix_schema = schema::sizet()
+				.between(3e3, 55e9).sufix("K", 1e3).sufix("M", 1e6).sufix("G", 1e9).caseInsensitive();
+	schema_result_size_t	res_suf = sufix_schema.parse("10m");
+	if (res_suf)
+		std::cout << "\n\n schema_result_size_t (10m): " << res_suf.value << "\n\n";
+	else
+		std::cout << "\n\n schema_result_size_t (10m): " << res_suf.format() << "\n\n";
+
+	res_suf = sufix_schema.parse("2k");
+	if (res_suf)
+		std::cout << "\n\n schema_result_size_t (2k): " << res_suf.value << "\n\n";
+	else
+		std::cout << "\n\n schema_result_size_t (2k): " << res_suf.format() << "\n\n";
 
     struct functor_refine_no_space : public schema_string::functor_refine
     {
@@ -59,14 +73,14 @@ int main()
     schema_result_string res_str_refine2 = no_space.parse("tes te");
     std::cout << res_str_refine.format();
     std::cout << res_str_refine2.format();
-    
+
     int arr[] = {301, 302, 303, 307, 308};
     std::vector<int> options(arr, arr + 5);
     schema_int oneOf = schema::integer().oneOf(options);
     schema_result_int res_one_of = oneOf.parse("3010");
     std::cout << res_one_of.format();
-    
-    
+
+
     return 0;
 }
 

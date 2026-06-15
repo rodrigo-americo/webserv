@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 18:28:35 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 18:09:17 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/06 14:05:39 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,12 +60,12 @@ public:
 	 */
 	void	visit(Directive &directive)
 	{
-		if (directive.name == PT_END) return;
+		if (directive.name == ParserTokenType::PT_END) return;
 		std::stringstream	ss;
 		ss << getPrefix() << directive.name.getContent() << " -> ";
 		for (size_t i = 0; i < directive.values.size(); i++)
 		{
-			if (directive.values[i] == PT_END) return;
+			if (directive.values[i] == ParserTokenType::PT_END) return;
 			ss << directive.values[i].getContent() << " ";
 		}
 		ss << "\n";
