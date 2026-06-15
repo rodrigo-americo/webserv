@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/28 19:11:32 by brunofer          #+#    #+#             */
-/*   Updated: 2026/06/03 13:10:21 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/14 18:41:41 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,22 @@ namespace schema
 			std::string title;
 			std::string msg;
 			error(std::string _title, std::string _msg) : title(_title), msg(_msg) {};
+			bool operator==(const error& other) const
+			{
+				if (this->title == other.title && this->msg == other.msg)
+					return true;
+				return false;
+			}
 			std::string format() const
 			{
 				return title.empty() ? msg : "[" + title + "] " + msg;
 			}
+			friend std::ostream& operator<<(std::ostream& os, const error& e)
+            {
+                os << e.format();
+                return os;
+            }
+			
 		};
 
 		template <typename T>
@@ -57,6 +69,29 @@ namespace schema
 				return ss.str();
 			}
 			operator bool() { return ok; };
+			bool operator==(const result& other) const
+			{
+				if (this->value == other.value && this->ok == other.ok && this->errors == other.errors)
+					return true;
+				return false;
+			}
+			bool operator!=(const result& other) const
+			{
+				if (*this == other)
+					return false;
+				return true;
+			}
+			friend std::ostream& operator<<(std::ostream& os, const result<T>& r)
+            {
+                if (r.ok)
+                    os << "ok: " << r.value;
+                else
+                {
+                    for (size_t i = 0; i < r.errors.size(); i++)
+                        os << r.errors[i];
+                }
+                return os;
+            }
 		};
 
 		template <typename T, typename Derived>

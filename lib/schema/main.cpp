@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:30:21 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/05 10:56:21 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/10 10:21:55 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,3 @@ int main()
     
     return 0;
 }
-
-// #include "container.hpp"
-// #include <memory>
-
-// int main()
-// {
-//     container<std::vector, int> container_teste;
-//     container_teste.getTeste()
-// }

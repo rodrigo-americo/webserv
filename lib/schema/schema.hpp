@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:28:43 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/02 16:29:27 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/10 10:42:41 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include "schema_string.hpp"
 # include "schema_number.hpp"
 # include "schema_bool.hpp"
+
+typedef schema::detail::error schema_error;
 
 typedef schema::detail::schema_string schema_string;
 typedef schema::detail::result<std::string> schema_result_string;
