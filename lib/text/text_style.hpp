@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 11:24:44 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 17:40:04 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 22:45:28 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,12 +101,12 @@ namespace text
 				text_style	&hidden() { _hidden = true; return *this; }
 				text_style	&strikethrough() { _strikethrough = true; return *this; }
 
-				text_style	&color(rgb &color) { _color = color; return *this; }
+				text_style	&color(const rgb &color) { _color = color; return *this; }
 				text_style	&color(double r, double g, double b) { _color = text::detail::rgb(r, g, b); return *this; }
 				text_style	&color(std::vector<double> &arr) { _color = arr; return *this; }
 
-				text_style	&interpolate(rgb &color, double factor) { _color = _color.interpolate(color, factor); return *this; }
-				text_style	&gradient(rgb &color, double factor = 1.0)
+				text_style	&interpolate(const rgb &color, double factor) { _color = _color.interpolate(color, factor); return *this; }
+				text_style	&gradient(const rgb &color, double factor = 1.0)
 				{
 					_has_gradient = true;
 					_gradient_to = color;

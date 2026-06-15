@@ -1,0 +1,209 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   time.hpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/13 13:50:25 by bruno-valer       #+#    #+#             */
+/*   Updated: 2026/06/13 22:20:42 by bruno-valer      ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef UTILS_TIME_HPP
+# define UTILS_TIME_HPP
+
+# include <iostream>
+# include <ctime>
+
+# include "str.hpp"
+
+namespace utils
+{
+
+	static const char *time_month_str[] =
+	{
+		"JANUARY",
+		"FEBRUARY",
+		"MARCH",
+		"APRIL",
+		"MAY",
+		"JUNE",
+		"JULY",
+		"AUGUST",
+		"SEPTEMBER",
+		"OCTOBER",
+		"NOVEMBER",
+		"DECEMBER"
+	};
+	// Dia do Mês
+	struct time_month
+	{
+		enum type
+		{
+			JANUARY,
+			FEBRUARY,
+			MARCH,
+			APRIL,
+			MAY,
+			JUNE,
+			JULY,
+			AUGUST,
+			SEPTEMBER,
+			OCTOBER,
+			NOVEMBER,
+			DECEMBER
+		};
+	};
+
+	static const char *time_week_day_str[] =
+	{
+		"MONDAY",
+		"TUESDAY",
+		"WEDNESDAY",
+		"THURSDAY",
+		"FRIDAY",
+		"SATURDAY",
+		"SUNDAY"
+	};
+	// Dia da Semana
+	struct time_week_day
+	{
+		enum type
+		{
+			SUNDAY,
+			MONDAY,
+			TUESDAY,
+			WEDNESDAY,
+			THURSDAY,
+			FRIDAY,
+			SATURDAY,
+		};
+	};
+
+
+	class time
+	{
+		public:
+			typedef	time_month::type	month; // Dia do Mês
+			typedef	time_week_day::type	week_day; // Dia da Semana
+	private:
+		std::time_t	_timestamp;
+		struct tm	_time;
+		bool		_timestamp_dirty;
+		bool		_time_dirty;
+		utils::str	_format;
+
+		void	_timestampDirty() { _timestamp_dirty = true; }
+		void	_timeDirty() { _time_dirty = true; }
+
+		void	_checkTime()
+		{
+			if (_time_dirty)
+			{
+				_time = *::std::localtime(&_timestamp);
+				_time_dirty = false;
+			}
+		}
+
+		void	_checkTimestamp()
+		{
+			if (_timestamp_dirty)
+			{
+				_timestamp = std::mktime(&_time);
+				_timestamp_dirty = false;
+			}
+		}
+
+	public:
+		time()
+			: _timestamp(::std::time(NULL)), _time(*::std::localtime(&_timestamp)),
+			_timestamp_dirty(false), _time_dirty(false), _format("%Y-%m-%d %H:%M:%S") {}
+		~time() { }
+
+		int		sec() const { return _time.tm_sec; }													// Seconds. [0-60] (1 leap second)
+		time	&sec(int sec) { _checkTime(); _time.tm_sec = sec; _timestampDirty(); return *this; }	// Seconds. [0-60] (1 leap second)
+
+		int		min() const { return _time.tm_min; }													// Minutes. [0-59]
+		time	&min(int min) { _checkTime(); _time.tm_min = min; _timestampDirty(); return *this; }	// Minutes. [0-59]
+
+		int		hour() const { return _time.tm_hour; }														// Hours. [0-23]
+		time	&hour(int hour) { _checkTime(); _time.tm_hour = hour; _timestampDirty(); return *this; }	// Hours. [0-23]
+
+		int		mday() const { return _time.tm_mday; }														// Day. [1-31]
+		time	&mday(int mday) { _checkTime(); _time.tm_mday = mday; _timestampDirty(); return *this; }	// Day. [1-31]
+
+		month	mon() const { return month(_time.tm_mon); }														// Month. [0-11]
+		time	&mon(month mon) { _checkTime(); _time.tm_mon = mon; _timestampDirty(); return *this; }			// Month. [0-11]
+
+		int		year() const { return _time.tm_year + 1900; }													// Year.
+		time	&year(int year) { _checkTime(); _time.tm_year = year - 1900; _timestampDirty(); return *this; }	// Year.
+
+		week_day	wday() const { return week_day(_time.tm_wday); }													// Day of week. [0-6]
+		time	&	wday(week_day wday) { _checkTime(); _time.tm_wday = wday; _timestampDirty(); return *this; }		// Day of week. [0-6]
+
+		int		yday() const { return _time.tm_yday; }														// Days in year.[0-365]
+		time	&yday(int yday) { _checkTime(); _time.tm_yday = yday; _timestampDirty(); return *this; }	// Days in year.[0-365]
+
+		int		isdst() const { return _time.tm_isdst; }														// DST. [-1/0/1]
+		time	&isdst(int isdst) { _checkTime(); _time.tm_isdst = isdst; _timestampDirty(); return *this; }	// DST. [-1/0/1]
+
+		time	&normalize() { _checkTimestamp(); _checkTime(); return *this; } // update internal status. Must be done before any operation, like `-`, `<`, `==`, etc.
+
+		/**
+		 *  set the default format (cannot be empty)
+		 */
+		time	&setFormat(const utils::str &__format)
+		{
+			utils::str	copy = __format;
+			if (copy.trim().empty()) return *this;
+			_format = __format;
+			return *this;
+		}
+
+		utils::str	format(const utils::str &__format = "") const //
+		{
+			const	unsigned short	buffer_size = 255;
+			char	buff[buffer_size];
+			if (__format.empty())
+			{
+				std::strftime(buff, buffer_size, _format.c_str(), &_time);
+				return buff;
+			}
+			std::strftime(buff, buffer_size, __format.c_str(), &_time);
+			return buff;
+		}
+
+		utils::str	formatIso() const { return format("%Y-%m-%dT%H:%M:%S"); }
+		utils::str	formatLog() const { return format("%Y-%m-%d %H:%M:%S"); }
+		utils::str	formatEmail() const { return format("%a, %d %b %Y %H:%M:%S"); }
+
+		bool	operator==(const time &other) const { return _timestamp == other._timestamp; }
+		bool	operator!=(const time &other) const { return !(*this == other); }
+		bool	operator>(const time &other) const { return _timestamp > other._timestamp; }
+		bool	operator>=(const time &other) const { return _timestamp >= other._timestamp; }
+		bool	operator<(const time &other) const { return _timestamp < other._timestamp; }
+		bool	operator<=(const time &other) const { return _timestamp <= other._timestamp; }
+		double	operator-(const time &other) const { return std::difftime(_timestamp, other._timestamp); }
+	};
+}
+
+inline std::ostream	&operator<<(std::ostream &os, utils::time_month::type value)
+{
+	os << utils::time_month_str[value];
+	return os;
+}
+
+inline std::ostream	&operator<<(std::ostream &os, utils::time value)
+{
+	os << value.format();
+	return os;
+}
+
+inline std::ostream	&operator<<(std::ostream &os, utils::time_week_day::type value)
+{
+	os << utils::time_week_day_str[value];
+	return os;
+}
+
+#endif

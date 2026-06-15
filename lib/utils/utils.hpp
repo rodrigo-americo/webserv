@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 15:00:29 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/12 20:06:26 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/13 16:59:09 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <vector>
 
 # include "str.hpp"
+# include "time.hpp"
 
 namespace utils
 {
