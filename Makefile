@@ -1,23 +1,15 @@
 NAME = webserver
 
-INCLUDES = -I. -Ilib -Ilib/segregation -Ilib/http -Ilib/text -Ilib/utils -Ilib/schema \
-           -Iparser/lexer -Iparser/parser -Iparser/parser/visitors \
-           -Iparser/parser/visitors/ParserVisitorValidator
-
-TEST_INCLUDES = -I lib/schema
+INCLUDES = $(shell find . -name ".git*" -prune -o -type d -print | sed 's/^/\-I /' | tr "\n" " ")
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++17 -g3 $(INCLUDES)
 
 SRC = main.cpp \
-      config/ConfigBuilderVisitor.cpp \
-      config/GlobalConfig.cpp \
-      config/HttpConfig.cpp \
-      config/ServerConfig.cpp \
-      config/LocationConfig.cpp \
-      config/WebServerConfig.cpp
+	$(shell find config -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
 
-TEST_SCHEMA_SRC = tests/schema/test_string.cpp
+
+TEST_SCHEMA_SRC = $(shell find tests/schema -name "*.cpp")
 
 OBJ = $(SRC:%.cpp=%.o)
 
@@ -30,7 +22,7 @@ retry:
 	@clear
 	@$(MAKE) -s re
 	@clear
-	@./$(NAME)
+	@./$(NAME) parser/lexer/example.config
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $@
@@ -39,10 +31,10 @@ $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 tests-schema: $(TEST_SCHEMA_SRC)
-	$(CC) $(CFLAGS) -I lib/schema -I lib/utils -I tests $(TEST_SCHEMA_SRC) -o tests/schema/test_schema
+	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_SCHEMA_SRC) -o tests/schema/test_schema
 	./tests/schema/test_schema
 
-tests: tests-schema
+tests: tests-schema 
 
 clean:
 	@rm -rf $(OBJ)
