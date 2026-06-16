@@ -13,4 +13,6 @@ jobs:
       - name: Build
         run: make
       - name: Tests
+        env:
+          TERM: xterm-256color
         run: make tests
