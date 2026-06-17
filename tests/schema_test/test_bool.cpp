@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 14:12:03 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 15:35:29 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/17 20:53:51 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int test_schema_bool_true_fail_invalid()
     schema_bool bool_schema = schema::boolean().truthy().name("NAME");
     schema_result_bool expected = schema_result_bool::failure(schema_error("NAME", "tru must be valid."));
     schema_result_bool got = bool_schema.parse(str);
-    return assert(expected, got, "test_schema_bool_true_fail_basic", LINE_DATA());
+    return assert(expected, got, "test_schema_bool_true_fail_invalid", LINE_DATA());
 }
 
 int test_schema_bool_true_fail_basic()
@@ -118,7 +118,7 @@ int test_schema_bool_false_fail_invalid()
     schema_bool bool_schema = schema::boolean().falsy().name("NAME");
     schema_result_bool expected = schema_result_bool::failure(schema_error("NAME", "fal must be valid."));
     schema_result_bool got = bool_schema.parse(str);
-    return assert(expected, got, "test_schema_bool_false_fail_basic", LINE_DATA());
+    return assert(expected, got, "test_schema_bool_false_fail_invalid", LINE_DATA());
 }
 
 int test_schema_bool_false_add_pass()

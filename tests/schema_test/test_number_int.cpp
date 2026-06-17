@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 15:37:21 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 18:08:39 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/17 20:52:36 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,7 +202,7 @@ int main()
 
     std::cout << "\n=== min ===\n";
     failures += test_schema_int_basic_min_fail();
-    failures += test_schema_int_limit_min_pass();
+    failures += test_schema_int_basic_min_pass();
     failures += test_schema_int_limit_min_pass();
 
     std::cout << "\n=== max ===\n";
