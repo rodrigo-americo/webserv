@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   time.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/13 13:50:25 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 22:20:42 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/17 12:40:46 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,13 +58,13 @@ namespace utils
 
 	static const char *time_week_day_str[] =
 	{
+		"SUNDAY",
 		"MONDAY",
 		"TUESDAY",
 		"WEDNESDAY",
 		"THURSDAY",
 		"FRIDAY",
 		"SATURDAY",
-		"SUNDAY"
 	};
 	// Dia da Semana
 	struct time_week_day
@@ -122,31 +122,51 @@ namespace utils
 		~time() { }
 
 		int		sec() const { return _time.tm_sec; }													// Seconds. [0-60] (1 leap second)
-		time	&sec(int sec) { _checkTime(); _time.tm_sec = sec; _timestampDirty(); return *this; }	// Seconds. [0-60] (1 leap second)
+		time	&sec(int sec) { _checkTime(); _time.tm_sec = sec; _timestampDirty(); _checkTimestamp(); return *this; }	// Seconds. [0-60] (1 leap second)
 
 		int		min() const { return _time.tm_min; }													// Minutes. [0-59]
-		time	&min(int min) { _checkTime(); _time.tm_min = min; _timestampDirty(); return *this; }	// Minutes. [0-59]
+		time	&min(int min) { _checkTime(); _time.tm_min = min; _timestampDirty(); _checkTimestamp(); return *this; }	// Minutes. [0-59]
 
 		int		hour() const { return _time.tm_hour; }														// Hours. [0-23]
-		time	&hour(int hour) { _checkTime(); _time.tm_hour = hour; _timestampDirty(); return *this; }	// Hours. [0-23]
+		time	&hour(int hour) { _checkTime(); _time.tm_hour = hour; _timestampDirty(); _checkTimestamp(); return *this; }	// Hours. [0-23]
 
 		int		mday() const { return _time.tm_mday; }														// Day. [1-31]
-		time	&mday(int mday) { _checkTime(); _time.tm_mday = mday; _timestampDirty(); return *this; }	// Day. [1-31]
+		time	&mday(int mday) { _checkTime(); _time.tm_mday = mday; _timestampDirty(); _checkTimestamp(); return *this; }	// Day. [1-31]
 
 		month	mon() const { return month(_time.tm_mon); }														// Month. [0-11]
-		time	&mon(month mon) { _checkTime(); _time.tm_mon = mon; _timestampDirty(); return *this; }			// Month. [0-11]
+		time	&mon(month mon) { _checkTime(); _time.tm_mon = mon; _timestampDirty(); _checkTimestamp(); return *this; }			// Month. [0-11]
 
 		int		year() const { return _time.tm_year + 1900; }													// Year.
-		time	&year(int year) { _checkTime(); _time.tm_year = year - 1900; _timestampDirty(); return *this; }	// Year.
+		time	&year(int year) { _checkTime(); _time.tm_year = year - 1900; _timestampDirty(); _checkTimestamp(); return *this; }	// Year.
 
 		week_day	wday() const { return week_day(_time.tm_wday); }													// Day of week. [0-6]
-		time	&	wday(week_day wday) { _checkTime(); _time.tm_wday = wday; _timestampDirty(); return *this; }		// Day of week. [0-6]
+		// Day of week. [0-6]
+		time		&wday(week_day wday)
+		{
+
+			_checkTime();
+			int	delta = wday - _time.tm_wday;
+			_time.tm_mday += delta;
+			_timestampDirty();
+			_checkTimestamp();
+			return *this;
+		}
 
 		int		yday() const { return _time.tm_yday; }														// Days in year.[0-365]
-		time	&yday(int yday) { _checkTime(); _time.tm_yday = yday; _timestampDirty(); return *this; }	// Days in year.[0-365]
+		// Days in year.[0-365]
+		time	&yday(int yday)
+		{
+			if (yday < 0 || yday > 365) return *this;
+			_checkTime();
+			int	delta = yday - _time.tm_yday;
+			mday(mday() + delta);
+			_timestampDirty();
+			_checkTimestamp();
+			return *this;
+		}
 
 		int		isdst() const { return _time.tm_isdst; }														// DST. [-1/0/1]
-		time	&isdst(int isdst) { _checkTime(); _time.tm_isdst = isdst; _timestampDirty(); return *this; }	// DST. [-1/0/1]
+		time	&isdst(int isdst) { _checkTime(); _time.tm_isdst = isdst; _timestampDirty(); _checkTimestamp(); return *this; }	// DST. [-1/0/1]
 
 		time	&normalize() { _checkTimestamp(); _checkTime(); return *this; } // update internal status. Must be done before any operation, like `-`, `<`, `==`, etc.
 
