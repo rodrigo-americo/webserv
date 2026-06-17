@@ -453,25 +453,27 @@ int test_macro_stream_expression()
 
 // ── main ──────────────────────────────────────────────────────────────────────
 
-int main()
+int main(int argc, char **argv)
 {
+	messages::settup(argc, argv);
+
 	int failures = 0;
 
-	std::cout << "\n=== LoggerRecord ===\n";
+	// std::cout << "\n=== LoggerRecord ===\n";
 	failures += test_record_stores_level();
 	failures += test_record_stores_msg();
 	failures += test_record_stores_file_and_line();
 	failures += test_record_default_level();
 
-	std::cout << "\n=== LoggerLevel ordering ===\n";
+	// std::cout << "\n=== LoggerLevel ordering ===\n";
 	failures += test_level_ordering();
 
-	std::cout << "\n=== LoggerFormatterNoStyle ===\n";
+	// std::cout << "\n=== LoggerFormatterNoStyle ===\n";
 	failures += test_formatter_nostyle_contains_msg();
 	failures += test_formatter_nostyle_contains_file_line();
 	failures += test_formatter_nostyle_ends_with_newline();
 
-	std::cout << "\n=== LoggerFormatter coloured variants ===\n";
+	// std::cout << "\n=== LoggerFormatter coloured variants ===\n";
 	failures += test_formatter_trace_contains_msg();
 	failures += test_formatter_debug_contains_msg();
 	failures += test_formatter_info_contains_msg();
@@ -479,45 +481,41 @@ int main()
 	failures += test_formatter_error_contains_msg();
 	failures += test_formatter_fatal_contains_msg();
 
-	std::cout << "\n=== LoggerDestine — isInRange ===\n";
+	// std::cout << "\n=== LoggerDestine — isInRange ===\n";
 	failures += test_destine_range_accepts_min();
 	failures += test_destine_range_accepts_max();
 	failures += test_destine_range_rejects_below();
 	failures += test_destine_range_rejects_above();
 	failures += test_destine_single_level_accepts();
 
-	std::cout << "\n=== LoggerDestineOstream — write ===\n";
+	// std::cout << "\n=== LoggerDestineOstream — write ===\n";
 	failures += test_destine_ostream_writes_when_in_range();
 	failures += test_destine_ostream_silent_when_out_of_range();
 
-	std::cout << "\n=== LoggerDestine — custom formatter ===\n";
+	// std::cout << "\n=== LoggerDestine — custom formatter ===\n";
 	failures += test_destine_custom_formatter_used_for_level();
 	failures += test_destine_other_levels_use_default_formatter();
 
-	std::cout << "\n=== LoggerDestineFile ===\n";
+	// std::cout << "\n=== LoggerDestineFile ===\n";
 	failures += test_destine_file_creates_file();
 	failures += test_destine_file_writes_message();
 	failures += test_destine_file_appends();
 	failures += test_destine_file_silent_out_of_range();
 	failures += test_destine_file_bad_path_logs_to_stderr();
 
-	std::cout << "\n=== Logger singleton — filtering ===\n";
+	// std::cout << "\n=== Logger singleton — filtering ===\n";
 	failures += test_logger_filters_below_min_level();
 	failures += test_logger_passes_at_min_level();
 	failures += test_logger_passes_above_min_level();
 	failures += test_logger_static_level_helpers();
 
-	std::cout << "\n=== Logger macros ===\n";
+	// std::cout << "\n=== Logger macros ===\n";
 	failures += test_macro_log_info();
 	failures += test_macro_log_error_captures_source_location();
 	failures += test_macro_log_trace_suppressed();
 	failures += test_macro_stream_expression();
 
-	std::cout << "\n──────────────────────────────────────────\n";
-	if (failures == 0)
-		std::cout << "\033[32mAll tests passed.\033[0m\n";
-	else
-		std::cout << "\033[31m" << failures << " test(s) failed.\033[0m\n";
+	messages::print();
 
 	return failures;
 }

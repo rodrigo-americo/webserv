@@ -33,6 +33,7 @@ CFLAGS17 = -Wall -Wextra -Werror -std=c++17 -g3 $(INCLUDES)
 
 TEST_PROGRAM = test
 TEST_SRC = test
+TEST_MODE =
 # TEST_SCHEMA_SRC = $(shell find tests/schema_test -name "*.cpp")
 
 SRC = main.cpp \
@@ -65,9 +66,13 @@ $(NAME): $(OBJ)
 
 # tests: tests-schema
 
+tests_verbose: TEST_MODE += --verbose
+tests_verbose: tests
+
 tests:
 	@clear
 	@errors=0; \
+	setup=$$(find tests/@setup -type f -name "*.cpp" | tr "\n" " "); \
 	tests=$$(find tests -type d -name "*_test"); \
 	for dir in $$tests; do \
 		module=$$(basename $$dir | sed 's/_test$$//'); \
@@ -77,7 +82,7 @@ tests:
 			name="$$(basename $$test | sed 's/test_//' | sed 's/\.cpp//')"; \
 			echo -e "    $(BOLD)$(UNDERLINE)testting$(RESET)... $(BOLD)$$name$(RESET)"; \
 			prog="$$dir/$$name-test"; \
-			make -s --no-print-directory sub-test TEST_SRC="$$test" TEST_PROGRAM="$$prog" 2>&1 | sed 's/^/        /'; \
+			make -s --no-print-directory sub-test TEST_MODE="$(TEST_MODE)" TEST_SRC="$$setup $$test" TEST_PROGRAM="$$prog" 2>&1 | sed 's/^/        /'; \
 			status=$${PIPESTATUS[0]}; \
 			if [ $$status -ne 0 ]; then \
 				errors=$$((errors + $$status)); \
@@ -89,7 +94,7 @@ tests:
 	fi;
 
 sub-test:
-	$(CC) $(CFLAGS17) $(INCLUDES) $(TEST_SRC) -o $(TEST_PROGRAM) && ./$(TEST_PROGRAM); \
+	$(CC) $(CFLAGS17) $(INCLUDES) $(TEST_SRC) -o $(TEST_PROGRAM) && ./$(TEST_PROGRAM) $(TEST_MODE); \
 	status=$$?; \
 	rm -f $(TEST_PROGRAM); \
 	exit $$status

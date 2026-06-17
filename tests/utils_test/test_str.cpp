@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_str.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 00:48:44 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/17 00:50:16 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/17 15:04:14 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ int test_assign_str()
 int test_assign_self()
 {
 	str a("hello");
-	a = a;
+	a.operator=(a);
 	return assert_true(a == "hello", "test_assign_self", LINE_DATA());
 }
 
@@ -766,11 +766,13 @@ int test_reserve_does_not_change_content()
 
 // ── main ──────────────────────────────────────────────────────────────────────
 
-int main()
+int main(int argc, char **argv)
 {
+	messages::settup(argc, argv);
+
 	int failures = 0;
 
-	std::cout << "\n=== Construtores ===\n";
+	// std::cout << "\n=== Construtores ===\n";
 	failures += test_ctor_default();
 	failures += test_ctor_from_cstr();
 	failures += test_ctor_from_stdstring();
@@ -778,7 +780,7 @@ int main()
 	failures += test_ctor_copy();
 	failures += test_ctor_copy_independent();
 
-	std::cout << "\n=== Accessors básicos ===\n";
+	// std::cout << "\n=== Accessors básicos ===\n";
 	failures += test_size();
 	failures += test_empty_true();
 	failures += test_empty_false();
@@ -789,18 +791,18 @@ int main()
 	failures += test_subscript_write();
 	failures += test_data();
 
-	std::cout << "\n=== Iteradores ===\n";
+	// std::cout << "\n=== Iteradores ===\n";
 	failures += test_begin_end();
 	failures += test_const_begin_end();
 
-	std::cout << "\n=== Operadores de atribuição ===\n";
+	// std::cout << "\n=== Operadores de atribuição ===\n";
 	failures += test_assign_str();
 	failures += test_assign_self();
 	failures += test_assign_stdstring();
 	failures += test_assign_cstr();
 	failures += test_assign_char();
 
-	std::cout << "\n=== Concatenação ===\n";
+	// std::cout << "\n=== Concatenação ===\n";
 	failures += test_pluseq_str();
 	failures += test_pluseq_stdstring();
 	failures += test_pluseq_cstr();
@@ -811,7 +813,7 @@ int main()
 	failures += test_plus_char();
 	failures += test_stdstring_plus_str();
 
-	std::cout << "\n=== Comparação ===\n";
+	// std::cout << "\n=== Comparação ===\n";
 	failures += test_eq_str();
 	failures += test_neq_str();
 	failures += test_lt_str();
@@ -827,18 +829,18 @@ int main()
 	failures += test_lt_cstr();
 	failures += test_gt_cstr();
 
-	std::cout << "\n=== compare() ===\n";
+	// std::cout << "\n=== compare() ===\n";
 	failures += test_compare_equal();
 	failures += test_compare_less();
 	failures += test_compare_greater();
 	failures += test_compare_cstr();
 
-	std::cout << "\n=== substr() ===\n";
+	// std::cout << "\n=== substr() ===\n";
 	failures += test_substr_full();
 	failures += test_substr_partial();
 	failures += test_substr_to_end();
 
-	std::cout << "\n=== trim() ===\n";
+	// std::cout << "\n=== trim() ===\n";
 	failures += test_trim_leading_spaces();
 	failures += test_trim_trailing_spaces();
 	failures += test_trim_both_sides();
@@ -847,7 +849,7 @@ int main()
 	failures += test_trim_no_spaces();
 	failures += test_trim_const();
 
-	std::cout << "\n=== tolower() / toupper() ===\n";
+	// std::cout << "\n=== tolower() / toupper() ===\n";
 	failures += test_tolower_basic();
 	failures += test_tolower_already_lower();
 	failures += test_tolower_const_does_not_modify();
@@ -855,38 +857,38 @@ int main()
 	failures += test_toupper_already_upper();
 	failures += test_toupper_const_does_not_modify();
 
-	std::cout << "\n=== split() ===\n";
+	// std::cout << "\n=== split() ===\n";
 	failures += test_split_char_basic();
 	failures += test_split_char_single_item();
 	failures += test_split_string_basic();
 	failures += test_split_spaces();
 
-	std::cout << "\n=== join() ===\n";
+	// std::cout << "\n=== join() ===\n";
 	failures += test_join_with_sep();
 	failures += test_join_no_sep();
 	failures += test_join_single_element();
 	failures += test_join_with_prefix();
 	failures += test_join_with_modifies_self();
 
-	std::cout << "\n=== contains() ===\n";
+	// std::cout << "\n=== contains() ===\n";
 	failures += test_contains_str_found();
 	failures += test_contains_str_not_found();
 	failures += test_contains_char_found();
 	failures += test_contains_char_not_found();
 
-	std::cout << "\n=== starts_with() / ends_with() ===\n";
+	// std::cout << "\n=== starts_with() / ends_with() ===\n";
 	failures += test_starts_with_true();
 	failures += test_starts_with_false();
 	failures += test_ends_with_true();
 	failures += test_ends_with_false();
 
-	std::cout << "\n=== find() ===\n";
+	// std::cout << "\n=== find() ===\n";
 	failures += test_find_str_found();
 	failures += test_find_str_not_found();
 	failures += test_find_char_found();
 	failures += test_find_with_offset();
 
-	std::cout << "\n=== find_first/last_of() ===\n";
+	// std::cout << "\n=== find_first/last_of() ===\n";
 	failures += test_find_first_of_char();
 	failures += test_find_first_of_str_charset();
 	failures += test_find_first_not_of_char();
@@ -894,44 +896,40 @@ int main()
 	failures += test_find_last_not_of_char();
 	failures += test_find_last_of_str_correct();
 
-	std::cout << "\n=== replace_first() ===\n";
+	// std::cout << "\n=== replace_first() ===\n";
 	failures += test_replace_first_same_size();
 	failures += test_replace_first_not_found();
 	failures += test_replace_first_const_does_not_modify();
 
-	std::cout << "\n=== insert() ===\n";
+	// std::cout << "\n=== insert() ===\n";
 	failures += test_insert_at_beginning();
 	failures += test_insert_at_end();
 	failures += test_insert_in_middle();
 
-	std::cout << "\n=== remove() ===\n";
+	// std::cout << "\n=== remove() ===\n";
 	failures += test_remove_char();
 	failures += test_remove_char_not_found();
 	failures += test_remove_str();
 
-	std::cout << "\n=== erase() ===\n";
+	// std::cout << "\n=== erase() ===\n";
 	failures += test_erase_single();
 	failures += test_erase_range();
 
-	std::cout << "\n=== to<T>() / str_to() ===\n";
+	// std::cout << "\n=== to<T>() / str_to() ===\n";
 	failures += test_to_int_valid();
 	failures += test_to_int_invalid();
 	failures += test_to_double_valid();
 	failures += test_to_with_rest();
 	failures += test_str_to_partial();
 
-	std::cout << "\n=== ostream / istream ===\n";
+	// std::cout << "\n=== ostream / istream ===\n";
 	failures += test_ostream_operator();
 	failures += test_istream_operator();
 
-	std::cout << "\n=== reserve() ===\n";
+	// std::cout << "\n=== reserve() ===\n";
 	failures += test_reserve_does_not_change_content();
 
-	std::cout << "\n──────────────────────────────────────────\n";
-	if (failures == 0)
-		std::cout << "\033[32mAll tests passed.\033[0m\n";
-	else
-		std::cout << "\033[31m" << failures << " test(s) failed.\033[0m\n";
+	messages::print();
 
 	return failures;
 }
