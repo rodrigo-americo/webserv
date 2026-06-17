@@ -53,7 +53,7 @@ static LoggerRecord make_record(LoggerLevel::type lvl, const std::string &msg)
 int test_record_stores_level()
 {
 	LoggerRecord rec = make_record(LoggerLevel::WARN, "oops");
-	return assert_true(rec.level == LoggerLevel::FATAL, "test_record_stores_level", LINE_DATA());
+	return assert_true(rec.level == LoggerLevel::WARN, "test_record_stores_level", LINE_DATA());
 }
 
 int test_record_stores_msg()
