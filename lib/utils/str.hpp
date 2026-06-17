@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:45:19 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/17 00:37:43 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <sstream>
 # include <string>
+# include <cstring>
 
 namespace utils
 {
@@ -24,7 +25,7 @@ namespace utils
 		::std::stringstream	ss;
 		ss << str;
 		ss >> item;
-		return !(ss.fail() || ss.peek() == ::std::stringstream::traits_type::eof());
+		return !(ss.fail() || ss.peek() != ::std::stringstream::traits_type::eof());
 	}
 
 	class str
@@ -56,7 +57,8 @@ namespace utils
 		size_t			size() const { return _str.size(); }
 		bool			empty() const { return _str.empty(); }
 		void			clear() { _str.clear(); }
-		const char *	c_str() const { return _str.c_str(); }
+		const char		*c_str() const { return _str.c_str(); }
+		char			*data() { return _str.data(); }
 		iterator		erase(iterator start) { return _str.erase(start); }
 		iterator		erase(iterator start, iterator _end) { return _str.erase(start, _end); }
 		int				compare(const str &__str) const { return _str.compare(__str.string()); }
@@ -83,8 +85,8 @@ namespace utils
 				clear();
 				return *this;
 			}
-			while (::std::isspace(_str[last]))
-				--last;
+			while (--last > first && ::std::isspace(_str[last]))
+				;
 			_str = _str.substr(first, last - first + 1);
 			return *this;
 		}
@@ -141,6 +143,133 @@ namespace utils
 			return string;
 		}
 
+		std::vector<str> split(char delim) const
+		{
+			return split(::std::string(1, delim));
+		}
+
+		std::vector<str> split(const std::string &delim) const
+		{
+			std::vector<str>	result;
+			size_t	first = _str.find_first_not_of(delim, 0);
+			size_t	last = _str.find_first_of(delim, first);
+			result.push_back(_str.substr(first, last - first));
+			while (last != npos || last < size())
+			{
+				first = _str.find_first_not_of(delim, last + 1);
+				if (first == npos) break;
+				last = _str.find_first_of(delim, first);
+				result.push_back(_str.substr(first, last - first));
+			}
+			return result;
+		}
+
+		static str join(const std::vector<str> &parts, const str &sep = "")
+		{
+			str	_string;
+			for (size_t i = 0; i < parts.size(); i++)
+			{
+				_string += parts[i];
+				if (i < parts.size() - 1)
+					_string += sep;
+			}
+			return	_string;
+		}
+
+		str &join_with(const std::vector<str> &parts, const str &sep = "")
+		{
+			_str += join(parts, sep).string();
+			return *this;
+		}
+
+		str join_with_const(const std::vector<str> &parts, const str &sep = "") const
+		{
+			str	_string(*this);
+			return _string.join_with(parts, sep);
+		}
+
+		str &replace_all(const str &from, const str &to)
+		{
+			size_t	first = _str.find(from.string());
+			if (first == npos) return *this;
+
+			if (from.size() == to.size())
+			{
+				while (first != npos)
+				{
+					std::strcpy(data() + first, to.c_str());
+					first += to.size();
+					first = _str.find(from.string(), first);
+				}
+				return *this;
+			}
+			size_t	second = 0;
+			str	_string = _str.substr(0, first);
+			_string += to;
+			while (first != npos)
+			{
+				second = _str.find(from.string(), first + from.size());
+				if (second != npos)
+					_string += to;
+				_string += _str.substr(first, second - first);
+				first = _str.find(from.string(), second + from.size());
+				if (first != npos)
+					_string += to;
+			}
+			_str = _string.string();
+			return *this;
+		}
+
+		str replace_all_const(const str &from, const str &to)
+		{
+			str	_string(*this);
+			return _string.replace_all(from, to);
+		}
+
+		str &replace_first(const str &from, const str &to)
+		{
+			size_t	first = _str.find(from.string());
+			if (first == npos) return *this;
+
+			if (from.size() == to.size())
+			{
+				for (size_t i = 0; i < from.size(); i++)
+					_str[i + first] = to[i];
+				return *this;
+			}
+			_str = _str.substr(0, first);
+			_str += to.string();
+			return *this;
+		}
+
+		str replace_first_const(const str &from, const str &to) const
+		{
+			str	_string(*this);
+			return _string.replace_first(from, to);
+		}
+
+		str &remove(char c)
+		{
+			size_t	idx = _str.find(c);
+			if (idx != npos)
+				_str.erase(idx, 1);
+			return *this;
+		}
+
+		str &remove(const str &sub)
+		{
+			size_t	idx = _str.find(sub.string());
+			if (idx != npos)
+				_str.erase(idx, sub.size());
+			return *this;
+		}
+
+		str &insert(size_t pos, const str &s)
+		{
+			_str.insert(pos, s.string());
+			return *this;
+		}
+
 		bool			starts_with(const str &__str) const
 		{
 			return find_first_of(__str) == 0;
@@ -148,7 +277,7 @@ namespace utils
 
 		bool			ends_with(const str &__str) const
 		{
-			size_t	idx = find_last_of(__str);
+			size_t	idx = rfind(__str);
 			if (idx == npos) return false;
 			return idx + __str.size() == size();
 		}
@@ -171,6 +300,17 @@ namespace utils
 		template <typename T>
 		bool			to(T &item) const { return str_to(_str, item); }
 
+
+		bool contains(const str &s) const
+		{
+			return _str.find_first_of(s.string()) != npos;
+		}
+
+		bool contains(char c) const
+		{
+			return _str.find_first_of(c) != npos;
+		}
+
 		/**
 		 *
 		 * @returns the position of the string, or `npos` if not fond
@@ -183,25 +323,28 @@ namespace utils
 		 *
 		 * @returns the position of the string, or `npos` if not fond
 		 */
-		size_t			find(const std::string &__str, size_t pos = 0) const
+		template<typename T>
+		size_t			find(const T &__str, size_t pos = 0) const
 		{
 			return	_str.find(__str, pos);
 		}
+
 		/**
 		 *
-		 * @returns the position of the string, or `npos` if not fond
+		 * @returns Starting from __pos, searches backward for value of __str within this string. If found, returns the index where it begins. If not found, returns npos.
 		 */
-		size_t			find(const char *__str, size_t pos = 0) const
+		size_t			rfind(const str &__str, size_t pos = npos) const
 		{
-			return	_str.find(__str, pos);
+			return	_str.rfind(__str.string(), pos);
 		}
 		/**
 		 *
-		 * @returns the position of the string, or `npos` if not fond
+		 * @returns Starting from __pos, searches backward for value of __str within this string. If found, returns the index where it begins. If not found, returns npos.
 		 */
-		size_t			find(const char __str, size_t pos = 0) const
+		template<typename T>
+		size_t			rfind(const T &__str, size_t pos = npos) const
 		{
-			return	_str.find(__str, pos);
+			return	_str.rfind(__str, pos);
 		}
 
 		/**
@@ -216,23 +359,8 @@ namespace utils
 		 *
 		 * @returns the position of the string, or `npos` if not fond
 		 */
-		size_t			find_first_of(const std::string &__str, size_t pos = 0) const
-		{
-			return	_str.find_first_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_first_of(const char *__str, size_t pos = 0) const
-		{
-			return	_str.find_first_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_first_of(const char __str, size_t pos = 0) const
+		template<typename T>
+		size_t			find_first_of(const T &__str, size_t pos = 0) const
 		{
 			return	_str.find_first_of(__str, pos);
 		}
@@ -249,23 +377,8 @@ namespace utils
 		 *
 		 * @returns the position of the string, or `npos` if not fond
 		 */
-		size_t			find_first_not_of(const std::string &__str, size_t pos = 0) const
-		{
-			return	_str.find_first_not_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_first_not_of(const char *__str, size_t pos = 0) const
-		{
-			return	_str.find_first_not_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_first_not_of(const char __str, size_t pos = 0) const
+		template<typename T>
+		size_t			find_first_not_of(const T &__str, size_t pos = 0) const
 		{
 			return	_str.find_first_not_of(__str, pos);
 		}
@@ -282,23 +395,8 @@ namespace utils
 		 *
 		 * @returns the position of the string, or `npos` if not fond
 		 */
-		size_t			find_last_of(const std::string &__str, size_t pos = 0) const
-		{
-			return	_str.find_last_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_last_of(const char *__str, size_t pos = 0) const
-		{
-			return	_str.find_last_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_last_of(const char __str, size_t pos = 0) const
+		template<typename T>
+		size_t			find_last_of(const T &__str, size_t pos = npos) const
 		{
 			return	_str.find_last_of(__str, pos);
 		}
@@ -315,23 +413,8 @@ namespace utils
 		 *
 		 * @returns the position of the string, or `npos` if not fond
 		 */
-		size_t			find_last_not_of(const std::string &__str, size_t pos = 0) const
-		{
-			return	_str.find_last_not_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_last_not_of(const char *__str, size_t pos = 0) const
-		{
-			return	_str.find_last_not_of(__str, pos);
-		}
-		/**
-		 *
-		 * @returns the position of the string, or `npos` if not fond
-		 */
-		size_t			find_last_not_of(const char __str, size_t pos = 0) const
+		template<typename T>
+		size_t			find_last_not_of(const T &__str, size_t pos = npos) const
 		{
 			return	_str.find_last_not_of(__str, pos);
 		}
