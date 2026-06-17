@@ -240,9 +240,9 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
         case ParserTokenType::PT_RETURN:
         {
-            LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
-            if (lc)
-                lc->setRedirect(directive.values[0].getContent());
+            ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
+            if (sc)
+                sc->setRedirect(directive.values[0].getContent());
             break;
         }
         case ParserTokenType::PT_FASTCGI_PASS:
@@ -306,11 +306,9 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
         case ParserTokenType::PT_EXPIRES:
         {
-            // pode aparecer tanto em http quanto em location
             LocationConfig* lc = dynamic_cast<LocationConfig*>(top);
-            if (lc) { lc->setExpires(directive.values[0].getContent()); break; }
-            HttpConfig* hc = dynamic_cast<HttpConfig*>(top);
-            if (hc) hc->setExpires(directive.values[0].getContent());
+            if (lc)
+                lc->setExpires(directive.values[0].getContent());
             break;
         }
         case ParserTokenType::SENDFILE:

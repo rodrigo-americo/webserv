@@ -22,6 +22,7 @@ class ServerConfig: public ConfigContainer{
         std::string _ssl_certificate_key;
         std::string _ssl_protocols;
         std::string _ssl_ciphers;
+        std::string _redirect;
         std::list<LocationConfig*> _locations;
     public:
         ServerConfig() : _client_max_body_size(0) {}
@@ -38,6 +39,7 @@ class ServerConfig: public ConfigContainer{
         void setSslCertificateKey(const std::string& v)			{ _ssl_certificate_key = v; }
         void setSslProtocols(const std::string& v)				{ _ssl_protocols = v; }
         void setSslCiphers(const std::string& v)				{ _ssl_ciphers = v; }
+        void setRedirect(const std::string& v)				{ _redirect = v; }
 
         size_t									getClientMaxBodySize() const { return _client_max_body_size; }
         const std::list<ConfigServerListen>&	getListen() const            { return _listen; }
@@ -48,6 +50,7 @@ class ServerConfig: public ConfigContainer{
         const std::string&						getSslCertificateKey() const { return _ssl_certificate_key; }
         const std::string&						getSslProtocols() const      { return _ssl_protocols; }
         const std::string&						getSslCiphers() const        { return _ssl_ciphers; }
+        const std::string&						getRedirect() const          { return _redirect; }
         const std::list<LocationConfig*>&		getLocations() const         { return _locations; }
 
         const LocationConfig* match_location(const std::string& uri) const;
