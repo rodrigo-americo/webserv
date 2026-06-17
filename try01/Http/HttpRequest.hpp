@@ -36,7 +36,7 @@ class HttpRequest
 		SocketConnection	*_connection;
 
 	public:
-		typedef RequestMethod::type 							Method;
+		typedef RequestMethod::type		Method;
 		Method		method;
 		std::string	path;
 		std::string	http_version;
@@ -44,7 +44,7 @@ class HttpRequest
 		HttpHeaders	headers;
 
 		HttpRequest(SocketConnection *conn)
-			: _connection(conn), method(), path(), http_version(), body(), headers() {}
+			: _connection(conn), method(), path(), http_version(), body(), headers() { (void)_connection; }
 
 };
 

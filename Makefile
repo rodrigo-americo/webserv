@@ -3,10 +3,10 @@ NAME = webserver
 INCLUDES = $(shell find . -name ".git*" -prune -o -type d -print | sed 's/^/\-I /' | tr "\n" " ")
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++17 -g3 $(INCLUDES)
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 $(INCLUDES)
 
 SRC = main.cpp \
-	$(shell find config -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
+	$(shell find config try01 -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
 
 
 TEST_SCHEMA_SRC = $(shell find tests/schema -name "*.cpp")

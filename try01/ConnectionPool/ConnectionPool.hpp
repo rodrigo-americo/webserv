@@ -133,6 +133,7 @@ public:
 					if (!event.error.empty())
 					{
 						std::cerr << event.error << std::endl;
+						_multiplexer->remove(event.socket);
 						continue;
 					}
 					SocketConnection	*connection = new SocketConnection(event.socket);
@@ -143,6 +144,11 @@ public:
 				// socket is SocketType::CONNETION
 
 				SocketConnection	*conn = static_cast<SocketConnection*>(event.socket);
+				if (!event.error.empty())
+				{
+					_multiplexer->remove(conn);
+					continue;
+				}
 				RequestBuilder	req_builder(conn);
 				if (_handleRequest(req_builder))
 				{

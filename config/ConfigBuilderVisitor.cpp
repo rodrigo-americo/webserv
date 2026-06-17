@@ -1,5 +1,8 @@
 #include "ConfigBuilderVisitor.hpp"
 #include <cstdlib>
+#include "ConfigServer.hpp"
+#include "ServerListenParser.hpp"
+
 
 ConfigBuilderVisitor::~ConfigBuilderVisitor() {}
 
@@ -174,18 +177,17 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         }
 
         // ServerConfig
-        case ParserTokenType::PT_LISTEN:
-        {
-            ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
-            if (sc)
-            {
-                Listen l;
-                l.host = directive.values[0].getContent();
-                l.port = directive.values.size() > 1 ? std::atoi(directive.values[1].getContent().c_str()) : 80;
-                sc->addListen(l);
-            }
-            break;
-        }
+        case ParserTokenType::PT_LISTEN: {
+		ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
+		if (sc) {
+			ConfigServer tmp;
+			ServerListenParser p(directive);
+			p.toConfig(tmp);
+			for (size_t i = 0; i < tmp.listeners.size(); i++)
+				sc->addListen(tmp.listeners[i]);
+		}
+		break;
+		}
         case ParserTokenType::PT_ERROR_PAGE:
         {
             ServerConfig* sc = dynamic_cast<ServerConfig*>(top);
