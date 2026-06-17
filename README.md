@@ -21,3 +21,30 @@ Construir uma base sólida e extensível para um servidor HTTP robusto, aplicand
 * ✅ **Boas práticas de engenharia** (SOLID, Clean Code, testes)
 * ✅ **Conformidade HTTP/1.1** e suporte a recursos modernos (IPv6)
 * ✅ **Configuração estilo Nginx** com parser robusto
+
+## Test Framework
+
+O projeto possui um framework de testes integrado ao sistema de build, com descoberta automática de testes, saída colorida, mensagens detalhadas de erro e rastreamento por arquivo e linha.
+
+### Executando os testes
+
+```bash
+make tests
+```
+
+Modo verboso:
+
+```bash
+make tests_verbose
+```
+
+### Criando novos testes
+
+Basta criar um diretório com o sufixo `_test` dentro de `tests/` e adicionar arquivos `.cpp`. O Makefile detectará e executará os testes automaticamente.
+
+### Documentação
+
+Para informações completas sobre assertions, estrutura dos testes, macros e exemplos de uso, consulte:
+
+* [Documentação do Framework de Testes](docs/test-framework.md)
+
