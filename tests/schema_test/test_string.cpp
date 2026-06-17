@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_string.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 10:18:08 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/15 18:11:42 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/16 18:42:34 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ int main()
     int failures = 0;
 
     schema_result_string expected = schema_result_string::failure(schema_error("NAME", "Minimal lenght not reached. Must be >= 20"));
-    failures += assert(expected, test_schema_str_minLenth_fail(), "test_schema_str_minLenth_fail");
+    failures += assert(expected, test_schema_str_minLenth_fail(), "test_schema_str_minLenth_fail", LINE_DATA());
+	return failures;
 }
 
 schema_result_string test_schema_str_minLenth_fail()
@@ -33,15 +34,15 @@ schema_result_string test_schema_str_minLenth_fail()
 }
 
 // int main()
-// {    
+// {
 //     std::string str = "Isadora";
 //     schema_string name_schema =  schema::string().minLength(20).name("NAME");
 //     schema_result_string res = name_schema.parse(str);
 //     std::cout << res.format();
-    
+
 //     schema_result_int res_int = schema::integer().min(10).name("NAME INT").parse("2");
 //     std::cout << res_int.format();
-	
+
 // 	schema_result_int res_int2 = schema::integer().between(10, 20).name("NAME INT").parse("2");
 //     std::cout << res_int2.format();
 
@@ -76,13 +77,13 @@ schema_result_string test_schema_str_minLenth_fail()
 //     schema_result_string res_str_refine2 = no_space.parse("tes te");
 //     std::cout << res_str_refine.format();
 //     std::cout << res_str_refine2.format();
-    
+
 //     int arr[] = {301, 302, 303, 307, 308};
 //     std::vector<int> options(arr, arr + 5);
 //     schema_int oneOf = schema::integer().oneOf(options);
 //     schema_result_int res_one_of = oneOf.parse("3010");
 //     std::cout << res_one_of.format();
-    
-    
+
+
 //     return 0;
 // }
