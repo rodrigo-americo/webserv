@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 16:22:29 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 17:02:24 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ namespace utils
 		bool			empty() const { return _str.empty(); }
 		void			clear() { _str.clear(); }
 		const char		*c_str() const { return _str.c_str(); }
-		char			*data() { return _str.data(); }
+		char			*data() { return &_str[0]; }
 		iterator		erase(iterator start) { return _str.erase(start); }
 		iterator		erase(iterator start, iterator _end) { return _str.erase(start, _end); }
 		int				compare(const str &__str) const { return _str.compare(__str.string()); }
