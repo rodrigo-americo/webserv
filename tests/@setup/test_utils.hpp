@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_utils.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 10:08:48 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 15:03:45 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/06/18 13:35:43 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,15 @@ public:
 		if (_verbose)
 			_printSuccesses();
 		_printErrors();
-		std::cout << "\n──────────────────────────────────────────\n";
+		if (!_verbose && !_errors.size())
+		{
+			std::cout << "\033[32m" << _successes.size() << " tests passed.\033[0m ";
+			std::cout << "\033[31m" << _errors.size() << " test(s) failed.\033[0m\n";
+			return;
+		}
+		std::cout << "──────────────────────────────────────────\n";
 		std::cout << "\033[32m" << _successes.size() << " tests passed.\033[0m\n";
-		std::cout << "\033[31m" << _errors.size() << " test(s) failed.\033[0m\n";
+		std::cout << "\033[31m" << _errors.size() << " test(s) failed.\033[0m\n\n";
 	}
 };
 

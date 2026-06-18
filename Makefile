@@ -39,6 +39,8 @@ TEST_MODE =
 SRC = main.cpp \
 	$(shell find config -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
 
+LIB_SRC = $(shell find lib -name "main.cpp" -prune -o -type f -name "*.cpp" -print | tr "\n" " ")
+
 
 
 OBJ = $(SRC:%.cpp=%.o)
@@ -47,6 +49,9 @@ all: $(NAME)
 
 includes:
 	@echo $(INCLUDES)
+
+lib_src:
+	@echo $(LIB_SRC)
 
 retry:
 	@clear
@@ -94,7 +99,7 @@ tests:
 	fi;
 
 sub-test:
-	$(CC) $(CFLAGS17) $(INCLUDES) $(TEST_SRC) -o $(TEST_PROGRAM) && ./$(TEST_PROGRAM) $(TEST_MODE); \
+	$(CC) $(CFLAGS17) $(INCLUDES) $(TEST_SRC) $(LIB_SRC) -o $(TEST_PROGRAM) && ./$(TEST_PROGRAM) $(TEST_MODE); \
 	status=$$?; \
 	rm -f $(TEST_PROGRAM); \
 	exit $$status

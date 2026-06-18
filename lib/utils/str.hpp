@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/17 00:37:43 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 14:18:39 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <sstream>
 # include <string>
 # include <cstring>
+# include <vector>
 
 namespace utils
 {
@@ -31,7 +32,7 @@ namespace utils
 	class str
 	{
 	protected:
-		std::string _str;
+		::std::string _str;
 
 	public:
 		typedef std::string::iterator		iterator;
@@ -47,7 +48,7 @@ namespace utils
 		~str() {};
 
 		const std::string	&string() const { return _str; }
-		std::string	&string() { return _str; }
+		::std::string	&string() { return _str; }
 
 		iterator		begin() { return _str.begin(); }
 		const_iterator	begin() const { return _str.begin(); }
@@ -143,14 +144,14 @@ namespace utils
 			return string;
 		}
 
-		std::vector<str> split(char delim) const
+		::std::vector<str> split(char delim) const
 		{
 			return split(::std::string(1, delim));
 		}
 
-		std::vector<str> split(const std::string &delim) const
+		::std::vector<str> split(const std::string &delim) const
 		{
-			std::vector<str>	result;
+			::std::vector<str>	result;
 			size_t	first = _str.find_first_not_of(delim, 0);
 			size_t	last = _str.find_first_of(delim, first);
 			result.push_back(_str.substr(first, last - first));
@@ -197,7 +198,7 @@ namespace utils
 			{
 				while (first != npos)
 				{
-					std::strcpy(data() + first, to.c_str());
+					::std::strcpy(data() + first, to.c_str());
 					first += to.size();
 					first = _str.find(from.string(), first);
 				}
@@ -288,7 +289,7 @@ namespace utils
 		template <typename T>
 		void			to(T &item, std::string &rest) const
 		{
-			std::stringstream	ss;
+			::std::stringstream	ss;
 			ss << _str;
 			ss >> item;
 			ss >> rest;

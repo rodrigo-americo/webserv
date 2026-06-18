@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_str.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 00:48:44 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/17 15:04:14 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/06/18 14:20:02 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -560,6 +560,80 @@ int test_find_with_offset()
 	return assert_true(s.find('a', 1) == 3, "test_find_with_offset", LINE_DATA());
 }
 
+// --- rfind() ------------------------------------------------------------------
+
+// Feature: rfind encontra a última ocorrência de utils::str
+int test_rfind_str()
+{
+	utils::str text("abc abc abc");
+
+	return assert((size_t)8, text.rfind(utils::str("abc")),
+		"test_rfind_str", LINE_DATA());
+}
+
+// Feature: rfind retorna npos quando não encontra utils::str
+int test_rfind_str_not_found()
+{
+	str text("abc abc abc");
+
+	return assert(str::npos, text.rfind(str("xyz")),
+		"test_rfind_str_not_found", LINE_DATA());
+}
+
+// Feature: rfind respeita o parâmetro pos
+int test_rfind_str_with_pos()
+{
+	str text("abc abc abc");
+
+	return assert((size_t)4, text.rfind(str("abc"), 7),
+		"test_rfind_str_with_pos", LINE_DATA());
+}
+
+// Feature: rfind encontra a última ocorrência de char
+int test_rfind_char()
+{
+	str text("banana");
+
+	return assert((size_t)5, text.rfind('a'),
+		"test_rfind_char", LINE_DATA());
+}
+
+// Feature: rfind encontra a última ocorrência de std::string
+int test_rfind_std_string()
+{
+	str text("hello world hello");
+
+	return assert((size_t)12, text.rfind(std::string("hello")),
+		"test_rfind_std_string", LINE_DATA());
+}
+
+// Feature: rfind retorna npos para char inexistente
+int test_rfind_char_not_found()
+{
+	str text("banana");
+
+	return assert(str::npos, text.rfind('z'),
+		"test_rfind_char_not_found", LINE_DATA());
+}
+
+// Feature: rfind em string vazia retorna npos
+int test_rfind_empty_string()
+{
+	str text("");
+
+	return assert(str::npos, text.rfind(str("abc")),
+		"test_rfind_empty_string", LINE_DATA());
+}
+
+// Feature: rfind de string vazia retorna o último índice válido
+int test_rfind_search_empty_string()
+{
+	str text("abc");
+
+	return assert((size_t)3, text.rfind(str("")),
+		"test_rfind_search_empty_string", LINE_DATA());
+}
+
 // ── find_first_of() ───────────────────────────────────────────────────────────
 
 int test_find_first_of_char()
@@ -887,6 +961,16 @@ int main(int argc, char **argv)
 	failures += test_find_str_not_found();
 	failures += test_find_char_found();
 	failures += test_find_with_offset();
+
+	// std::cout << "\n=== rfind() ===\n";
+	test_rfind_str();
+	test_rfind_str_not_found();
+	test_rfind_str_with_pos();
+	test_rfind_char();
+	test_rfind_std_string();
+	test_rfind_char_not_found();
+	test_rfind_empty_string();
+	test_rfind_search_empty_string();
 
 	// std::cout << "\n=== find_first/last_of() ===\n";
 	failures += test_find_first_of_char();
