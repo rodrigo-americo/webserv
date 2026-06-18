@@ -14,7 +14,7 @@
 # define HTTP_REQUEST_BUILDER_HPP
 
 # include <string>
-
+# include <stdlib.h>
 # include "HttpRequest.hpp"
 # include "HttpHeaders.hpp"
 # include "SocketConnection.hpp"

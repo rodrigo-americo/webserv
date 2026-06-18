@@ -239,7 +239,7 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::MULTI_ACCEPT, ParserTokenType::PT_EVENTS)
 				.withDirectiveOnScope(ParserTokenType::PT_WORKER_CONNECTIONS, ParserTokenType::PT_EVENTS)
 				.withDirectiveOnScope(ParserTokenType::PT_SERVER_DIRECTIVE, ParserTokenType::PT_UPSTREAM)
-				.withDirectiveOnScope(ParserTokenType::PT_RETURN, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_RETURN, ParserTokenType::PT_SERVER).andOn(ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_REWRITE, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_LISTEN, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_SERVER_NAME, ParserTokenType::PT_SERVER)
