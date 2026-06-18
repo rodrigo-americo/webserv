@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_number_double.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 18:09:58 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 20:38:16 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:13:39 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,32 +131,36 @@ int test_schema_double_big_eps_min_pass()
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-    int failures = 0;
+	messages::settup(argc, argv);
 
-    std::cout << "\n=== basic parse ===\n";
-    failures += test_schema_double_basic_parse_pass();
-    failures += test_schema_double_basic_parse_fail();
-    failures += test_schema_double_not_valid_sufix_parse_fail();
-    failures += test_schema_double_space_sufix_parse_fail();
+	int failures = 0;
 
-    std::cout << "\n=== min ===\n";
-    failures += test_schema_double_basic_min_fail();
-    failures += test_schema_double_basic_min_pass();
-    failures += test_schema_double_limit_min_pass();
+	// std::cout << "\n=== basic parse ===\n";
+	failures += test_schema_double_basic_parse_pass();
+	failures += test_schema_double_basic_parse_fail();
+	failures += test_schema_double_not_valid_sufix_parse_fail();
+	failures += test_schema_double_space_sufix_parse_fail();
 
-    std::cout << "\n=== max ===\n";
-    failures += test_schema_double_basic_max_pass();
-    failures += test_schema_double_basic_max_fail();
-    failures += test_schema_double_limit_max_pass();
+	// std::cout << "\n=== min ===\n";
+	failures += test_schema_double_basic_min_fail();
+	failures += test_schema_double_basic_min_pass();
+	failures += test_schema_double_limit_min_pass();
 
-    std::cout << "\n=== between ===\n";
-    failures += test_schema_double_between_pass();
-    failures += test_schema_double_between_fail();
+	// std::cout << "\n=== max ===\n";
+	failures += test_schema_double_basic_max_pass();
+	failures += test_schema_double_basic_max_fail();
+	failures += test_schema_double_limit_max_pass();
 
-    std::cout << "\n=== custom eps ===\n";
-    failures += test_schema_double_big_eps_min_pass();
-	
-    return failures;
+	// std::cout << "\n=== between ===\n";
+	failures += test_schema_double_between_pass();
+	failures += test_schema_double_between_fail();
+
+	// std::cout << "\n=== custom eps ===\n";
+	failures += test_schema_double_big_eps_min_pass();
+
+	messages::print();
+
+	return failures;
 }

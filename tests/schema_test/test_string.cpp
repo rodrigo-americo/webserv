@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_string.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 10:18:08 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 14:11:41 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:13:15 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,37 +165,41 @@ int test_schema_str_minLength_maxLength_fail_custom_msg()
     return assert(expected, got, "test_schema_str_minLength_maxLength_fail_custom_msg", LINE_DATA());
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    int failures = 0;
+	messages::settup(argc, argv);
 
-    std::cout << "\n=== minLength ===\n";
-    failures += test_schema_str_minLength_fail_basic();
-    failures += test_schema_str_minLength_pass_basic();
-    failures += test_schema_str_minLength_fail_limit();
-    failures += test_schema_str_minLength_pass_limit();
+	int failures = 0;
 
-    std::cout << "\n=== maxLength ===\n";
-    failures += test_schema_str_maxLength_fail_basic();
-    failures += test_schema_str_maxLength_pass_basic();
-    failures += test_schema_str_maxLength_fail_limit();
-    failures += test_schema_str_maxLength_pass_limit();
+	// std::cout << "\n=== minLength ===\n";
+	failures += test_schema_str_minLength_fail_basic();
+	failures += test_schema_str_minLength_pass_basic();
+	failures += test_schema_str_minLength_fail_limit();
+	failures += test_schema_str_minLength_pass_limit();
 
-    std::cout << "\n=== startsWith ===\n";
-    failures += test_schema_str_startsWith_pass_basic();
-    failures += test_schema_str_startsWith_fail_basic();
-    failures += test_schema_str_startsWith_fail_prefix_greather_than_str();
+	// std::cout << "\n=== maxLength ===\n";
+	failures += test_schema_str_maxLength_fail_basic();
+	failures += test_schema_str_maxLength_pass_basic();
+	failures += test_schema_str_maxLength_fail_limit();
+	failures += test_schema_str_maxLength_pass_limit();
 
-    std::cout << "\n=== noChars ===\n";
-    failures += test_schema_str_noChars_pass_basic();
-    failures += test_schema_str_noChars_fail_basic();
-    failures += test_schema_str_noChars_pass_empty_str();
+	// std::cout << "\n=== startsWith ===\n";
+	failures += test_schema_str_startsWith_pass_basic();
+	failures += test_schema_str_startsWith_fail_basic();
+	failures += test_schema_str_startsWith_fail_prefix_greather_than_str();
 
-    std::cout << "\n=== minLength + maxLength ===\n";
-    failures += test_schema_str_minLength_maxLength_fail();
+	// std::cout << "\n=== noChars ===\n";
+	failures += test_schema_str_noChars_pass_basic();
+	failures += test_schema_str_noChars_fail_basic();
+	failures += test_schema_str_noChars_pass_empty_str();
 
-    std::cout << "\n=== custom error msg ===\n";
-    failures += test_schema_str_minLength_maxLength_fail_custom_msg();
-    
+	// std::cout << "\n=== minLength + maxLength ===\n";
+	failures += test_schema_str_minLength_maxLength_fail();
+
+	// std::cout << "\n=== custom error msg ===\n";
+	failures += test_schema_str_minLength_maxLength_fail_custom_msg();
+
+	messages::print();
+
 	return failures;
 }

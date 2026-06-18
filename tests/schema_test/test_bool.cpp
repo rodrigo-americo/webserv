@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_bool.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 14:12:03 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 20:53:51 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:13:47 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,32 +140,36 @@ int test_schema_bool_false_add_fail()
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-    int failures = 0;
+	messages::settup(argc, argv);
 
-    std::cout << "\n=== truthy - basic ===\n";
-    failures += test_schema_bool_true_pass_basic();
-    failures += test_schema_bool_true_all_caps_pass_basic();
-    failures += test_schema_bool_true_all_lower_pass_basic();
-    failures += test_schema_bool_true_fail_basic();
-    failures += test_schema_bool_true_fail_invalid();
-    
+	int failures = 0;
 
-    std::cout << "\n=== falsy - basic ===\n";
-    failures += test_schema_bool_false_pass_basic();
-    failures += test_schema_bool_false_all_caps_pass_basic();
-    failures += test_schema_bool_false_all_lower_pass_basic();
-    failures += test_schema_bool_false_fail_basic();
-    failures += test_schema_bool_false_fail_invalid();
+	// std::cout << "\n=== truthy - basic ===\n";
+	failures += test_schema_bool_true_pass_basic();
+	failures += test_schema_bool_true_all_caps_pass_basic();
+	failures += test_schema_bool_true_all_lower_pass_basic();
+	failures += test_schema_bool_true_fail_basic();
+	failures += test_schema_bool_true_fail_invalid();
 
-    std::cout << "\n=== add truthy ===\n";
-    failures += test_schema_bool_true_add_pass();
-    failures += test_schema_bool_true_add_fail();
 
-    std::cout << "\n=== add falsy ===\n";
-    failures += test_schema_bool_false_add_pass();
-    failures += test_schema_bool_false_add_fail();
-    
+	// std::cout << "\n=== falsy - basic ===\n";
+	failures += test_schema_bool_false_pass_basic();
+	failures += test_schema_bool_false_all_caps_pass_basic();
+	failures += test_schema_bool_false_all_lower_pass_basic();
+	failures += test_schema_bool_false_fail_basic();
+	failures += test_schema_bool_false_fail_invalid();
+
+	// std::cout << "\n=== add truthy ===\n";
+	failures += test_schema_bool_true_add_pass();
+	failures += test_schema_bool_true_add_fail();
+
+	// std::cout << "\n=== add falsy ===\n";
+	failures += test_schema_bool_false_add_pass();
+	failures += test_schema_bool_false_add_fail();
+
+	messages::print();
+
 	return failures;
 }
