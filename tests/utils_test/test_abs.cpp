@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/18 13:32:37 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 13:36:52 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 14:55:21 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,22 +42,11 @@ int test_abs_double()
 	return assert_true(ok, "test_abs_double", LINE_DATA());
 }
 
-// BUG: abs(entry) faz "entry > 0 ? entry : -entry". Para o menor valor
-// representável de um tipo com sinal (ex.: INT_MIN), "-entry" é overflow
-// (undefined behavior em C++, pois -INT_MIN não é representável em int).
-// Na prática, na maioria das implementações com overflow de complemento de
-// dois, o resultado "estoura" e retorna o PRÓPRIO INT_MIN (negativo), em vez
-// do valor positivo esperado.
-// Comportamento esperado: abs(INT_MIN) deveria, idealmente, ou ser evitado
-// (documentado como entrada inválida) ou usar um tipo de retorno maior para
-// representar o resultado corretamente.
-int test_abs_int_min_overflow_BUG()
+int test_abs_int_min_overflow()
 {
 	int result = utils::abs(std::numeric_limits<int>::min());
-	// Comportamento atual nesta plataforma: o overflow de "-INT_MIN" devolve
-	// o próprio INT_MIN (ainda negativo), não o valor absoluto positivo.
-	return assert_true(result == std::numeric_limits<int>::min(),
-					"test_abs_int_min_overflow_BUG", LINE_DATA());
+	return assert(std::numeric_limits<int>::max(), result,
+					"test_abs_int_min_overflow", LINE_DATA());
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -74,7 +63,7 @@ int main(int argc, char **argv)
 	failures += test_abs_negative_int();
 	failures += test_abs_zero();
 	failures += test_abs_double();
-	failures += test_abs_int_min_overflow_BUG();
+	failures += test_abs_int_min_overflow();
 
 	messages::print();
 

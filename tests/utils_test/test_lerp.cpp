@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_lerp.hpp                                      :+:      :+:    :+:   */
+/*   test_lerp.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/18 13:17:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 13:20:34 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 15:02:47 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,26 +91,20 @@ int test_lerp_vector_result_size_matches_input()
 	return assert_true(result.size() == 3, "test_lerp_vector_result_size_matches_input", LINE_DATA());
 }
 
-// BUG: o laço de lerp(vector,vector,double) usa sempre vec1[0]/vec2[0] em
-// vez de vec1[i]/vec2[i]. Resultado: todas as posições do vetor retornado
-// recebem o MESMO valor (a interpolação do primeiro par), ignorando
-// completamente os outros elementos dos vetores de entrada.
-// Comportamento esperado: result[i] deveria ser lerp(vec1[i], vec2[i], factor)
-// para cada i, produzindo {5, 105, 205} no exemplo abaixo.
-// Fix: trocar `lerp(vec1[0], vec2[0], factor)` por `lerp(vec1[i], vec2[i], factor)`
-// dentro do laço.
-int test_lerp_vector_uses_index_zero_for_all_positions_BUG()
+
+int test_lerp_vector_uses_index_zero_for_all_positions()
 {
 	std::vector<double> v1; v1.push_back(0);   v1.push_back(100); v1.push_back(200);
 	std::vector<double> v2; v2.push_back(10);  v2.push_back(110); v2.push_back(210);
 	std::vector<double> result = utils::lerp(v1, v2, 0.5);
 
-	// Comportamento atual: todos os elementos == lerp(v1[0], v2[0], 0.5) == 5
-	bool ok = result.size() == 3
-		&& result[0] == 5.0
-		&& result[1] == 5.0   // deveria ser 105
-		&& result[2] == 5.0;  // deveria ser 205
-	return assert_true(ok, "test_lerp_vector_uses_index_zero_for_all_positions_BUG", LINE_DATA());
+	std::stringstream	ss_result;
+	ss_result << result[0] << ", " << result[1] << ", " << result[2];
+
+	std::stringstream	ss_expected;
+	ss_expected << 5 << ", " << 105 << ", " << 205;
+
+	return assert(ss_expected.str(), ss_result.str(), "test_lerp_vector_uses_index_zero_for_all_positions", LINE_DATA());
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -134,7 +128,7 @@ int main(int argc, char **argv)
 	failures += test_lerp_vector_both_empty();
 	failures += test_lerp_vector_size_one();
 	failures += test_lerp_vector_result_size_matches_input();
-	failures += test_lerp_vector_uses_index_zero_for_all_positions_BUG();
+	failures += test_lerp_vector_uses_index_zero_for_all_positions();
 
 	messages::print();
 

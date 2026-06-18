@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*  test_time.cpp — unit tests for utils::time                                */
 /*                                                                            */
-/*  Convenção:                                                                */
-/*    - Testes que verificam comportamento CORRETO ficam como estão.          */
-/*    - Testes que documentam um BUG têm sufixo _BUG e comentário explicando  */
-/*      o comportamento atual vs. o esperado. O assert verifica o que o código*/
-/*      REALMENTE faz, não o que deveria fazer — então o teste PASSA hoje e   */
-/*      vai FALHAR no dia em que o bug for corrigido (sinal de que o fix      */
-/*      funcionou).                                                          */
+/*                                                        :::      ::::::::   */
+/*   test_time.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/18 14:58:07 by bruno-valer       #+#    #+#             */
+/*   Updated: 2026/06/18 14:58:10 by bruno-valer      ###   ########.fr       */
+/*                                                                            */
 /* ************************************************************************** */
 
 #include "test_utils.hpp"

@@ -6,16 +6,18 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 15:00:29 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/18 13:09:15 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 15:03:24 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <string>
-#include <sstream>
-#include <vector>
+# include <string>
+# include <sstream>
+# include <vector>
+# include <limits>
+# include <typeinfo>
 
 # include "str.hpp"
 # include "time.hpp"
@@ -38,6 +40,8 @@ namespace utils
 	template <typename T>
 	T abs(T entry)
 	{
+		if (entry == std::numeric_limits<T>::min())
+			return std::numeric_limits<T>::max();
 		return entry > 0 ? entry : -entry;
 	}
 
@@ -71,7 +75,7 @@ namespace utils
 		if (vec1.size() != vec2.size()) return resp;
 
 		for (size_t i = 0; i < vec1.size(); i++)
-			resp.push_back(lerp(vec1[0], vec2[0], factor));
+			resp.push_back(lerp(vec1[i], vec2[i], factor));
 
 		return resp;
 	}
