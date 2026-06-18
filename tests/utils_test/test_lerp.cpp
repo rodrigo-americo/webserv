@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/18 13:17:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 15:02:47 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 15:08:55 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ int test_lerp_vector_result_size_matches_input()
 }
 
 
-int test_lerp_vector_uses_index_zero_for_all_positions()
+int test_lerp_vector_returns_midpoint_between_two_vectors()
 {
 	std::vector<double> v1; v1.push_back(0);   v1.push_back(100); v1.push_back(200);
 	std::vector<double> v2; v2.push_back(10);  v2.push_back(110); v2.push_back(210);
@@ -104,7 +104,7 @@ int test_lerp_vector_uses_index_zero_for_all_positions()
 	std::stringstream	ss_expected;
 	ss_expected << 5 << ", " << 105 << ", " << 205;
 
-	return assert(ss_expected.str(), ss_result.str(), "test_lerp_vector_uses_index_zero_for_all_positions", LINE_DATA());
+	return assert(ss_expected.str(), ss_result.str(), "test_lerp_vector_returns_midpoint_between_two_vectors", LINE_DATA());
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 	failures += test_lerp_vector_both_empty();
 	failures += test_lerp_vector_size_one();
 	failures += test_lerp_vector_result_size_matches_input();
-	failures += test_lerp_vector_uses_index_zero_for_all_positions();
+	failures += test_lerp_vector_returns_midpoint_between_two_vectors();
 
 	messages::print();
 

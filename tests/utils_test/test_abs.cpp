@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/18 13:32:37 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 14:55:21 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 15:10:42 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,11 @@ int test_abs_double()
 	return assert_true(ok, "test_abs_double", LINE_DATA());
 }
 
-int test_abs_int_min_overflow()
+int test_abs_int_min_value_is_clamped_to_max_int()
 {
 	int result = utils::abs(std::numeric_limits<int>::min());
 	return assert(std::numeric_limits<int>::max(), result,
-					"test_abs_int_min_overflow", LINE_DATA());
+					"test_abs_int_min_value_is_clamped_to_max_int", LINE_DATA());
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	failures += test_abs_negative_int();
 	failures += test_abs_zero();
 	failures += test_abs_double();
-	failures += test_abs_int_min_overflow();
+	failures += test_abs_int_min_value_is_clamped_to_max_int();
 
 	messages::print();
 
