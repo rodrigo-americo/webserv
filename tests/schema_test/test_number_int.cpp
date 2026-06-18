@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test_number_int.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/17 15:37:21 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/17 20:52:36 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:13:28 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,45 +190,49 @@ int test_schema_int_sufix_case_insensitive_pass()
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-    int failures = 0;
+	messages::settup(argc, argv);
 
-    std::cout << "\n=== basic parse ===\n";
-    failures += test_schema_int_basic_parse_pass();
-    failures += test_schema_int_basic_parse_fail();
-    failures += test_schema_int_not_valid_sufix_parse_fail();
-    failures += test_schema_int_space_sufix_parse_fail();
+	int failures = 0;
 
-    std::cout << "\n=== min ===\n";
-    failures += test_schema_int_basic_min_fail();
-    failures += test_schema_int_basic_min_pass();
-    failures += test_schema_int_limit_min_pass();
+	// std::cout << "\n=== basic parse ===\n";
+	failures += test_schema_int_basic_parse_pass();
+	failures += test_schema_int_basic_parse_fail();
+	failures += test_schema_int_not_valid_sufix_parse_fail();
+	failures += test_schema_int_space_sufix_parse_fail();
 
-    std::cout << "\n=== max ===\n";
-    failures += test_schema_int_basic_max_pass();
-    failures += test_schema_int_basic_max_fail();
-    failures += test_schema_int_limit_max_pass();
+	// std::cout << "\n=== min ===\n";
+	failures += test_schema_int_basic_min_fail();
+	failures += test_schema_int_basic_min_pass();
+	failures += test_schema_int_limit_min_pass();
 
-    std::cout << "\n=== between ===\n";
-    failures += test_schema_int_between_pass();
-    failures += test_schema_int_between_fail();
+	// std::cout << "\n=== max ===\n";
+	failures += test_schema_int_basic_max_pass();
+	failures += test_schema_int_basic_max_fail();
+	failures += test_schema_int_limit_max_pass();
 
-    std::cout << "\n=== oneOf ===\n";
-    failures += test_schema_int_oneOf_pass();
-    failures += test_schema_int_oneOf_fail();
-    
+	// std::cout << "\n=== between ===\n";
+	failures += test_schema_int_between_pass();
+	failures += test_schema_int_between_fail();
 
-    std::cout << "\n=== sufix ===\n";
-    failures += test_schema_int_sufix_pass();
-    failures += test_schema_int_sufix_fail();
+	// std::cout << "\n=== oneOf ===\n";
+	failures += test_schema_int_oneOf_pass();
+	failures += test_schema_int_oneOf_fail();
 
-    std::cout << "\n=== sufixOptional ===\n";
-    failures += test_schema_int_sufix_optional_with_sufix_pass();
-    failures += test_schema_int_sufix_optional_without_sufix_pass();
 
-    std::cout << "\n=== caseInsensitive ===\n";
-    failures += test_schema_int_sufix_case_insensitive_pass();
-	
-    return failures;
+	// std::cout << "\n=== sufix ===\n";
+	failures += test_schema_int_sufix_pass();
+	failures += test_schema_int_sufix_fail();
+
+	// std::cout << "\n=== sufixOptional ===\n";
+	failures += test_schema_int_sufix_optional_with_sufix_pass();
+	failures += test_schema_int_sufix_optional_without_sufix_pass();
+
+	// std::cout << "\n=== caseInsensitive ===\n";
+	failures += test_schema_int_sufix_case_insensitive_pass();
+
+	messages::print();
+
+	return failures;
 }
