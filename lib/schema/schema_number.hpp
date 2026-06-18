@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   schema_number.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 15:40:55 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/12 22:03:42 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/17 18:41:06 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ namespace schema
 					{
 						if (!this->_custom_message.empty())
 							return result<T>::failure(error(this->field_name, this->_custom_message));
-						return result<T>::failure(error(this->field_name, "Sufix " + entry + " is invalid, mus be one of '" + this->_sufixes_str + "'."));
+						return result<T>::failure(error(this->field_name, "Sufix " + entry + " is invalid, must be one of '" + this->_sufixes_str + "'."));
 					}
 					value = T(double(value) * it->second);
 					return this->runAllValidators(value);
@@ -251,7 +251,7 @@ namespace schema
 						}
 						std::string operator()(const T& value)
 						{
-							if (value - min_value <= eps)
+							if (value - min_value < -eps)
 								return _msg.empty() ? "Minimal value not reached. Is " + utils::to_string(value) + ". Must be at least " + utils::to_string(min_value) : _msg;
 							return "";
 						}

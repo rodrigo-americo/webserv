@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 17:25:06 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/03 15:42:13 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/17 15:17:36 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,27 +87,37 @@ namespace schema
             }
             schema_bool& add_truthy(const std::string& word)
             {
-                true_indicators.push_back(word);
+                std::string word_lower_case = word;
+                std::transform(word.begin(), word.end(), word_lower_case.begin(),::tolower);
+                true_indicators.push_back(word_lower_case);
                 return *this;
             }
             schema_bool& add_truthy(const std::vector<std::string>& words)
             {
+                std::string word_lower_case;
                 for (size_t i = 0; i < words.size(); i++)
                 {
-                    true_indicators.push_back(words[i]);
+                    word_lower_case = words[i];
+                    std::transform(words[i].begin(), words[i].end(), word_lower_case.begin(),::tolower);
+                    true_indicators.push_back(word_lower_case);
                 }
                 return *this;
             }
             schema_bool& add_falsy(const std::string& word)
             {
-                false_indicators.push_back(word);
+                std::string word_lower_case = word;
+                std::transform(word.begin(), word.end(), word_lower_case.begin(),::tolower);
+                false_indicators.push_back(word_lower_case);
                 return *this;
             }
             schema_bool& add_falsy(const std::vector<std::string>& words)
             {
+                std::string word_lower_case;
                 for (size_t i = 0; i < words.size(); i++)
                 {
-                    false_indicators.push_back(words[i]);
+                    word_lower_case = words[i];
+                    std::transform(words[i].begin(), words[i].end(), word_lower_case.begin(),::tolower);
+                    false_indicators.push_back(word_lower_case);
                 }
                 return *this;
             }
