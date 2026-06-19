@@ -29,6 +29,7 @@ INCLUDES = $(shell find . -name ".git*" -prune -o -type d -print | sed 's/^/\-I 
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 $(INCLUDES)
+
 CFLAGS17 = -Wall -Wextra -Werror -std=c++17 -g3 $(INCLUDES)
 
 TEST_PROGRAM = test
@@ -37,7 +38,7 @@ TEST_MODE =
 # TEST_SCHEMA_SRC = $(shell find tests/schema_test -name "*.cpp")
 
 SRC = main.cpp \
-	$(shell find config -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
+	$(shell find config try01 -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
 
 LIB_SRC = $(shell find lib -name "main.cpp" -prune -o -type f -name "*.cpp" -print | tr "\n" " ")
 

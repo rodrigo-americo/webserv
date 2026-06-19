@@ -29,7 +29,8 @@ class ConfigServerSsl {
 	public:
 		ConfigServerSsl()
 			: certificate(), certificate_key(), protocols(), ciphers(),
-			session_cache(), session_timeout(300), prefer_server_ciphers(false) {}
+			session_cache(), session_timeout(300), prefer_server_ciphers(false) {(void)session_timeout;
+				 (void)prefer_server_ciphers;}
 };
 
 #endif
