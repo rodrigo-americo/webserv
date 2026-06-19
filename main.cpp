@@ -1,6 +1,7 @@
 #include <iostream>
 #include "parser/parser/ParserBuilder.hpp"
 #include "config/ConfigBuilderVisitor.hpp"
+#include "WebServer.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -37,9 +38,8 @@ int main(int argc, char* argv[])
         delete config;
         return 1;
     }
-
-    std::cout << "Configuração carregada com sucesso" << std::endl;
-
+	WebServer webServer;
+	webServer.start(config);
     delete config;
     return 0;
 }

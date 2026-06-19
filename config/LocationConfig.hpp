@@ -14,7 +14,7 @@ class LocationConfig: public ConfigLeaf{
         std::string _path;
         LocationModifier _modifier;
         std::list<HttpMethod> _methods;
-        std::string _redirect;
+        std::pair<int, std::string> _redirect;
         std::string _root;
         bool _autoindex;
         std::list<std::string> _index;
@@ -28,10 +28,10 @@ class LocationConfig: public ConfigLeaf{
         std::list<std::pair<std::string, std::string> > _proxy_set_header;
         std::map<std::string, std::string> _cgi;
     public:
-        LocationConfig() : _modifier(MOD_NONE), _autoindex(false) {}
+        LocationConfig() : _modifier(MOD_NONE), _redirect(0, ""), _autoindex(false) {}
         void setPath(const std::string& path)                          { _path = path; }
         void setModifier(LocationModifier modifier)                    { _modifier = modifier; }
-        void setRedirect(const std::string& redirect)                  { _redirect = redirect; }
+        void setRedirect(int code,const std::string& url)              { _redirect = std::make_pair(code, url); }
         void setRoot(const std::string& root)                          { _root = root; }
         void setAutoindex(bool autoindex)                              { _autoindex = autoindex; }
         void setUploadDir(const std::string& dir)                      { _upload_dir = dir; }
@@ -41,7 +41,7 @@ class LocationConfig: public ConfigLeaf{
         void setExpires(const std::string& v)                          { _expires = v; }
         const std::string &getPath() const                             { return _path; }
         LocationModifier getModifier() const                           { return _modifier; }
-        const std::string &getRedirect() const                         { return _redirect; }
+        const std::pair<int, std::string> &getRedirect() const         { return _redirect; }
         const std::string &getRoot() const                             { return _root; }
         bool getAutoIndex() const                                      { return _autoindex; }
         const std::string &getUploadDir() const                        { return _upload_dir; }

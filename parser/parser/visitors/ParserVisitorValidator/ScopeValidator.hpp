@@ -239,7 +239,7 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::MULTI_ACCEPT, ParserTokenType::PT_EVENTS)
 				.withDirectiveOnScope(ParserTokenType::PT_WORKER_CONNECTIONS, ParserTokenType::PT_EVENTS)
 				.withDirectiveOnScope(ParserTokenType::PT_SERVER_DIRECTIVE, ParserTokenType::PT_UPSTREAM)
-				.withDirectiveOnScope(ParserTokenType::PT_RETURN, ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_RETURN, ParserTokenType::PT_SERVER).andOn(ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_REWRITE, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_LISTEN, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_SERVER_NAME, ParserTokenType::PT_SERVER)
@@ -249,7 +249,7 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::PT_SSL_CIPHERS, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_PASS, ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PASS, ParserTokenType::PT_LOCATION)
-				.withDirectiveOnScope(ParserTokenType::PT_EXPIRES, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_EXPIRES, ParserTokenType::PT_LOCATION) // TODO: expandir para PT_HTTP e PT_SERVER quando HttpConfig e ServerConfig suportarem expires
 				.withDirectiveOnScope(ParserTokenType::PT_ROOT, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_ACCESS_LOG, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
