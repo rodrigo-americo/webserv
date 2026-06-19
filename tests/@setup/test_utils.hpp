@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 10:08:48 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/18 13:35:43 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/18 23:25:10 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ public:
 		_printErrors();
 		if (!_verbose && !_errors.size())
 		{
-			std::cout << "\033[32m" << _successes.size() << " tests passed.\033[0m ";
-			std::cout << "\033[31m" << _errors.size() << " test(s) failed.\033[0m\n";
+			std::cout << "\033[32m" << _successes.size() << " tests passed.\033[0m\n";
 			return;
 		}
 		std::cout << "──────────────────────────────────────────\n";
