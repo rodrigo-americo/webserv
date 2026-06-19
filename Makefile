@@ -30,7 +30,7 @@ VENV = .venv
 INCLUDES = $(shell find . -name ".git*" -o -name "$(VENV)*" -prune -o -type d -print | sed 's/^/\-I /' | tr "\n" " ")
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 $(INCLUDES) --coverage
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 $(INCLUDES)
 CFLAGS17 = -Wall -Wextra -Werror -std=c++17 -g3 $(INCLUDES)
 
 
