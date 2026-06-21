@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 18:46:01 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 11:53:49 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/20 11:05:01 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,8 @@ public:
 	 */
 	bool	hasError() const { return !_errors.empty(); }
 
+	const std::vector<std::string>	&getErrors() const { return _errors; }
+
 	// @brief Exibe todos os erros registrados.
 	void	printErrors() const
 	{
@@ -110,6 +112,8 @@ public:
 			delete _root;
 		_root = root;
 	}
+
+	const Block	*getRoot() const { return _root; }
 
 	/**
 	 * @brief Adiciona um erro à lista interna.

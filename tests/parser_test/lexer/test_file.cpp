@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 16:42:17 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/19 16:42:45 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/20 10:53:44 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,10 +346,10 @@ int test_nextIs_no_match()
 	return assert_true(!f.nextIs("world"), "test_nextIs_no_match", LINE_DATA());
 }
 
-int test_nextIs_empty_string_always_true()
+int test_nextIs_empty_string_false()
 {
 	File f(HELLO);
-	return assert_true(f.nextIs(""), "test_nextIs_empty_string_always_true", LINE_DATA());
+	return assert_false(f.nextIs(""), "test_nextIs_empty_string_false", LINE_DATA());
 }
 
 int test_nextIs_after_advance()
@@ -658,7 +658,7 @@ int main(int argc, char **argv)
 	// std::cout << "\n=== nextIs ===\n";
 	failures += test_nextIs_match_at_start();
 	failures += test_nextIs_no_match();
-	failures += test_nextIs_empty_string_always_true();
+	failures += test_nextIs_empty_string_false();
 	failures += test_nextIs_after_advance();
 	failures += test_nextIs_too_long_at_end();
 	failures += test_nextIs_exact_fit_at_end();
