@@ -261,7 +261,8 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PARAM, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_CACHE_BYPASS, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
-				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER);
+				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_UPLOAD_DIR, ParserTokenType::PT_LOCATION);
 		}
 
 		/**

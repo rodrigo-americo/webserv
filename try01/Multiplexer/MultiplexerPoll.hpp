@@ -28,9 +28,11 @@ class MultiplexerPoll: public IMultiplexer
 		typedef std::vector<pollfd>		pollfds;
 		sockets	_sockets;
 		pollfds	_pollfds;
+		int		_timeout_ms;
 
 	public:
-		MultiplexerPoll(): _sockets(), _pollfds() {};
+		MultiplexerPoll(): _sockets(), _pollfds(), _timeout_ms(-1) {};
+		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerPoll() {};
 
 		void add(Socket *socket)
@@ -67,7 +69,7 @@ class MultiplexerPoll: public IMultiplexer
 		{
 			events.clear();
 			if (_pollfds.empty()) return "";
-			int ret = poll(&_pollfds[0], _pollfds.size(), -1);
+			int ret = poll(&_pollfds[0], _pollfds.size(), _timeout_ms);
 			if (ret < 0) return strerror(errno);
 			for (size_t i = 0; i < _sockets.size(); i++)
 			{

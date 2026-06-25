@@ -14,6 +14,7 @@
 # define CONNECTION_POOL_HPP
 
 # include <map>
+# include <list>
 # include <vector>
 
 # include "singleton.hpp"
@@ -63,17 +64,43 @@ class ConnectionPool: public patterns::singleton<ConnectionPool>
 private:
 	IMultiplexer				*_multiplexer;
 	HttpRequestObservers		_http_request_observers;
-	std::vector<RequestBuilder>	_pending_request;
+	std::list<RequestBuilder>	_pending_request;
+
+	RequestBuilder *_findPending(SocketConnection *conn)
+	{
+		for (std::list<RequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
+		{
+			if (it->connection == conn)
+				return &(*it);
+		}
+		return NULL;
+	}
+
+	void	_removePending(SocketConnection *conn)
+	{
+		for (std::list<RequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
+		{
+			if (it->connection == conn)
+			{
+				_pending_request.erase(it);
+				return;
+			}
+		}
+	}
 
 	bool	_handleRequest(RequestBuilder &req_builder)
 	{
 		static const size_t buffer_size = 1024;
-		std::string	buff;
-		ssize_t bytes_read = req_builder.connection->read(buffer_size, buff);
-		while (bytes_read == buffer_size)
-			bytes_read = req_builder.connection->read(buffer_size, buff);
-
-		req_builder.addToBuffer(buff);
+		std::string	chunk;
+		ssize_t bytes_read = req_builder.connection->read(buffer_size, chunk);
+		while (bytes_read > 0)
+		{
+			req_builder.addToBuffer(chunk);
+			if (req_builder.isComplete()) break;
+			if (bytes_read < static_cast<ssize_t>(buffer_size)) break;
+			chunk.clear();
+			bytes_read = req_builder.connection->read(buffer_size, chunk);
+		}
 
 		bool	is_request_complete = req_builder.isComplete();
 		if (is_request_complete)
@@ -149,13 +176,24 @@ public:
 					_multiplexer->remove(conn);
 					continue;
 				}
-				RequestBuilder	req_builder(conn);
-				if (_handleRequest(req_builder))
+				RequestBuilder *existing = _findPending(conn);
+				if (existing)
 				{
-					_multiplexer->remove(conn);
-					continue;
+					if (_handleRequest(*existing))
+					{
+						_removePending(conn);
+						_multiplexer->remove(conn);
+					}
 				}
-				// _pending_request.push_back(req_builder);
+				else
+				{
+					_pending_request.push_back(RequestBuilder(conn));
+					if (_handleRequest(_pending_request.back()))
+					{
+						_pending_request.pop_back();
+						_multiplexer->remove(conn);
+					}
+				}
 			}
 		}
 	}

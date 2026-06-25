@@ -30,7 +30,7 @@ private:
 	bool											_is_complete;
 	size_t											_cursor;
 
-	void	_processHeader(size_t last)
+	void	_processHeader(size_t header_end)
 	{
 		if (!_is_request_line_processed)
 		{
@@ -46,22 +46,27 @@ private:
 				_req.method = RequestMethod::PATCH;
 			else if (line_method == "DELETE")
 				_req.method = RequestMethod::DELETE;
-			_cursor = _buffer.find_first_not_of(' ', _cursor); // path
-			_req.path = _buffer.substr(_cursor, _buffer.find_first_of(' ', _cursor) - _cursor);
-			_cursor = _buffer.find_first_not_of(' ', _cursor); // http_version
-			_req.http_version = _buffer.substr(_cursor, _buffer.find_first_of('\r') - _cursor);
-			_cursor += 2;
+			_cursor = _buffer.find_first_not_of(' ', _cursor); // path start
+			size_t path_end = _buffer.find_first_of(' ', _cursor);
+			_req.path = _buffer.substr(_cursor, path_end - _cursor);
+			_cursor = _buffer.find_first_not_of(' ', path_end); // http_version start
+			size_t ver_end = _buffer.find_first_of('\r', _cursor);
+			_req.http_version = _buffer.substr(_cursor, ver_end - _cursor);
+			_cursor = ver_end + 2; // pula \r\n da request line
 		}
 		_is_request_line_processed = true;
-		while (_cursor <= last)
+		while (_cursor <= header_end)
 		{
 			size_t	begin = _cursor;
-			_cursor = _buffer.find_first_of(':', _cursor);
-			std::string	key = _buffer.substr(begin, _cursor - begin);
-			begin = _buffer.find_first_not_of(' ', _cursor);
-			_cursor = _buffer.find_first_of('\r', _cursor);
-			std::string	value = _buffer.substr(begin, _cursor - begin);
+			size_t	colon = _buffer.find_first_of(':', _cursor);
+			if (colon == std::string::npos || colon > header_end) break;
+			std::string	key = _buffer.substr(begin, colon - begin);
+			size_t	val_start = _buffer.find_first_not_of(' ', colon + 1);
+			size_t	val_end = _buffer.find_first_of('\r', colon + 1);
+			if (val_end == std::string::npos || val_end > header_end) break;
+			std::string	value = _buffer.substr(val_start, val_end - val_start);
 			_req.headers[key] = value;
+			_cursor = val_end + 2; // pula \r\n
 		}
 		_verifyCompletion();
 	}
@@ -70,15 +75,20 @@ private:
 	{
 		if (_body_start == 0) return;
 
-		if ( _req.method != RequestMethod::GET)
+		if (_req.method != RequestMethod::GET)
 		{
-			const HttpRequest &req = _req;
-			int	body_size = _buffer.size() - _body_start;
-			_is_complete = body_size >= std::atoi(req.headers.content_length().c_str());
+			const std::string &cl = _req.headers.content_length();
+			int expected = cl.empty() ? 0 : std::atoi(cl.c_str());
+			int body_size = static_cast<int>(_buffer.size() - _body_start);
 			_req.body = _buffer.substr(_body_start, body_size);
+			if (expected > 0)
+				_is_complete = body_size >= expected;
+			else
+				_is_complete = true;
 		}
-		_is_complete = true;
-}
+		else
+			_is_complete = true;
+	}
 
 public:
 	SocketConnection *connection;
@@ -100,7 +110,7 @@ public:
 		if (idx != std::string::npos)
 		{
 			_body_start = idx + 4;
-			_processHeader(idx - 1);
+			_processHeader(idx);
 		}
 	}
 

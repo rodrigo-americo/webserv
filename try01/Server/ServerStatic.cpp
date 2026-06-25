@@ -1,0 +1,131 @@
+#include "Server.hpp"
+#include <fstream>
+#include <sstream>
+#include <dirent.h>
+#include <sys/stat.h>
+
+static std::string _mimeType(const std::string& path)
+{
+    size_t dot = path.rfind('.');
+    if (dot == std::string::npos) return "application/octet-stream";
+    std::string ext = path.substr(dot);
+    if (ext == ".html") return "text/html";
+    if (ext == ".css")  return "text/css";
+    if (ext == ".js")   return "application/javascript";
+    if (ext == ".json") return "application/json";
+    if (ext == ".png")  return "image/png";
+    if (ext == ".jpg" || ext == ".jpeg") return "image/jpeg";
+    if (ext == ".ico")  return "image/x-icon";
+    return "application/octet-stream";
+}
+
+
+void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const std::string &dir_path)
+{
+    DIR *dir = opendir(dir_path.c_str());
+    if (!dir)
+        return _sendError(res, 403, "Forbidden", &req);
+
+    std::string body;
+    body += "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">";
+    body += "<title>Index of " + req.path + "</title>";
+    body += "<style>";
+    body += "body{background:#0d1117;color:#e6edf3;font-family:'Courier New',monospace;padding:2rem;}";
+    body += "h1{color:#58a6ff;margin-bottom:1.5rem;font-size:1.4rem;}";
+    body += "table{width:100%;border-collapse:collapse;}";
+    body += "tr:hover{background:#161b22;}";
+    body += "td,th{padding:0.5rem 1rem;text-align:left;border-bottom:1px solid #21262d;}";
+    body += "th{color:#8b949e;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;}";
+    body += "a{color:#58a6ff;text-decoration:none;}";
+    body += "a:hover{text-decoration:underline;}";
+    body += ".size{color:#8b949e;font-size:0.85rem;}";
+    body += "</style></head><body>";
+    body += "<h1>Index of " + req.path + "</h1>";
+    body += "<table><tr><th>nome</th><th>tamanho</th></tr>";
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        std::string name = entry->d_name;
+        if (name == ".") continue;
+
+        std::string full = dir_path + name;
+        struct stat st;
+        bool is_dir = false;
+        std::string size_str = "-";
+
+        if (stat(full.c_str(), &st) == 0)
+        {
+            is_dir = S_ISDIR(st.st_mode);
+            if (!is_dir)
+            {
+                std::ostringstream oss;
+                if (st.st_size < 1024)
+                    oss << st.st_size << " B";
+                else if (st.st_size < 1024 * 1024)
+                    oss << st.st_size / 1024 << " KB";
+                else
+                    oss << st.st_size / (1024 * 1024) << " MB";
+                size_str = oss.str();
+            }
+        }
+
+        std::string display = is_dir ? name + "/" : name;
+        std::string href = req.path + display;
+
+        body += "<tr><td><a href=\"" + href + "\">" + display + "</a></td>";
+        body += "<td class=\"size\">" + size_str + "</td></tr>";
+    }
+    closedir(dir);
+
+    body += "</table></body></html>";
+
+    res.statusCode(200, "OK");
+    res.headers.content_type("text/html");
+    res.body(body);
+    res.send(ResponseHTTPVersion::HTTP_1_1);
+}
+
+
+void Server::_serveStatic(const HttpRequest &req, HttpResponse &res,
+                           const ServerConfig &server, const LocationConfig &location)
+{
+    std::string root = location.getRoot().empty() ? server.getRoot() : location.getRoot();
+    
+    // Remove trailing slash from root to normalize path joining
+    if (!root.empty() && root[root.size() - 1] == '/')
+        root = root.substr(0, root.size() - 1);
+    
+    std::string file_path = root + req.path;
+    if (file_path.find("..") != std::string::npos)
+        return _sendError(res, 403, "Forbidden", &req);
+    struct stat st;
+    if (stat(file_path.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+    {
+        if (file_path[file_path.size() - 1] != '/')
+            file_path += '/';
+
+        const std::list<std::string>& indexes = location.getIndex();
+        bool found = false;
+        for (std::list<std::string>::const_iterator it = indexes.begin(); it != indexes.end(); ++it)
+        {
+            std::string candidate = file_path + *it;
+            std::ifstream f(candidate.c_str());
+            if (f.good()) { file_path = candidate; found = true; break; }
+        }
+        if (!found)
+        {
+            if (location.getAutoIndex())
+                return _serveAutoIndex(req, res, file_path);
+            return _sendError(res, 403, "Forbidden", &req);
+        }
+    }
+    std::ifstream file(file_path.c_str(), std::ios::binary);
+    if (!file.is_open())
+        return _sendError(res, 404, "Not Found", &req);
+    std::string content((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+    res.statusCode(200, "OK");
+    res.headers.content_type(_mimeType(file_path));
+    res.body(content);
+    res.send(ResponseHTTPVersion::HTTP_1_1);
+}

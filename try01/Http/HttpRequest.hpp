@@ -42,9 +42,11 @@ class HttpRequest
 		std::string	http_version;
 		std::string	body;
 		HttpHeaders	headers;
+		uint16_t port;
 
 		HttpRequest(SocketConnection *conn)
-			: _connection(conn), method(), path(), http_version(), body(), headers() { (void)_connection; }
+			: _connection(conn), method(), path(), http_version(),
+			 body(), headers(), port(conn->listenner()->addr().port()) {}
 
 };
 

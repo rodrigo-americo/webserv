@@ -25,10 +25,12 @@ class MultiplexerEpoll: public IMultiplexer
 {
 	private:
 		int	_epollfd;
+		int	_timeout_ms;
 
 	public:
 		// sobre `epoll_create` (info retirada do `man epoll_create`) -> Since Linux 2.6.8, the size argument is ignored, but must be greater than zero;
-		MultiplexerEpoll(): _epollfd(epoll_create(1)) {};
+		MultiplexerEpoll(): _epollfd(epoll_create(1)), _timeout_ms(-1) {};
+		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerEpoll()
 		{
 			if (_epollfd > 2)
@@ -57,7 +59,7 @@ class MultiplexerEpoll: public IMultiplexer
 		{
 			epoll_event	epoll_events[1024];
 
-			int n = epoll_wait(_epollfd, epoll_events, 1024, -1);
+			int n = epoll_wait(_epollfd, epoll_events, 1024, _timeout_ms);
 			if (n < 0)
 				return strerror(errno);
 			for (int i = 0; i < n; i++)

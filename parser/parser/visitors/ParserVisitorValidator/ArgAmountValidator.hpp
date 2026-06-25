@@ -213,7 +213,8 @@ public:
 		.add(ParserTokenType::PT_AUTOINDEX, schema::unsigned_integer().between(1, 1).name("autoindex args amount"))
 		.add(ParserTokenType::PT_LOG_NOT_FOUND, schema::unsigned_integer().between(1, 1).name("log_not_found args amount"))
 		.add(ParserTokenType::PT_PROXY_CACHE_BYPASS, schema::unsigned_integer().between(1, unlimited).name("proxy_cache_bypass args amount"))
-		.add(ParserTokenType::PT_FASTCGI_INDEX, schema::unsigned_integer().between(1, 1).name("fastcgi_index args amount"));
+		.add(ParserTokenType::PT_FASTCGI_INDEX, schema::unsigned_integer().between(1, 1).name("fastcgi_index args amount"))
+		.add(ParserTokenType::PT_UPLOAD_DIR, schema::unsigned_integer().between(1, 1).name("upload_dir args amount"));
 	}
 
 	/**

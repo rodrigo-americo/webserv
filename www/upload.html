@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload — webserv</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid #21262d;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo { font-size: 1.1rem; font-weight: bold; color: #58a6ff; }
+        .logo span { color: #8b949e; }
+        .badge {
+            background: #1f6feb33;
+            border: 1px solid #1f6feb;
+            color: #58a6ff;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+        }
+        header a {
+            margin-left: auto;
+            color: #8b949e;
+            font-size: 0.82rem;
+            text-decoration: none;
+        }
+        header a:hover { color: #58a6ff; }
+
+        main {
+            flex: 1;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #e6edf3;
+            margin-bottom: 0.4rem;
+        }
+
+        h1 em { color: #58a6ff; font-style: normal; }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.88rem;
+            margin-bottom: 2rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed #21262d;
+            border-radius: 10px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 1.5rem;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #58a6ff;
+            background: #1f6feb11;
+        }
+
+        .drop-zone input { display: none; }
+
+        .drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+        .drop-text {
+            color: #8b949e;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .drop-text strong { color: #58a6ff; cursor: pointer; }
+
+        #file-name {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #3fb950;
+            min-height: 1.2rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #1f6feb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #388bfd; }
+        .btn:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
+
+        #status {
+            margin-top: 1.2rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            display: none;
+        }
+
+        #status.ok {
+            background: #3fb95022;
+            border: 1px solid #3fb95044;
+            color: #3fb950;
+            display: block;
+        }
+
+        #status.err {
+            background: #f8514922;
+            border: 1px solid #f8514944;
+            color: #f85149;
+            display: block;
+        }
+
+        footer {
+            border-top: 1px solid #21262d;
+            padding: 1rem 2rem;
+            font-size: 0.78rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">web<span>serv</span></div>
+    <span class="badge">POST</span>
+    <span class="badge">multipart/form-data</span>
+    <a href="/">← voltar</a>
+</header>
+
+<main>
+    <h1>Upload de <em>arquivo</em></h1>
+    <p class="subtitle">Selecione ou arraste um arquivo para enviar ao servidor.</p>
+
+    <form id="upload-form">
+        <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" name="file">
+            <div class="drop-icon">📂</div>
+            <div class="drop-text">
+                Arraste um arquivo aqui ou<br>
+                <strong onclick="document.getElementById('file-input').click()">clique para selecionar</strong>
+            </div>
+            <div id="file-name"></div>
+        </div>
+
+        <button type="submit" class="btn" id="submit-btn" disabled>Enviar arquivo</button>
+    </form>
+
+    <div id="status"></div>
+</main>
+
+<footer>
+    POST /upload/ — os arquivos são salvos em www/uploads/
+</footer>
+
+<script>
+    const dropZone   = document.getElementById('drop-zone');
+    const fileInput  = document.getElementById('file-input');
+    const fileNameEl = document.getElementById('file-name');
+    const submitBtn  = document.getElementById('submit-btn');
+    const statusEl   = document.getElementById('status');
+    const form       = document.getElementById('upload-form');
+
+    function setFile(file) {
+        fileNameEl.textContent = file ? file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)' : '';
+        submitBtn.disabled = !file;
+    }
+
+    fileInput.addEventListener('change', function() {
+        setFile(fileInput.files[0] || null);
+    });
+
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', function() {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        var file = e.dataTransfer.files[0];
+        if (file) {
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            setFile(file);
+        }
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        statusEl.className = '';
+        statusEl.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload/', { method: 'POST', body: formData })
+            .then(function(res) {
+                submitBtn.textContent = 'Enviar arquivo';
+                if (res.ok) {
+                    statusEl.className = 'ok';
+                    statusEl.textContent = 'Arquivo "' + file.name + '" enviado com sucesso!';
+                    fileInput.value = '';
+                    setFile(null);
+                } else {
+                    return res.text().then(function(t) {
+                        statusEl.className = 'err';
+                        statusEl.textContent = 'Erro ' + res.status + ': ' + t;
+                    });
+                }
+            })
+            .catch(function(err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar arquivo';
+                statusEl.className = 'err';
+                statusEl.textContent = 'Falha na conexão: ' + err.message;
+            });
+    });
+</script>
+
+</body>
+</html>

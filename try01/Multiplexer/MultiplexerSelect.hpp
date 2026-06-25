@@ -29,9 +29,11 @@ class MultiplexerSelect: public IMultiplexer
 		fd_set	_main_write_set;
 		fd_set	_main_error_set;
 		int		_max_fd;
+		int		_timeout_ms;
 
 	public:
-		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0) {};
+		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0), _timeout_ms(-1) {};
+		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerSelect() {};
 
 		void add(Socket *socket)
@@ -73,7 +75,15 @@ class MultiplexerSelect: public IMultiplexer
 			fd_set	error_set = _main_error_set;
 
 			// o primeiro parametro do select diz todos os fds que ele deve checkar, de zero ate o valor passado.
-			int ret = select(_max_fd + 1, &read_set, &write_set, &error_set, NULL);
+			struct timeval	tv;
+			struct timeval*	tvp = NULL;
+			if (_timeout_ms >= 0)
+			{
+				tv.tv_sec  = _timeout_ms / 1000;
+				tv.tv_usec = (_timeout_ms % 1000) * 1000;
+				tvp = &tv;
+			}
+			int ret = select(_max_fd + 1, &read_set, &write_set, &error_set, tvp);
 			if (ret < 0)
 				return strerror(errno);
 			for (sockets::iterator it = _sockets.begin(); it != _sockets.end(); ++it)

@@ -35,6 +35,7 @@ struct IMultiplexer
 	virtual void		add(Socket *socket) = 0;
 	virtual void		remove(Socket *socket) = 0;
 	virtual std::string	wait(SocketEventList &events) = 0;
+	virtual void		setTimeout(int timeout_ms) = 0;
 };
 
 
