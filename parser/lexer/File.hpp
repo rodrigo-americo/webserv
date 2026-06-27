@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/30 19:50:46 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:14:21 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/19 20:42:10 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,15 @@ private:
 	size_t						_idx; // @brief Índice atual dentro de `_src`.
 	size_t						_line; // @brief Linha atual do cursor.
 	size_t						_line_col; // @brief Coluna atual do cursor.
+
+	void	_reset()
+	{
+		_src.clear();
+		_lines.clear();
+		_idx = 0;
+		_line = 1;
+		_line_col = 0;
+	}
 
 	/**
 	 * @brief Lê o arquivo e popula as estruturas internas.
@@ -91,7 +100,7 @@ public:
 	 *
 	 * @param file_name Caminho do arquivo.
 	 */
-	void				setName(const std::string &file_name) { _name = file_name; _readFile(); }
+	void				setName(const std::string &file_name) { _name = file_name; _reset(); _readFile(); }
 
 	/**
 	 * @brief Obtém o nome do arquivo.
@@ -150,7 +159,7 @@ public:
 	 */
 	bool				nextIs(const std::string &str)
 	{
-		if (str.size() + _idx > size())
+		if (str.size() + _idx > size() || str.empty())
 			return false;
 		for (size_t i = 0; i < str.size(); i++)
 			if (_src[_idx + i] != str[i])
@@ -213,8 +222,8 @@ public:
 	 */
 	const std::string	*lineContent() const
 	{
-		if (_line >= _lines.size()) return NULL;
-		return &_lines[_line];
+		if (_line - 1 >= _lines.size()) return NULL;
+		return &_lines[_line - 1];
 	}
 
 	/**

@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/30 09:50:53 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:01:49 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/19 20:48:36 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,13 @@ class Lexer
 	typedef	std::pair<std::string, token_type>	delimitter; // @brief Associação entre um delimitador textual e seu tipo de token.
 	std::vector<delimitter>		_delimitters; // @brief Lista de delimitadores reconhecidos.
 	std::vector<std::string>	_comments; // @brief Prefixos de comentários suportados.
-	std::vector<std::string>	_quotes; // @brief Delimitadores de strings suportados.
+	std::vector<delimitter>		_quotes; // @brief Delimitadores de strings suportados.
 	File						_file; // @brief Arquivo sendo analisado.
 	std::string					_error; // @brief Mensagem de erro gerada durante a análise.
 	std::vector<token>			_tokens; // @brief Tokens produzidos pela análise léxica.
 
-	delimitter						_temp_delimitter; // @brief Delimitador temporariamente identificado.
-	std::string					_temp_quote; // @brief Delimitador de string temporariamente identificado.
+	delimitter					_temp_delimitter; // @brief Delimitador temporariamente identificado.
+	delimitter					_temp_quote; // @brief Delimitador de string temporariamente identificado.
 
 	public:
 		/**
@@ -97,8 +97,9 @@ class Lexer
 		 */
 		token	_readKeyword()
 		{
+			token	_tk = token(_file.name(), _file.line(), _file.lineColumn(), _temp_delimitter.first, _temp_delimitter.second);
 			_file += _temp_delimitter.first.size();
-			return token(_file.name(), _file.line(), _file.lineColumn(), _temp_delimitter.first, _temp_delimitter.second);
+			return _tk;
 		}
 
 		/**
@@ -113,7 +114,7 @@ class Lexer
 		{
 			for (size_t qt = 0; qt < _quotes.size(); qt++)
 			{
-				if (_file.nextIs(_quotes[qt]))
+				if (_file.nextIs(_quotes[qt].first))
 				{
 					_temp_quote = _quotes[qt];
 					return true;
@@ -132,18 +133,19 @@ class Lexer
 		 */
 		token	_readQuote()
 		{
-			_file += _temp_quote.size();
+			_file += _temp_quote.first.size();
 			size_t	quote_start_cursor		= _file.cursor();
 			size_t	quote_start_line		= _file.line();
 			size_t	quote_start_line_col	= _file.lineColumn();
 			while (_file)
 			{
-				if (*_file == _temp_quote[0])
+
+				if (*_file == _temp_quote.first[0])
 				{
-					if (_file.nextIs(_temp_quote))
+					if (_file.nextIs(_temp_quote.first))
 					{
-						token	_token = token::fromQuote(_file.name(), _file.line(), _file.lineColumn(), _temp_quote, _file.substr(quote_start_cursor, _file.cursor() - quote_start_cursor));
-						_file += _temp_quote.size();
+						token	_token = token(_file.name(), _file.line(), _file.lineColumn(), _file.substr(quote_start_cursor, _file.cursor() - quote_start_cursor), _temp_quote.second);
+						_file += _temp_quote.first.size();
 						return _token;
 					}
 				}
@@ -152,7 +154,7 @@ class Lexer
 				++_file;
 			}
 			std::string e_header = _file.name()+":"+utils::to_string(quote_start_line)+":"+utils::to_string(quote_start_line_col)+" -> ";
-			_error = e_header + "quote open '"+_temp_quote+"'.";
+			_error = e_header + "quote open '"+_temp_quote.first+"'.";
 			return token(_file.name(), _file.line(), _file.lineColumn(), "", LexerTokenType::ERROR);
 		}
 
@@ -181,7 +183,7 @@ class Lexer
 			size_t	comment_start_cursor		= _file.cursor();
 			while (*_file && *_file != '\n')
 				++_file;
-			return	token(_file.name(), _file.line(), _file.lineColumn(), _file.substr_back(comment_start_cursor), LexerTokenType::COMMENT);
+			return	token(_file.name(), _file.line(), _file.lineColumn(), _file.substr(comment_start_cursor, _file.cursor() - comment_start_cursor), LexerTokenType::COMMENT);
 		}
 
 		/**
@@ -197,7 +199,7 @@ class Lexer
 			if (!_file)
 				return token(_file.name(), _file.line(), _file.lineColumn(), "", LexerTokenType::END);
 			size_t	word_start_cursor		= _file.cursor();
-			while (*_file && !std::isspace(*_file) && !_isDelimitter() && !_isQuote())
+			while (*_file && !std::isspace(*_file) && !_isDelimitter() && !_isQuote() && !_isComment())
 				++_file;
 			return token(_file.name(), _file.line(), _file.lineColumn(), _file.substr(word_start_cursor, _file.cursor() - word_start_cursor), LexerTokenType::WORD);
 		}
@@ -215,7 +217,7 @@ class Lexer
 		 * @param _keyword Texto do delimitador.
 		 * @param _type Tipo de token associado.
 		 */
-		void	addDelimitter(const std::string &_keyword, token_type _type) { _delimitters.push_back(std::make_pair(_keyword, _type)); }
+		void	addDelimitter(const std::string &_keyword, token_type _type) { if (!_keyword.empty()) _delimitters.push_back(std::make_pair(_keyword, _type)); }
 		/**
 		 * @brief Adiciona um prefixo de comentário.
 		 *
@@ -223,7 +225,7 @@ class Lexer
 		 *
 		 * @param comment Prefixo do comentário.
 		 */
-		void	addComment(const std::string &comment) { _comments.push_back(comment); }
+		void	addComment(const std::string &comment) { if (!comment.empty()) _comments.push_back(comment); }
 		/**
 		 * @brief Adiciona um delimitador de string.
 		 *
@@ -231,7 +233,7 @@ class Lexer
 		 *
 		 * @param quote Delimitador de string.
 		 */
-		void	addQuote(const std::string &quote) { _quotes.push_back(quote); }
+		void	addQuote(const std::string &_quote, token_type _type) { if (!_quote.empty()) _quotes.push_back(std::make_pair(_quote, _type)); }
 
 		/**
 		 * @brief Executa a análise léxica do arquivo.

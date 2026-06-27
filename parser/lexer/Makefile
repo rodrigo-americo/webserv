@@ -1,6 +1,6 @@
 NAME = lexer
 
-INCLUDES =
+INCLUDES = $(shell find ../.. \( -type d -name ".[a-zA-Z0-9]*" -prune \) -o -type d -print | sed 's/^/-I /' | tr "\n" " ")
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++11 -g3 $(INCLUDES)
@@ -10,6 +10,9 @@ SRC = main.cpp
 OBJ = $(SRC:%.cpp=%.o)
 
 all: $(NAME)
+
+includes:
+	@echo $(INCLUDES)
 
 retry:
 	@clear

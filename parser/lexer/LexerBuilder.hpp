@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 00:29:16 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:03:18 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/19 19:35:28 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,8 @@ public:
 		_lexer.addDelimitter("{", LexerTokenType::LBRACE);
 		_lexer.addDelimitter("}", LexerTokenType::RBRACE);
 		_lexer.addDelimitter(";", LexerTokenType::SEMICOLON);
-		_lexer.addQuote("\"");
-		_lexer.addQuote("'");
+		_lexer.addQuote("\"", LexerTokenType::STRING_DOUBLE);
+		_lexer.addQuote("'", LexerTokenType::STRING_SINGLE);
 		return *this;
 	}
 
@@ -76,7 +76,7 @@ public:
 	 * @param quote Delimitador de string.
 	 * @return Referência para o builder.
 	 */
-	LexerBuilder	&withQuote(const std::string &quote) { _lexer.addQuote(quote); return *this; }
+	LexerBuilder	&withQuote(const std::string &quote, LexerTokenType::type type) { _lexer.addQuote(quote, type); return *this; }
 
 	/**
 	 * @brief Adiciona um delimitador/token personalizado.

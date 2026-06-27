@@ -1,3 +1,4 @@
+
 # Framework de Testes
 
 Este projeto inclui um framework de testes leve, integrado ao sistema de build e projetado para facilitar a criação, execução e manutenção de testes automatizados.
@@ -13,7 +14,13 @@ Este projeto inclui um framework de testes leve, integrado ao sistema de build e
 * Rastreamento automático da origem dos erros através de arquivo e linha.
 * Suporte a assertions genéricas e booleanas.
 * Integração com `utils::to_string()` para melhor visualização de valores durante o debug.
-
+* Filtragem de testes por módulo ou nome (`TEST_FILTER`).
+* Execução de testes em modo verbose.
+* Suporte a coverage automatizado via `gcovr`.
+* Ambiente virtual Python (`.venv`) criado automaticamente para tooling.
+* Lib e setup de testes pré-compilados para otimização de performance.
+* Execução isolada de cada teste (um binário por teste).
+* Sistema de limpeza completo incluindo artefatos de coverage e ambiente Python.
 
 ## Estrutura dos Testes
 
@@ -24,7 +31,8 @@ Os testes são organizados em diretórios com o sufixo `_test`.
 ```text
 tests/
 ├── @setup/
-│   └── framework.cpp
+│   ├── framework.cpp
+│   └── *.cpp (setup compartilhado)
 │
 ├── parser_test/
 │   ├── test_constructor.cpp
@@ -32,11 +40,18 @@ tests/
 │
 └── utils_test/
     └── test_string.cpp
+````
+
+### Componentes adicionais do framework
+
+```text
+tests/
+├── test/        → biblioteca de testes pré-compilada (.ar)
+├── lib/         → biblioteca do projeto usada nos testes (.ar)
 ```
 
 Cada arquivo `.cpp` dentro de um diretório `_test` representa um teste executável independente.
 
-# Execução dos Testes
 
 ## Executar todos os testes
 
@@ -47,40 +62,88 @@ make tests
 O sistema irá:
 
 1. Localizar automaticamente todos os diretórios com sufixo `_test`.
-2. Compilar cada arquivo de teste encontrado.
-3. Executar cada teste individualmente.
-4. Exibir um resumo ao final.
-
-### Exemplo de saída
-
-```text
-module: parser
-
-    testing... constructor
-    testing... validation
-
-──────────────────────────────────────────
-12 tests passed.
-0 test(s) failed.
-```
+2. Compilar a lib e setup (pré-compilados quando possível).
+3. Compilar cada arquivo de teste individualmente.
+4. Executar cada teste isoladamente.
+5. Exibir um resumo ao final.
 
 ## Modo Verbose
-
-Para exibir também os testes aprovados:
 
 ```bash
 make tests_verbose
 ```
 
-Internamente, o Makefile adiciona o parâmetro:
+Exibe também informações detalhadas de execução de cada teste.
+
+Internamente ativa:
 
 ```bash
 --verbose
 ```
 
-que é interpretado pelo framework.
+## Filtragem de testes
 
-# Criando Novos Testes
+Permite executar apenas partes específicas do framework.
+
+```bash
+make tests TEST_FILTER="<nome_1>, <nome_2>, ... <nome_n>"
+```
+
+### Exemplos
+
+A separação dos nomes pode ser através de `,` ou `<espaço>`.
+
+```bash
+# executa apenas o teste file do módulo parser
+make tests TEST_FILTER=file
+# executa apenas o teste str do módulo utils, apos isso executa todos os testes do módulo schema
+make tests TEST_FILTER="str, schema"
+# executa apenas o teste file do módulo parser, apos isso executa apenas o teste logger do módulo tools
+make tests TEST_FILTER="file logger"
+```
+
+📌 O filtro pode ser aplicado tanto em módulos quanto em arquivos de teste.
+
+## Coverage
+
+```bash
+make tests_coverage
+```
+
+Este modo:
+
+1. Cria automaticamente o ambiente `.venv` (se necessário)
+2. Instala dependências via `requirements.py_txt`
+3. Compila com flag `--coverage`
+4. Executa os testes
+5. Gera relatório com `gcovr`
+
+## Limpeza
+
+### Limpeza parcial
+
+```bash
+make clean
+```
+
+Remove objetos e arquivos intermediários:
+
+* objetos de build
+* bibliotecas `.ar`
+* artefatos de coverage (`.gcda`, `.gcno`, `.gcov`)
+
+### Limpeza total
+
+```bash
+make fclean
+```
+
+Remove:
+
+* binário principal
+* `.venv`
+
+## Criando Novos Testes
 
 Para adicionar um novo conjunto de testes:
 
@@ -111,7 +174,7 @@ int main(int argc, char **argv)
 
 Nenhuma alteração no Makefile é necessária.
 
-# Inicialização
+## Inicialização
 
 Todo teste deve inicializar o sistema de mensagens:
 
@@ -122,271 +185,125 @@ messages::settup(argc, argv);
 Essa função:
 
 * Limpa o estado interno.
-* Detecta o parâmetro `--verbose`.
-* Define se os testes aprovados serão exibidos.
+* Detecta parâmetros como `--verbose`.
+* Configura o modo de exibição de resultados.
 
-# Sistema de Assertions
+## Sistema de Assertions
 
-## assert
+### assert
 
 Compara dois valores.
-
-### Sintaxe
-
-```cpp
-assert(expected, actual, test_name);
-```
-
-ou
 
 ```cpp
 assert(expected, actual, test_name, LINE_DATA());
 ```
 
-### Exemplo
+### assert_true
+
+Valida expressão verdadeira.
 
 ```cpp
-failures += assert(
-    42,
-    result,
-    "Should return the expected value"
-);
+assert_true(expression, test_name, LINE_DATA());
 ```
 
-### Em caso de falha
+### assert_false
 
-```text
-FAILED: Should return the expected value
-
-EXPECTED:
-42
-
-GOT:
-38
-```
-
-## assert_true
-
-Atalho para validar expressões booleanas verdadeiras.
-
-### Sintaxe
+Valida expressão falsa.
 
 ```cpp
-assert_true(expression, test_name);
+assert_false(expression, test_name, LINE_DATA());
 ```
 
-### Exemplo
-
-```cpp
-failures += assert_true(
-    user.isValid(),
-    "User should be valid"
-);
-```
-
-Equivale a:
-
-```cpp
-assert(true, user.isValid(), "User should be valid");
-```
-
-## assert_false
-
-Atalho para validar expressões booleanas falsas.
-
-### Sintaxe
-
-```cpp
-assert_false(expression, test_name);
-```
-
-### Exemplo
-
-```cpp
-failures += assert_false(
-    user.hasErrors(),
-    "User should not contain errors"
-);
-```
-
-Equivale a:
-
-```cpp
-assert(false, user.hasErrors(), "User should not contain errors");
-```
-
-# Rastreamento de Arquivo e Linha
-
-O framework fornece a macro:
+## Rastreamento de Arquivo e Linha
 
 ```cpp
 LINE_DATA()
 ```
 
-que captura automaticamente:
+Captura automaticamente:
 
 ```text
 arquivo:linha
 ```
 
-onde a assertion foi executada.
-
-### Exemplo
+Exemplo:
 
 ```cpp
-failures += assert(
-    expected,
-    actual,
-    "Result validation",
-    LINE_DATA()
-);
+FAILED: Test name src/file.cpp:42
 ```
 
-Saída:
-
-```text
-FAILED: Result validation src/parser.cpp:42
-```
-
-Isso facilita localizar rapidamente a origem do erro.
-
-# Sistema de Mensagens
-
-O framework armazena internamente:
-
-* Testes aprovados.
-* Testes falhos.
-
-Ao final da execução:
+## Sistema de Mensagens
 
 ```cpp
 messages::print();
 ```
 
-é exibido um relatório consolidado.
+Exibe resumo final:
 
-### Exemplo
+* testes aprovados
+* testes falhos
+* detalhes de erro
 
-```text
-PASSED: Constructor test
-PASSED: Empty input test
+## Recursos do Framework
 
-FAILED: Invalid token test
-EXPECTED: ERROR
-GOT: OK
+### Saída colorida
 
-──────────────────────────────────────────
-2 tests passed.
-1 test(s) failed.
-```
+* Verde → sucesso
+* Vermelho → falha
+* Destaques para EXPECTED / GOT
 
-# Recursos do Framework
+### Mensagens detalhadas
 
-## Saída Colorida
+Quando um teste falha:
 
-Os resultados são exibidos com estilos visuais para facilitar a leitura:
+* nome do teste
+* localização (arquivo/linha)
+* valor esperado
+* valor obtido
 
-* Verde para sucessos.
-* Vermelho para falhas.
-* Amarelo para valores esperados.
-* Informações de localização destacadas.
+---
 
-## Mensagens Detalhadas
-
-Quando ocorre uma falha, o framework mostra:
-
-* Nome do teste.
-* Arquivo e linha (quando informado).
-* Valor esperado.
-* Valor obtido.
-
-Exemplo:
-
-```text
-FAILED: Parse integer src/parser.cpp:87
-
-EXPECTED:
-123
-
-GOT:
-321
-```
-
-## Conversão Automática de Tipos
-
-As mensagens utilizam:
+### Conversão automática
 
 ```cpp
 utils::to_string()
 ```
 
-para converter valores para texto.
+Permite imprimir tipos complexos automaticamente.
 
-Isso melhora significativamente o debug de tipos personalizados e estruturas complexas.
+---
 
-## Descoberta Automática
+### Descoberta automática
 
 O Makefile detecta automaticamente:
 
-* Novos módulos de teste.
-* Novos arquivos `.cpp`.
-* Arquivos de setup compartilhados.
+* novos módulos `_test`
+* novos arquivos `.cpp`
+* setup compartilhado
 
-Não é necessário registrar testes manualmente.
+---
 
-# Exemplo Completo
+## Fluxo de uso recomendado
 
-```cpp
-int main(int argc, char **argv)
-{
-    messages::settup(argc, argv);
-
-    int failures = 0;
-
-    failures += assert(
-        10,
-        5 + 5,
-        "Simple addition",
-        LINE_DATA()
-    );
-
-    failures += assert_true(
-        10 > 5,
-        "Comparison test",
-        LINE_DATA()
-    );
-
-    failures += assert_false(
-        5 > 10,
-        "Negative comparison"
-    );
-
-    messages::print();
-
-    return failures;
-}
-```
-
-## Fluxo de Uso
-
-1. Compilar o projeto normalmente.
-2. Executar:
+### Desenvolvimento
 
 ```bash
-make tests
+make tests TEST_FILTER=<feature>
 ```
 
-3. Para exibir também os testes aprovados:
+### Validação completa
 
 ```bash
-make tests_verbose
+make tests_coverage
+make fclean
 ```
 
-4. Criar novos testes apenas adicionando:
+---
 
-   * uma pasta com sufixo `_test`;
-   * arquivos `.cpp` dentro dela.
+## Observações importantes
 
-5. Utilizar `LINE_DATA()` para rastrear rapidamente a origem das falhas.
+* Cada teste é compilado e executado isoladamente
+* O framework é otimizado para feedback rápido durante desenvolvimento
+* Coverage e tooling Python são opcionais e isolados via `.venv`
 
-O framework cuidará automaticamente da compilação, execução, agregação dos resultados e geração dos relatórios.
+---

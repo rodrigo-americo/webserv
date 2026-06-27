@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 16:47:55 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:07:35 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/21 11:09:24 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ class ScopeValidator
 				return;
 			}
 			std::vector<ParserTokenType::type> &scopes = validator_it->second;
-			std::vector<ParserTokenType::type>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes[_curr_scopes.size() - 1]);
+			std::vector<ParserTokenType::type>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes.back());
 			if (scope_it == scopes.end())
 			{
 				std::string msg = name.getLineAddress() + " " + name.getContent() + " in wrong context. Must be in scopes '" + _getStringTypes(scopes) + "'";
