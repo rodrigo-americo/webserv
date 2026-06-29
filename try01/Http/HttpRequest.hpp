@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:13:29 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 23:32:05 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 12:21:30 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,20 @@ struct RequestMethod
 		DELETE
 	};
 };
+
+static const char *RequestMethodStr[] = {
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE"
+};
+
+inline std::ostream	&operator<<(std::ostream &os, RequestMethod::type req)
+{
+	os << RequestMethodStr[req];
+	return os;
+}
 
 class HttpRequest
 {

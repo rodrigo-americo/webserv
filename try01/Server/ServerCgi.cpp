@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 21:08:03 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/28 23:42:45 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 17:29:17 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "SocketPipeRead.hpp"
 #include "CgiProcess.hpp"
 #include "ConnectionPool.hpp"
+#include "Logger.hpp"
 
 void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
                         const LocationConfig &location, const ServerConfig &server)
@@ -45,7 +46,7 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
     std::string script_path = root + clean_path;
     
     if (script_path.find("..") != std::string::npos)
-    return _sendError(res, 403, "Forbidden", &req);
+        return _sendError(res, 403, "Forbidden", &req);
 
     std::string script_dir;
     size_t last_slash = script_path.rfind('/');
@@ -144,21 +145,11 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
             waitpid(pid_child, NULL, 0);
             return _sendError(res, 500, "Internal Server Error", &req);
         }
-        CgiProcess *cgi = new CgiProcess(req.connection(), req, stdin_pipe, stdout_pipe, pid_child);
+        CgiProcess *cgi = new CgiProcess(res.getConn(), req, stdin_pipe, stdout_pipe, pid_child);
+        LOG_TRACE("fd conn _ServerCgi " << res.getFd() << "\n");
+        LOG_TRACE("fd conn cggi " << cgi->clientConn()->fd() << "\n");
         ConnectionPool::getInstance().addCgi(cgi);
     }
-}
-
-static const char *_methodToString(RequestMethod::type m)
-{
-    switch (m) {
-        case RequestMethod::GET:    return "GET";
-        case RequestMethod::POST:   return "POST";
-        case RequestMethod::DELETE: return "DELETE";
-        case RequestMethod::PUT:    return "PUT";
-        case RequestMethod::PATCH:  return "PATCH";
-    }
-    return "UNKNOWN";
 }
 
 static std::string _envEntry(const std::string &key, const std::string &value)
@@ -187,7 +178,7 @@ std::vector<std::string> Server::_buildCgiEnv(const HttpRequest &req, const Serv
 {
     (void)server;
     std::vector<std::string> env_strings;
-    env_strings.push_back(_envEntry("REQUEST_METHOD", _methodToString(req.method)));
+    env_strings.push_back(_envEntry("REQUEST_METHOD", RequestMethodStr[req.method]));
     env_strings.push_back(_envEntry("QUERY_STRING", query_string));
     env_strings.push_back(_envEntry("CONTENT_LENGTH", utils::to_string(req.body.size())));
     env_strings.push_back(_envEntry("CONTENT_TYPE", req.headers.content_type()));

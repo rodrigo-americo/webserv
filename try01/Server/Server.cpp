@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include "Server.hpp"
+#include "Logger.hpp"
 
 void Server::_sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req)
 {
@@ -54,15 +55,18 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
         std::string clean_path = req.path;
         size_t qpos = clean_path.find('?');
         if (qpos != std::string::npos)
-            clean_path = clean_path.substr(0, qpos);
-
+        clean_path = clean_path.substr(0, qpos);
+        
         // extrair extensão
         size_t dot = clean_path.rfind('.');
         if (dot != std::string::npos)
         {
             std::string ext = clean_path.substr(dot);
             if (cgi_ext.count(ext))
+            {
+                LOG_TRACE("fd conn _dispatch " << res.getFd() << "\n");
                 return _serveCgi(req, res, location, server);
+            }
         }
     }
     if (req.method == RequestMethod::POST && !location.getUploadDir().empty())

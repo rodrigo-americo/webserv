@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 22:19:23 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/28 22:26:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 18:36:04 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ public:
     CgiProcess(SocketConnection *client, const HttpRequest &req,
                SocketPipeWrite *stdin_pipe, SocketPipeRead *stdout_pipe,
                pid_t pid);
+    CgiProcess(const CgiProcess& other);
     ~CgiProcess();
     void onStdinWritable();
     void onStdoutReadable();

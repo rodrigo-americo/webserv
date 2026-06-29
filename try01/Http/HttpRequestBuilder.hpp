@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestBuilder.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:31:28 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 17:35:24 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/29 15:33:30 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 class RequestBuilder
 {
 private:
-	HttpRequest											_req;
+	HttpRequest										_req;
 	std::string										_buffer;
 	size_t											_body_start;
 	size_t											_is_request_line_processed;

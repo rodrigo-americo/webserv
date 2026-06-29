@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:14:21 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 16:02:55 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/29 17:28:02 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,15 @@ class HttpResponse
 		HttpResponse(SocketConnection *conn): _connection(conn), _body(), headers(), status_code(500), status_code_message("Internal Server Error.") {}
 		~HttpResponse() {}
 
+		// void from(const std::string &str)
+		// {
+			
+		// }
+		
+		int getFd() const { return _connection->fd(); }
+
+		SocketConnection	*getConn() const { return _connection; }
+		
 		void	statusCode(int status, const std::string &msg)
 		{
 			status_code = status;

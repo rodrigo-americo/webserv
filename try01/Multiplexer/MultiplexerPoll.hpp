@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:39:15 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 19:10:11 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class MultiplexerPoll: public IMultiplexer
 			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), socket);
 			if (it == _sockets.end()) return;
 			size_t	idx = it - _sockets.begin();
-			delete *it;
+			// delete *it;
 			_sockets.erase(it);
 			_pollfds.erase(_pollfds.begin() + idx);
 		}

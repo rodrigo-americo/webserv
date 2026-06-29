@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:54:10 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 23:40:23 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 18:22:27 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "CgiProcess.hpp"
 #include "SocketPipeRead.hpp"
 #include "SocketPipeWrite.hpp"
+#include "Logger.hpp"
 
 
 class HttpRequestObservers
@@ -76,6 +77,21 @@ private:
 		{
 			if (it->connection == conn)
 				return &(*it);
+		}
+		return NULL;
+	}
+
+	CgiProcess *_findCgiByPipe(Socket *pipe_socket)
+	{
+		for (std::list<CgiProcess*>::iterator it = _running_cgis.begin();
+			it != _running_cgis.end(); ++it)
+		{
+			if ((*it)->stdinPipe() == pipe_socket ||
+				(*it)->stdoutPipe() == pipe_socket)
+			{
+				LOG_TRACE("fd conn _findCgiByPipe " << (*it)->clientConn()->fd() << "\n");
+				return *it;
+			}	
 		}
 		return NULL;
 	}
@@ -209,18 +225,23 @@ public:
 				}
 				else if (event.socket->getType() == SocketType::PIPE_READ)
 				{
-					std::cout << "[pipe read event] fd=" << event.socket->fd()
-					<< " readable=" << event.readable
-					<< " writable=" << event.writable
-					<< " eof=" << event.eof
-					<< " error=" << event.error << std::endl;
+					CgiProcess *cgi = _findCgiByPipe(event.socket);
+					LOG_TRACE("fd socket event: " << event.socket->fd());
+					if (cgi)
+					{
+						LOG_TRACE("fd conn waitConnections " << cgi->clientConn()->fd() << "\n");
+						cgi->onStdoutReadable();
+						/* code */
+					}
+					
+					
 				}
 				else if (event.socket->getType() == SocketType::PIPE_WRITE)
 				{
-					std::cout << "[pipe write event] fd=" << event.socket->fd()
-					<< " readable=" << event.readable
-					<< " writable=" << event.writable
-					<< " error=" << event.error << std::endl;
+					CgiProcess *cgi = _findCgiByPipe(event.socket);
+					// LOG_TRACE("fd socket event: " << event.socket->fd());
+					// LOG_TRACE("fd conn waitConnections " << cgi->clientConn()->fd() << "\n");
+					cgi->onStdinWritable();
 				}
 				else
 				{
@@ -236,6 +257,7 @@ public:
 		_multiplexer->add(cgi->stdinPipe());
 		_multiplexer->add(cgi->stdoutPipe());
 		_running_cgis.push_back(cgi);
+		LOG_TRACE("fd conn addCgi " << cgi->clientConn()->fd() << "\n");
 	}
 };
 

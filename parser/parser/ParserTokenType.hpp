@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:52:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:16:44 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/06/29 12:19:24 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_FASTCGI_PASS",
 	"PT_FASTCGI_PARAM",
 	"PT_FASTCGI_INDEX",
-	"PT_CGI_EXTENSION"
+	"PT_CGI_EXTENSION",
 	"PT_RETURN",
 	"PT_REWRITE",
 	"PT_SSL_CERTIFICATE",
