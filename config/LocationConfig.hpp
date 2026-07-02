@@ -7,6 +7,8 @@
 # include "ConfigNode.hpp"
 # include "http.hpp"
 
+class ServerConfig;
+
 class LocationConfig: public ConfigLeaf{
     private:
         LocationConfig(const LocationConfig &other);
@@ -28,8 +30,9 @@ class LocationConfig: public ConfigLeaf{
         std::list<std::pair<std::string, std::string> > _proxy_set_header;
         std::map<std::string, std::string> _cgi;
         std::map<std::string, std::string> _cgi_extensions;
+		const ServerConfig* _parent;
     public:
-        LocationConfig() : _modifier(MOD_NONE), _redirect(0, ""), _autoindex(false) {}
+        LocationConfig() : _modifier(MOD_NONE), _redirect(0, ""), _autoindex(false), _parent(NULL) {}
         void setPath(const std::string& path)                          { _path = path; }
         void setModifier(LocationModifier modifier)                    { _modifier = modifier; }
         void setRedirect(int code,const std::string& url)              { _redirect = std::make_pair(code, url); }
@@ -40,7 +43,8 @@ class LocationConfig: public ConfigLeaf{
         void setProxyCacheBypass(const std::string& v)                 { _proxy_cache_bypass = v; }
         void setFastcgiIndex(const std::string& v)                     { _fastcgi_index = v; }
         void setExpires(const std::string& v)                          { _expires = v; }
-        const std::string &getPath() const                             { return _path; }
+        void setParent(const ServerConfig* parent)                     {_parent = parent;}
+		const std::string &getPath() const                             { return _path; }
         LocationModifier getModifier() const                           { return _modifier; }
         const std::pair<int, std::string> &getRedirect() const         { return _redirect; }
         const std::string &getRoot() const                             { return _root; }
@@ -57,7 +61,8 @@ class LocationConfig: public ConfigLeaf{
         const std::list<std::pair<std::string,std::string> > &getProxySetHeader() const  { return _proxy_set_header; }
         const std::map<std::string, std::string> &getCgi() const       { return _cgi; }
         const std::map<std::string, std::string> &getCgiExtensions() const       { return _cgi_extensions; }
-        void addMethod(HttpMethod method)                              { _methods.push_back(method); }
+		const std::string &resolveRoot() const;
+		void addMethod(HttpMethod method)                              { _methods.push_back(method); }
         void addIndex(const std::string& index)                        { _index.push_back(index); }
         void addTryFile(const std::string& v)                          { _try_files.push_back(v); }
         void addAddHeader(const std::string& k, const std::string& v)  { _add_header.push_back(std::make_pair(k, v)); }

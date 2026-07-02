@@ -201,27 +201,6 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
         case ParserTokenType::PT_ROOT:
             sc->setRoot(d.values[0].getContent());
             break;
-        case ParserTokenType::PT_RETURN:
-   			 if (d.values.size() == 2)
-				sc->setRedirect(std::atoi(d.values[0].getContent().c_str()), d.values[1].getContent());
-			else
-				sc->setRedirect(0, d.values[0].getContent());
-			break;
-        case ParserTokenType::PT_ACCESS_LOG:
-            sc->setAccessLog(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CERTIFICATE:
-            sc->setSslCertificate(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CERTIFICATE_KEY:
-            sc->setSslCertificateKey(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_PROTOCOLS:
-            sc->setSslProtocols(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CIPHERS:
-            sc->setSslCiphers(d.values[0].getContent());
-            break;
         default:
             break;
     }

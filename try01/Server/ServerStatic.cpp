@@ -88,10 +88,9 @@ void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const st
 
 
 void Server::_serveStatic(const HttpRequest &req, HttpResponse &res,
-                           const ServerConfig &server, const LocationConfig &location)
+                           const ServerConfig &, const LocationConfig &location)
 {
-    std::string root = location.getRoot().empty() ? server.getRoot() : location.getRoot();
-    
+    std::string root = location.resolveRoot();
     // Remove trailing slash from root to normalize path joining
     if (!root.empty() && root[root.size() - 1] == '/')
         root = root.substr(0, root.size() - 1);

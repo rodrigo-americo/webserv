@@ -23,10 +23,6 @@ struct ResponseHTTPVersion
 	{
 		HTTP_1_0,
 		HTTP_1_1,
-		// impossivel para esse projeto
-		HTTP_2_0,
-		// impossivel para esse projeto
-		HTTP_3_0,
 	};
 };
 
@@ -43,11 +39,6 @@ class HttpResponse
 		std::string			status_code_message;
 		HttpResponse(SocketConnection *conn): _connection(conn), _body(), headers(), status_code(500), status_code_message("Internal Server Error.") {}
 		~HttpResponse() {}
-
-		// void from(const std::string &str)
-		// {
-			
-		// }
 		
 		int getFd() const { return _connection->fd(); }
 

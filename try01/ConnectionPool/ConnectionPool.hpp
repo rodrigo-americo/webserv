@@ -42,7 +42,11 @@ class HttpRequestObservers
 		{
 			_observers[socket] = server;
 		}
-
+		Server	*findServer(const Socket *listener) const
+		{
+			std::map<const Socket*, Server*>::const_iterator it = _observers.find(listener);
+			return (it == _observers.end()) ? NULL : it->second;
+		}
 		bool	notifyRequest(RequestBuilder &req_builder)
 		{
 			std::map<const Socket*, Server*>::iterator list_it = _observers.find(req_builder.connection->listenner());
@@ -134,10 +138,19 @@ private:
 		while (bytes_read > 0)
 		{
 			req_builder.addToBuffer(chunk);
-			if (req_builder.isComplete()) break;
+			if (req_builder.isComplete() || req_builder.hasError()) break;
 			if (bytes_read < static_cast<ssize_t>(buffer_size)) break;
 			chunk.clear();
 			bytes_read = req_builder.connection->read(buffer_size, chunk);
+		}
+		if (req_builder.hasError())
+		{
+			HttpResponse res(req_builder.connection);
+			res.statusCode(req_builder.errorStatus(), req_builder.errorMessage());
+			res.headers.connection("close");
+			res.body(req_builder.errorMessage() + "\n");
+			res.send(ResponseHTTPVersion::HTTP_1_1);
+			return true;
 		}
 
 		bool	is_request_complete = req_builder.isComplete();
@@ -290,7 +303,9 @@ public:
 					}
 					else
 					{
-						_pending_request.push_back(RequestBuilder(conn));
+						Server *server = _http_request_observers.findServer(conn->listenner());
+						const WebServerConfig *config = server ? server->getConfig() : NULL;
+						_pending_request.push_back(RequestBuilder(conn, config));
 						if (_handleRequest(_pending_request.back()))
 						{
 							_pending_request.pop_back();
