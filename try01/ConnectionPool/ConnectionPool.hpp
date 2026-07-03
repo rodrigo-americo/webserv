@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:54:10 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/30 20:03:12 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/02 11:12:30 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <vector>
 # include <signal.h>
 # include <sys/wait.h>
+# include <ctime>
 
 # include "singleton.hpp"
 # include "IMultiplexer.hpp"
@@ -160,7 +161,6 @@ private:
 		SocketConnection *conn = cgi->clientConn();
 		pid_t pid = cgi->pid();
 		
-		// 1. Enviar resposta (se cliente ainda vivo).
 		if (reason == CGI_NORMAL)
 		{
 			cgi->buildAndSendResponse();
@@ -179,21 +179,16 @@ private:
 			res.body("Gateway Timeout\n");
 			res.send(ResponseHTTPVersion::HTTP_1_1);
 		}
-		// CGI_CLIENT_GONE: não envia nada.
-		
-		// 2. Garantir que o filho morreu e reapar.
+
 		::kill(pid, SIGKILL);
-		waitpid(pid, NULL, 0);  // bloqueia até reapar. SIGKILL torna isso quase instantâneo.
+		waitpid(pid, NULL, 0);
 		
-		// 3. Remover pipes do multiplexer (destrói os SocketPipeRead/Write).
 		_multiplexer->remove(cgi->stdinPipe());
 		_multiplexer->remove(cgi->stdoutPipe());
 		
-		// 4. Remover CGI da lista e destruir.
 		_running_cgis.erase(it);
 		delete cgi;
 		
-		// 5. Remover client conn (se não foi o próprio motivo).
 		if (reason != CGI_CLIENT_GONE)
 			_multiplexer->remove(conn);
 	}
@@ -243,6 +238,19 @@ public:
 		std::cout << "Waitting for connections!\n";
 		while (true)
 		{
+			time_t now = time(NULL);
+			std::list<CgiProcess*>::iterator cit = _running_cgis.begin();
+			while (cit != _running_cgis.end())
+			{
+				if ((*cit)->isExpired(now, 30))
+				{
+					std::list<CgiProcess*>::iterator victim = cit;
+					++cit;
+					_cleanupCgi(victim, CGI_TIMEOUT);
+				}
+				else
+					++cit;
+			}
 			// _processPendingRequests();
 			SocketEventList	events;
 			std::string error = _multiplexer->wait(events);
@@ -328,9 +336,10 @@ public:
 				}
 				else
 				{
-					std::cerr << "unknown socket type " << event.socket->getType();
+					std::cerr << "unknown socket type " << event.socket->getType() << "\n";
 				}		
 			}
+			_multiplexer->flushRemovals();
 		}
 	}
 

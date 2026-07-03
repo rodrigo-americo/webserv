@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/28 20:59:50 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/01 15:24:01 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,12 +77,5 @@ void WebServer::start(WebServerConfig* config)
 			pool.addListenner(sock, srv);
 		}
 	}
-
-	// int fds[2];
-	// pipe(fds);
-	// write(fds[1], "hello", 5);
-	// close(fds[1]);
-	// pool.addPipe(new SocketPipeRead(fds[0]));
-
 	pool.waitConnections();
 }

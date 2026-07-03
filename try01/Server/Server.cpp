@@ -45,9 +45,6 @@ bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMeth
 void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
                const ServerConfig &server, const LocationConfig &location)
 {
-    //const std::map<std::string, std::string>& cgi = location.getCgi();
-    // if (cgi.count("fastcgi_pass"))
-    //     return _serveCgi(req, res, location);
     const std::map<std::string, std::string>& cgi_ext = location.getCgiExtensions();
     if (!cgi_ext.empty())
     {
@@ -63,10 +60,7 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
         {
             std::string ext = clean_path.substr(dot);
             if (cgi_ext.count(ext))
-            {
-                LOG_TRACE("fd conn _dispatch " << res.getFd() << "\n");
                 return _serveCgi(req, res, location, server);
-            }
         }
     }
     if (req.method == RequestMethod::POST && !location.getUploadDir().empty())
@@ -104,3 +98,4 @@ void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
     }
     _dispatch(req, res, *server, *location);
 }
+

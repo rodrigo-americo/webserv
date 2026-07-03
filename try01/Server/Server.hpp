@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:08:12 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 22:36:38 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/02 14:38:02 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ class Server
         void _serveStatic(const HttpRequest &req, HttpResponse &res, const ServerConfig &server, const LocationConfig &location);
         void _serveAutoIndex(const HttpRequest &req, HttpResponse &res, const std::string &dir_path);
         std::vector<std::string> _buildCgiEnv(const HttpRequest &req, const ServerConfig &server, const std::string &script_path, const std::string &clean_path, const std::string &query_string);
-
 
     public:
         Server(const WebServerConfig* config) : _config(config) {}

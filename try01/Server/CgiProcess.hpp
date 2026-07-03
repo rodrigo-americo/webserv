@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 22:19:23 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/29 23:46:59 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/01 17:29:31 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ public:
     SocketPipeRead  *stdoutPipe() const { return _stdout_pipe; }
     pid_t            pid()        const { return _child_pid; }
     SocketConnection *clientConn() const { return _client_conn; }
-    void kill();
     void buildAndSendResponse();
 };
 

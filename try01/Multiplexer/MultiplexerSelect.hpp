@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:44:46 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 19:27:34 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/01 17:15:03 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class MultiplexerSelect: public IMultiplexer
 		fd_set	_main_error_set;
 		int		_max_fd;
 		int		_timeout_ms;
+		sockets _pending_deletion;
 
 	public:
 		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0), _timeout_ms(-1) {};
@@ -57,9 +58,16 @@ class MultiplexerSelect: public IMultiplexer
 			FD_CLR(it->first, &_main_read_set);
 			FD_CLR(it->first, &_main_write_set);
 			FD_CLR(it->first, &_main_error_set);
-			delete it->second;
+			_pending_deletion[it->first] = it->second;
 			_sockets.erase(it);
 		}
+
+		void flushRemovals()
+        {
+            for (sockets::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
+                delete it->second;
+            _pending_deletion.clear();
+        }
 
 		std::string wait(SocketEventList &events)
 		{

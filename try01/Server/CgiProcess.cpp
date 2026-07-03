@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 23:18:30 by ighannam          #+#    #+#             */
-/*   Updated: 2026/06/30 20:11:08 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/02 11:25:40 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,6 @@ bool CgiProcess::isExpired(time_t now, time_t timeout_secs) const
     return (now - _start_time) > timeout_secs;
 }
 
-void CgiProcess::kill()
-{
-    
-}
 void CgiProcess::buildAndSendResponse()
 {
     size_t delim_pos = _stdout_buffer.find("\r\n\r\n");
@@ -93,7 +89,8 @@ void CgiProcess::buildAndSendResponse()
         if (line.empty()) continue;
         
         size_t colon = line.find(':');
-        if (colon == std::string::npos) continue;  // linha malformada, ignora
+        if (colon == std::string::npos)
+            continue;
         
         std::string key = line.substr(0, colon);
         std::string value = line.substr(colon + 1);

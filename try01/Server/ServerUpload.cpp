@@ -3,8 +3,6 @@
 #include <sstream>
 #include <sys/stat.h>
 
-// "foto.png" -> "foto(1).png", "foto(2).png", ...
-// "arquivo"  -> "arquivo(1)", "arquivo(2)", ...
 static std::string _uniquePath(const std::string &dir, const std::string &filename)
 {
     std::string base = filename;
@@ -165,7 +163,6 @@ void Server::_serveUpload(const HttpRequest &req, HttpResponse &res,
 {
     std::string upload_dir = location.getUploadDir();
 
-    // garantir que o diretório existe
     struct stat st;
     if (stat(upload_dir.c_str(), &st) != 0)
     {
