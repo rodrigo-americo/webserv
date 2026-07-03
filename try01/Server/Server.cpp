@@ -62,7 +62,7 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
 void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 {
     const ServerConfig* server = _config->match_server(req.port, req.headers.host());
-	return HttpResponseError(res, 400, "Internal Server Error", server).send(ResponseHTTPVersion::HTTP_1_1);
+	//return HttpResponseError(res, 400, "Internal Server Error", server).send(ResponseHTTPVersion::HTTP_1_1);
     if (!server)
         return _sendError(res, 500, "Internal Server Error");
 

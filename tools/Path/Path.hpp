@@ -160,7 +160,7 @@ public:
     
 };
 
-std::ostream& operator<<(std::ostream& os, const Path& p)
+inline std::ostream& operator<<(std::ostream& os, const Path& p)
 {
     os << "path{normalized=" << p.getNormalizedPath().string()
        << ", clean=" << p.getCleanPath().string()
