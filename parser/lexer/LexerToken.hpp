@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:44:53 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:44:23 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/19 21:46:23 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,36 +147,6 @@ class LexerToken: public BaseToken<LexerTokenType::type>
 			: base(file_name, line, line_col, content, _type) {};
 		~LexerToken() {};
 
-		/**
-		 * @brief Cria um token de string delimitada por aspas.
-		 *
-		 * O tipo é gerado dinamicamente a partir do delimitador
-		 * utilizado, permitindo distinguir diferentes tipos de aspas.
-		 *
-		 * Exemplos:
-		 * - "
-		 * - '
-		 * - delimitadores personalizados
-		 *
-		 * @param file_name Nome do arquivo de origem.
-		 * @param line Linha do token.
-		 * @param line_col Coluna do token.
-		 * @param quote Delimitador utilizado.
-		 * @param content Conteúdo interno da string.
-		 *
-		 * @return Novo token representando a string.
-		 */
-		static LexerToken	fromQuote(const std::string &file_name, size_t line, size_t line_col, const std::string &quote, const std::string &content)
-		{
-			size_t	_type = 0;
-			size_t	size = quote.size() - 1;
-			for (size_t i = 0; i < quote.size(); i++)
-			{
-				_type |= quote[i] << (size * 8);
-				size--;
-			}
-			return LexerToken(file_name, line, line_col, content, static_cast<LexerTokenType::type>(_type));
-		}
 };
 
 /**
@@ -192,6 +162,11 @@ class LexerToken: public BaseToken<LexerTokenType::type>
 inline std::ostream	&operator<<(std::ostream &os, LexerToken token)
 {
 	size_t		size = token.getContent().size();
+	if (size == 0)
+	{
+		os << "<" << token.getType() << ">[]";
+		return os;
+	}
 	bool		has_endl = token.getContent()[size - 1] == '\n';
 	std::string	content = has_endl ? token.getContent().substr(0, size - 1) : token.getContent();
 	os << "<" << token.getType() << ">[" << content << "]" << (has_endl ? "\n" : "");

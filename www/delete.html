@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete — webserv</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid #21262d;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo { font-size: 1.1rem; font-weight: bold; color: #58a6ff; }
+        .logo span { color: #8b949e; }
+        .badge {
+            background: #f8514922;
+            border: 1px solid #f85149;
+            color: #f85149;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+        }
+        header a {
+            margin-left: auto;
+            color: #8b949e;
+            font-size: 0.82rem;
+            text-decoration: none;
+        }
+        header a:hover { color: #58a6ff; }
+
+        main {
+            flex: 1;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #e6edf3;
+            margin-bottom: 0.4rem;
+        }
+
+        h1 em { color: #f85149; font-style: normal; }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.88rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus { border-color: #f85149; }
+        input[type="text"]::placeholder { color: #8b949e; }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: #b91c1c;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover { background: #f85149; }
+        .btn:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
+
+        #status {
+            margin-top: 1.2rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            display: none;
+        }
+
+        #status.ok {
+            background: #3fb95022;
+            border: 1px solid #3fb95044;
+            color: #3fb950;
+            display: block;
+        }
+
+        #status.err {
+            background: #f8514922;
+            border: 1px solid #f8514944;
+            color: #f85149;
+            display: block;
+        }
+
+        footer {
+            border-top: 1px solid #21262d;
+            padding: 1rem 2rem;
+            font-size: 0.78rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">web<span>serv</span></div>
+    <span class="badge">DELETE</span>
+    <a href="/">← voltar</a>
+</header>
+
+<main>
+    <h1>Deletar <em>arquivo</em></h1>
+    <p class="subtitle">Digite o nome do arquivo para removê-lo do servidor.</p>
+
+    <div class="input-group">
+        <input type="text" id="filename" placeholder="ex: foto.png" autocomplete="off">
+        <button class="btn" id="delete-btn">Deletar</button>
+    </div>
+
+    <div id="status"></div>
+</main>
+
+<footer>
+    DELETE /upload/&lt;filename&gt; — remove o arquivo de www/uploads/
+</footer>
+
+<script>
+    var input     = document.getElementById('filename');
+    var deleteBtn = document.getElementById('delete-btn');
+    var statusEl  = document.getElementById('status');
+
+    function doDelete() {
+        var name = input.value.trim();
+        if (!name) return;
+
+        statusEl.className = '';
+        statusEl.style.display = 'none';
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Deletando...';
+
+        fetch('/upload/' + encodeURIComponent(name), { method: 'DELETE' })
+            .then(function(res) {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Deletar';
+                if (res.ok) {
+                    statusEl.className = 'ok';
+                    statusEl.textContent = 'Arquivo "' + name + '" deletado com sucesso!';
+                    input.value = '';
+                } else if (res.status === 404) {
+                    statusEl.className = 'err';
+                    statusEl.textContent = 'Arquivo "' + name + '" não encontrado.';
+                } else {
+                    return res.text().then(function(t) {
+                        statusEl.className = 'err';
+                        statusEl.textContent = 'Erro ' + res.status + ': ' + t;
+                    });
+                }
+            })
+            .catch(function(err) {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Deletar';
+                statusEl.className = 'err';
+                statusEl.textContent = 'Falha na conexão: ' + err.message;
+            });
+    }
+
+    deleteBtn.addEventListener('click', doDelete);
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') doDelete();
+    });
+</script>
+
+</body>
+</html>

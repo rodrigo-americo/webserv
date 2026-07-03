@@ -13,7 +13,13 @@ Este projeto inclui um framework de testes leve, integrado ao sistema de build e
 * Rastreamento automático da origem dos erros através de arquivo e linha.
 * Suporte a assertions genéricas e booleanas.
 * Integração com `utils::to_string()` para melhor visualização de valores durante o debug.
-
+* Filtragem de testes por módulo ou nome (`TEST_FILTER`).
+* Execução de testes em modo verbose.
+* Suporte a coverage automatizado via `gcovr`.
+* Ambiente virtual Python (`.venv`) criado automaticamente para tooling.
+* Lib e setup de testes pré-compilados para otimização de performance.
+* Execução isolada de cada teste (um binário por teste).
+* Sistema de limpeza completo incluindo artefatos de coverage e ambiente Python.
 
 ## Estrutura dos Testes
 
@@ -24,7 +30,8 @@ Os testes são organizados em diretórios com o sufixo `_test`.
 ```text
 tests/
 ├── @setup/
-│   └── framework.cpp
+│   ├── framework.cpp
+│   └── *.cpp (setup compartilhado)
 │
 ├── parser_test/
 │   ├── test_constructor.cpp
@@ -32,6 +39,14 @@ tests/
 │
 └── utils_test/
     └── test_string.cpp
+````
+
+### Componentes adicionais do framework
+
+```text
+tests/
+├── test/        → biblioteca de testes pré-compilada (.ar)
+├── lib/         → biblioteca do projeto usada nos testes (.ar)
 ```
 
 Cada arquivo `.cpp` dentro de um diretório `_test` representa um teste executável independente.
@@ -47,40 +62,88 @@ make tests
 O sistema irá:
 
 1. Localizar automaticamente todos os diretórios com sufixo `_test`.
-2. Compilar cada arquivo de teste encontrado.
-3. Executar cada teste individualmente.
-4. Exibir um resumo ao final.
-
-### Exemplo de saída
-
-```text
-module: parser
-
-    testing... constructor
-    testing... validation
-
-──────────────────────────────────────────
-12 tests passed.
-0 test(s) failed.
-```
+2. Compilar a lib e setup (pré-compilados quando possível).
+3. Compilar cada arquivo de teste individualmente.
+4. Executar cada teste isoladamente.
+5. Exibir um resumo ao final.
 
 ## Modo Verbose
-
-Para exibir também os testes aprovados:
 
 ```bash
 make tests_verbose
 ```
 
-Internamente, o Makefile adiciona o parâmetro:
+Exibe também informações detalhadas de execução de cada teste.
+
+Internamente ativa:
 
 ```bash
 --verbose
 ```
 
-que é interpretado pelo framework.
+## Filtragem de testes
 
-# Criando Novos Testes
+Permite executar apenas partes específicas do framework.
+
+```bash
+make tests TEST_FILTER="<nome_1>, <nome_2>, ... <nome_n>"
+```
+
+### Exemplos
+
+A separação dos nomes pode ser através de `,` ou `<espaço>`.
+
+```bash
+# executa apenas o teste file do módulo parser
+make tests TEST_FILTER=file
+# executa apenas o teste str do módulo utils, apos isso executa todos os testes do módulo schema
+make tests TEST_FILTER="str, schema"
+# executa apenas o teste file do módulo parser, apos isso executa apenas o teste logger do módulo tools
+make tests TEST_FILTER="file logger"
+```
+
+📌 O filtro pode ser aplicado tanto em módulos quanto em arquivos de teste.
+
+## Coverage
+
+```bash
+make tests_coverage
+```
+
+Este modo:
+
+1. Cria automaticamente o ambiente `.venv` (se necessário)
+2. Instala dependências via `requirements.py_txt`
+3. Compila com flag `--coverage`
+4. Executa os testes
+5. Gera relatório com `gcovr`
+
+## Limpeza
+
+### Limpeza parcial
+
+```bash
+make clean
+```
+
+Remove objetos e arquivos intermediários:
+
+* objetos de build
+* bibliotecas `.ar`
+* artefatos de coverage (`.gcda`, `.gcno`, `.gcov`)
+
+### Limpeza total
+
+```bash
+make fclean
+```
+
+Remove:
+
+* binário principal
+* `.venv`
+
+## Criando Novos Testes
 
 Para adicionar um novo conjunto de testes:
 
@@ -111,7 +174,7 @@ int main(int argc, char **argv)
 
 Nenhuma alteração no Makefile é necessária.
 
-# Inicialização
+## Inicialização
 
 Todo teste deve inicializar o sistema de mensagens:
 
@@ -223,7 +286,7 @@ O framework fornece a macro:
 LINE_DATA()
 ```
 
-que captura automaticamente:
+Captura automaticamente:
 
 ```text
 arquivo:linha

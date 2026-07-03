@@ -2,9 +2,16 @@
 #include "parser/parser/ParserBuilder.hpp"
 #include "config/ConfigBuilderVisitor.hpp"
 #include "WebServer.hpp"
+#include "Logger.hpp"
+# include "LoggerDestineFile.hpp"
+# include "LoggerDestineOstream.hpp"
 
 int main(int argc, char* argv[])
 {
+    // Logger	&logger = Logger::getInstance();
+    // LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE);
+    // logger.addDestine(cgi_log);
+
     if (argc != 2)
     {
         std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;

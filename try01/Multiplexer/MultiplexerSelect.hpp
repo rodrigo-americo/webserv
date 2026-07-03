@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerSelect.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:44:46 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/09 21:17:48 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/01 17:15:03 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,12 @@ class MultiplexerSelect: public IMultiplexer
 		fd_set	_main_write_set;
 		fd_set	_main_error_set;
 		int		_max_fd;
+		int		_timeout_ms;
+		sockets _pending_deletion;
 
 	public:
-		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0) {};
+		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0), _timeout_ms(-1) {};
+		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerSelect() {};
 
 		void add(Socket *socket)
@@ -55,9 +58,16 @@ class MultiplexerSelect: public IMultiplexer
 			FD_CLR(it->first, &_main_read_set);
 			FD_CLR(it->first, &_main_write_set);
 			FD_CLR(it->first, &_main_error_set);
-			delete it->second;
+			_pending_deletion[it->first] = it->second;
 			_sockets.erase(it);
 		}
+
+		void flushRemovals()
+        {
+            for (sockets::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
+                delete it->second;
+            _pending_deletion.clear();
+        }
 
 		std::string wait(SocketEventList &events)
 		{
@@ -73,7 +83,15 @@ class MultiplexerSelect: public IMultiplexer
 			fd_set	error_set = _main_error_set;
 
 			// o primeiro parametro do select diz todos os fds que ele deve checkar, de zero ate o valor passado.
-			int ret = select(_max_fd + 1, &read_set, &write_set, &error_set, NULL);
+			struct timeval	tv;
+			struct timeval*	tvp = NULL;
+			if (_timeout_ms >= 0)
+			{
+				tv.tv_sec  = _timeout_ms / 1000;
+				tv.tv_usec = (_timeout_ms % 1000) * 1000;
+				tvp = &tv;
+			}
+			int ret = select(_max_fd + 1, &read_set, &write_set, &error_set, tvp);
 			if (ret < 0)
 				return strerror(errno);
 			for (sockets::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
@@ -87,13 +105,20 @@ class MultiplexerSelect: public IMultiplexer
 				{
 					int			err;
 					socklen_t	len = sizeof(err);
-					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len) < 0)
+					if (Socket::usesGetSockOpt(event.socket->getType()))
 					{
-						events.clear();
-						return strerror(errno);
+						if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len) < 0)
+						{
+							events.clear();
+							return strerror(errno);
+						}
+						if (err != 0)
+							event.error = "select error: " + std::string(strerror(err));
 					}
-					if (err != 0)
-						event.error = "select error: " + std::string(strerror(err));
+					else
+					{
+						event.error = "pipe error";
+					}
 				}
 				if (event.readable || event.writable || !event.error.empty())
 					events.push_back(event);

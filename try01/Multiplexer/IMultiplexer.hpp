@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IMultiplexer.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:58:06 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 13:46:39 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/01 11:23:17 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ struct IMultiplexer
 	virtual void		add(Socket *socket) = 0;
 	virtual void		remove(Socket *socket) = 0;
 	virtual std::string	wait(SocketEventList &events) = 0;
+	virtual void		setTimeout(int timeout_ms) = 0;
+	virtual void flushRemovals() = 0;
 };
 
 

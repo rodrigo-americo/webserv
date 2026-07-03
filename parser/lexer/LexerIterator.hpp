@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/30 22:33:46 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/04 17:32:21 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/19 22:21:26 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ public:
 	 */
 	size_t		size() const { return _tokens.size(); }
 
+	bool		empty() const { return _tokens.size() == 0; }
+
 	/**
 	 * @brief Obtém a mensagem de erro do lexer.
 	 *
@@ -71,7 +73,7 @@ public:
 	 * @param lexer Lexer de origem.
 	 * @return Referência para o iterador.
 	 */
-	LexerIterator	&operator=(const Lexer &lexer) { _tokens = lexer.tokens(); _error = lexer.error(); return *this; }
+	LexerIterator	&operator=(const Lexer &lexer) { _tokens = lexer.tokens(); _error = lexer.error(); _idx = 0; return *this; }
 
 	/**
 	 * @brief Verifica se ainda existem tokens disponíveis.
@@ -88,10 +90,11 @@ public:
 	 *
 	 * @return Referência constante para o token atual.
 	 */
-	const token	&operator->() const
+	const token	*operator->() const
 	{
-		if (_idx == size()) return _tokens[size() - 1];
-		return _tokens[_idx];
+		if (empty()) return NULL;
+		if (_idx == size()) return &_tokens.back();
+		return &_tokens[_idx];
 	}
 
 	/**
@@ -104,7 +107,12 @@ public:
 	 */
 	const token	&operator*() const
 	{
-		if (_idx == size()) return _tokens[size() - 1];
+		if (empty())
+			return _tokens.back();
+
+		if (_idx >= size())
+			return _tokens.back();
+
 		return _tokens[_idx];
 	}
 

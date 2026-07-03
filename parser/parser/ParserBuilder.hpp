@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserBuilder.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 17:40:15 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:11:59 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/28 19:58:04 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ public:
 		_parser.addDirectiveKeyword("proxy_cache_bypass", ParserTokenType::PT_PROXY_CACHE_BYPASS);
 		_parser.addDirectiveKeyword("fastcgi_index", ParserTokenType::PT_FASTCGI_INDEX);
 		_parser.addDirectiveKeyword("fastcgi_param", ParserTokenType::PT_FASTCGI_PARAM);
+		_parser.addDirectiveKeyword("cgi_extension", ParserTokenType::PT_CGI_EXTENSION);
 		_parser.addDirectiveKeyword("worker_connections", ParserTokenType::PT_WORKER_CONNECTIONS);
 		_parser.addDirectiveKeyword("expires", ParserTokenType::PT_EXPIRES);
 		_parser.addDirectiveKeyword("access_log", ParserTokenType::PT_ACCESS_LOG);
@@ -114,6 +115,7 @@ public:
 		_parser.addDirectiveKeyword("ssl_certificate_key", ParserTokenType::PT_SSL_CERTIFICATE_KEY);
 		_parser.addDirectiveKeyword("ssl_protocols", ParserTokenType::PT_SSL_PROTOCOLS);
 		_parser.addDirectiveKeyword("ssl_ciphers", ParserTokenType::PT_SSL_CIPHERS);
+		_parser.addDirectiveKeyword("upload_dir", ParserTokenType::PT_UPLOAD_DIR);
 		return *this;
 	}
 

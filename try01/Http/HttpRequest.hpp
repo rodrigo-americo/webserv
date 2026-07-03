@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:13:29 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 17:35:21 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/29 12:21:30 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,21 @@ struct RequestMethod
 	{
 		GET,
 		POST,
-		PUT,
-		PATCH,
 		DELETE
 	};
 };
+
+static const char *RequestMethodStr[] = {
+	"GET",
+	"POST",
+	"DELETE"
+};
+
+inline std::ostream	&operator<<(std::ostream &os, RequestMethod::type req)
+{
+	os << RequestMethodStr[req];
+	return os;
+}
 
 class HttpRequest
 {
@@ -42,9 +52,12 @@ class HttpRequest
 		std::string	http_version;
 		std::string	body;
 		HttpHeaders	headers;
+		uint16_t port;
 
 		HttpRequest(SocketConnection *conn)
-			: _connection(conn), method(), path(), http_version(), body(), headers() { (void)_connection; }
+			: _connection(conn), method(), path(), http_version(),
+			 body(), headers(), port(conn->listenner()->addr().port()) {}
+		SocketConnection *connection() const { return _connection; }
 
 };
 

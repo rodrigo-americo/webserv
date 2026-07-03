@@ -201,27 +201,6 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
         case ParserTokenType::PT_ROOT:
             sc->setRoot(d.values[0].getContent());
             break;
-        case ParserTokenType::PT_RETURN:
-   			 if (d.values.size() == 2)
-				sc->setRedirect(std::atoi(d.values[0].getContent().c_str()), d.values[1].getContent());
-			else
-				sc->setRedirect(0, d.values[0].getContent());
-			break;
-        case ParserTokenType::PT_ACCESS_LOG:
-            sc->setAccessLog(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CERTIFICATE:
-            sc->setSslCertificate(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CERTIFICATE_KEY:
-            sc->setSslCertificateKey(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_PROTOCOLS:
-            sc->setSslProtocols(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_SSL_CIPHERS:
-            sc->setSslCiphers(d.values[0].getContent());
-            break;
         default:
             break;
     }
@@ -252,6 +231,10 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
         case ParserTokenType::PT_FASTCGI_INDEX:
             lc->setFastcgiIndex(d.values[0].getContent());
             break;
+        case ParserTokenType::PT_CGI_EXTENSION:
+            lc->addCgiExtension(std::make_pair(d.values[0].getContent(), 
+                                        d.values[1].getContent()));
+            break;
         case ParserTokenType::PT_TRY_FILES:
             for (size_t i = 0; i < d.values.size(); ++i)
                 lc->addTryFile(d.values[i].getContent());
@@ -281,6 +264,9 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
 			else
 				lc->setRedirect(0, d.values[0].getContent());
 			break;
+        case ParserTokenType::PT_UPLOAD_DIR:
+            lc->setUploadDir(d.values[0].getContent());
+            break;
         default:
             break;
     }

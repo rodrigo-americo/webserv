@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserTokenType.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:52:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/15 13:42:12 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/06/29 12:19:24 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ struct ParserTokenType
 		PT_FASTCGI_PASS,
 		PT_FASTCGI_PARAM,
 		PT_FASTCGI_INDEX,
+		PT_CGI_EXTENSION,
 		PT_RETURN,
 		PT_REWRITE,
 		PT_SSL_CERTIFICATE,
@@ -82,6 +83,7 @@ struct ParserTokenType
 		PT_SSL_PROTOCOLS,
 		PT_SSL_CIPHERS,
 		PT_CLIENT_MAX_BODY_SIZE,
+		PT_UPLOAD_DIR,
 
 		// modificadores de location
 		PT_MOD_EXACT,        // =
@@ -153,6 +155,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_FASTCGI_PASS",
 	"PT_FASTCGI_PARAM",
 	"PT_FASTCGI_INDEX",
+	"PT_CGI_EXTENSION",
 	"PT_RETURN",
 	"PT_REWRITE",
 	"PT_SSL_CERTIFICATE",
@@ -160,6 +163,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_SSL_PROTOCOLS",
 	"PT_SSL_CIPHERS",
 	"PT_CLIENT_MAX_BODY_SIZE",
+	"PT_UPLOAD_DIR",
 
 	// modificadores de location
 	"PT_MOD_EXACT",        // =

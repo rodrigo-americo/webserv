@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketListenner.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:37:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/10 21:48:16 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/29 17:46:26 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,31 +29,31 @@ class SocketListenner: public Socket
 		{
 			int enable = 1;
 			size_t	size = sizeof(enable);
-			if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, size) < 0)
+			if (setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, &enable, size) < 0)
 				_errors.push_back(std::string("Error on set socket option SO_REUSEADDR: ") + strerror(errno));
 
 			if (listenner.reuseport)
-				if (setsockopt(_fd, SOL_SOCKET, SO_REUSEPORT, &enable, size) < 0)
+				if (setsockopt(fd(), SOL_SOCKET, SO_REUSEPORT, &enable, size) < 0)
 					_errors.push_back(std::string("Error on set socket option SO_REUSEPORT: ") + strerror(errno));
 
 			if (listenner.ipv6only)
-				if (setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &enable, size) < 0)
+				if (setsockopt(fd(), IPPROTO_IPV6, IPV6_V6ONLY, &enable, size) < 0)
 					_errors.push_back(std::string("Error on set socket option IPV6_V6ONLY: ") + strerror(errno));
 
 			typedef ConfigServerListenKeepAlive	KeepAlive;
 			if (listenner.keepalive == KeepAlive::ON || listenner.keepalive == KeepAlive::CUSTOM)
-				if (setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &enable, size) < 0)
+				if (setsockopt(fd(), SOL_SOCKET, SO_KEEPALIVE, &enable, size) < 0)
 					_errors.push_back(std::string("Error on set socket option SO_KEEPALIVE: ") + strerror(errno));
 			if (listenner.keepalive == KeepAlive::CUSTOM)
 			{
 				int iddle = listenner.keepalive_time;
-				if (setsockopt(_fd, IPPROTO_TCP, TCP_KEEPIDLE, &iddle, sizeof(iddle)) < 0)
+				if (setsockopt(fd(), IPPROTO_TCP, TCP_KEEPIDLE, &iddle, sizeof(iddle)) < 0)
 					_errors.push_back(std::string("Error on set socket option TCP_KEEPIDLE: ") + strerror(errno));
 				int interval = listenner.keepalive_intvl;
-				if (setsockopt(_fd, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval)) < 0)
+				if (setsockopt(fd(), IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval)) < 0)
 					_errors.push_back(std::string("Error on set socket option TCP_KEEPINTVL: ") + strerror(errno));
 				int count = listenner.keepalive_probes;
-				if (setsockopt(_fd, IPPROTO_TCP, TCP_KEEPCNT, &count, sizeof(count)) < 0)
+				if (setsockopt(fd(), IPPROTO_TCP, TCP_KEEPCNT, &count, sizeof(count)) < 0)
 					_errors.push_back(std::string("Error on set socket option TCP_KEEPCNT: ") + strerror(errno));
 			}
 		}
@@ -70,14 +70,14 @@ class SocketListenner: public Socket
 
 		void	_bind_and_listen(size_t worker_connections)
 		{
-			if (bind(_fd, _addr.ptr(), _addr.size()) < 0)
+			if (bind(fd(), _addr.ptr(), _addr.size()) < 0)
 			{
 				_errors.push_back(std::string("Error on bind: ") + strerror(errno));
 				printErrors();
 				std::cerr << std::endl;
 				return;
 			}
-			if (listen(_fd, worker_connections) < 0)
+			if (listen(fd(), worker_connections) < 0)
 			{
 				_errors.push_back(std::string("Error on linten: ") + strerror(errno));
 				printErrors();
@@ -90,8 +90,8 @@ class SocketListenner: public Socket
 		SocketListenner(const ConfigServerListen &listenner, size_t worker_connections): Socket(SocketType::LISTENNER)
 		{
 			int domain = listenner.is_unix ? AF_UNIX : (listenner.is_ipv6 ? AF_INET6 : AF_INET);
-			_fd = socket(domain, SOCK_STREAM, 0);
-			if (_fd < 0)
+			fd(socket(domain, SOCK_STREAM, 0));
+			if (fd() < 0)
 			{
 				_errors.push_back(std::string("Error on create listenner socket as SOCK_STREAM: ") + strerror(errno));
 				printErrors();

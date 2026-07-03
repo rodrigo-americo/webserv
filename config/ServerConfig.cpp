@@ -5,6 +5,7 @@ void ServerConfig::addChild(ConfigNode* child)
     LocationConfig* location = dynamic_cast<LocationConfig*>(child);
     if (location)
     {
+		location->setParent(this);
         _locations.push_back(location);
         return;
     }

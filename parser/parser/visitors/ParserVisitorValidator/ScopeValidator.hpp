@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ScopeValidator.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 16:47:55 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/06 14:07:35 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/06/28 20:13:33 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ class ScopeValidator
 				return;
 			}
 			std::vector<ParserTokenType::type> &scopes = validator_it->second;
-			std::vector<ParserTokenType::type>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes[_curr_scopes.size() - 1]);
+			std::vector<ParserTokenType::type>::iterator scope_it = std::find(scopes.begin(), scopes.end(), _curr_scopes.back());
 			if (scope_it == scopes.end())
 			{
 				std::string msg = name.getLineAddress() + " " + name.getContent() + " in wrong context. Must be in scopes '" + _getStringTypes(scopes) + "'";
@@ -249,6 +249,7 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::PT_SSL_CIPHERS, ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_PASS, ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PASS, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_CGI_EXTENSION, ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_EXPIRES, ParserTokenType::PT_LOCATION) // TODO: expandir para PT_HTTP e PT_SERVER quando HttpConfig e ServerConfig suportarem expires
 				.withDirectiveOnScope(ParserTokenType::PT_ROOT, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
@@ -260,8 +261,10 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_SET_HEADER, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_INDEX, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_FASTCGI_PARAM, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_CGI_EXTENSION, ParserTokenType::PT_LOCATION)
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_CACHE_BYPASS, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
-				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER);
+				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER)
+				.withDirectiveOnScope(ParserTokenType::PT_UPLOAD_DIR, ParserTokenType::PT_LOCATION);
 		}
 
 		/**

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerPoll.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 13:45:19 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/02 10:47:07 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,12 @@ class MultiplexerPoll: public IMultiplexer
 		typedef std::vector<pollfd>		pollfds;
 		sockets	_sockets;
 		pollfds	_pollfds;
+		int		_timeout_ms;
+		sockets _pending_deletion; 
 
 	public:
-		MultiplexerPoll(): _sockets(), _pollfds() {};
+		MultiplexerPoll(): _sockets(), _pollfds(), _timeout_ms(-1) {};
+		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerPoll() {};
 
 		void add(Socket *socket)
@@ -56,18 +59,26 @@ class MultiplexerPoll: public IMultiplexer
 			if (!socket) return;
 
 			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), socket);
-			if (it == _sockets.end()) return;
+			if (it == _sockets.end() || *it != socket)
+				return;
 			size_t	idx = it - _sockets.begin();
-			delete *it;
+			_pending_deletion.push_back(*it);
 			_sockets.erase(it);
 			_pollfds.erase(_pollfds.begin() + idx);
 		}
+
+		void flushRemovals()
+        {
+            for (sockets::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
+                delete *it;
+            _pending_deletion.clear();
+        }
 
 		std::string wait(SocketEventList &events)
 		{
 			events.clear();
 			if (_pollfds.empty()) return "";
-			int ret = poll(&_pollfds[0], _pollfds.size(), -1);
+			int ret = poll(&_pollfds[0], _pollfds.size(), _timeout_ms);
 			if (ret < 0) return strerror(errno);
 			for (size_t i = 0; i < _sockets.size(); i++)
 			{
@@ -81,16 +92,25 @@ class MultiplexerPoll: public IMultiplexer
 				{
 					int			err;
 					socklen_t	len = sizeof(err);
-					if (getsockopt(_sockets[i]->fd(), SOL_SOCKET, SO_ERROR, &err, &len) < 0)
+					if (Socket::usesGetSockOpt(_sockets[i]->getType()))
 					{
-						events.clear();
-						return strerror(errno);
+						if (getsockopt(_sockets[i]->fd(), SOL_SOCKET, SO_ERROR, &err, &len) < 0)
+						{
+							events.clear();
+							return strerror(errno);
+						}
+						if (err != 0)
+							event.error = "poll error: " + std::string(strerror(err));
 					}
-					if (err != 0)
-						event.error = "poll error: " + std::string(strerror(err));
+					else
+					{
+						event.error = "pipe error";
+					}
 				}
 				else if (_pollfds[i].revents & POLLHUP)
-					event.error = "poll error: client has disconnected!";
+				{
+					event.eof = true;
+				}
 				else if (_pollfds[i].revents & POLLNVAL)
 					event.error = "poll error: invalid fd '" + utils::to_string(_sockets[i]->fd()) + "'!";
 				events.push_back(event);
