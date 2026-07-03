@@ -130,7 +130,7 @@ void ConfigBuilderVisitor::_handleEventsDirective(Directive& d, EventsConfig* ec
             ec->setWorkerConnections(std::atoi(d.values[0].getContent().c_str()));
             break;
         case ParserTokenType::MULTI_ACCEPT:
-            ec->setMultiAccept(d.values[0].getContent() == "on");
+            ec->setMultiAccept(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         case ParserTokenType::PT_USE:
         {
@@ -157,7 +157,7 @@ void ConfigBuilderVisitor::_handleHttpDirective(Directive& d, HttpConfig* hc)
             hc->setKeepaliveTimeout(std::atoi(d.values[0].getContent().c_str()));
             break;
         case ParserTokenType::SENDFILE:
-            hc->setSendfile(d.values[0].getContent() == "on");
+            hc->setSendfile(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         case ParserTokenType::DEFAULT_TYPE:
             hc->setDefaultType(d.values[0].getContent());
@@ -214,7 +214,7 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
             lc->setRoot(d.values[0].getContent());
             break;
         case ParserTokenType::PT_AUTOINDEX:
-            lc->setAutoindex(d.values[0].getContent() == "on");
+            lc->setAutoindex(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
             break;
         case ParserTokenType::PT_INDEX:
             for (size_t i = 0; i < d.values.size(); ++i)

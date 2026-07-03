@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:54:12 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:39:52 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/01 17:14:50 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <unistd.h>
 # include <errno.h>
 # include <sys/epoll.h>
+# include <vector>
 
 # include "IMultiplexer.hpp"
 # include "Socket.hpp"
@@ -24,8 +25,10 @@
 class MultiplexerEpoll: public IMultiplexer
 {
 	private:
+		typedef std::vector<Socket *>	sockets;
 		int	_epollfd;
 		int	_timeout_ms;
+		sockets _pending_deletion;
 
 	public:
 		// sobre `epoll_create` (info retirada do `man epoll_create`) -> Since Linux 2.6.8, the size argument is ignored, but must be greater than zero;
@@ -52,8 +55,15 @@ class MultiplexerEpoll: public IMultiplexer
 		{
 			if (!socket) return;
 			epoll_ctl(_epollfd, EPOLL_CTL_DEL, socket->fd(), NULL);
-			delete socket;
+			_pending_deletion.push_back(socket);
 		}
+
+		void flushRemovals()
+        {
+            for (sockets::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
+                delete *it;
+            _pending_deletion.clear();
+        }
 
 		std::string	wait(SocketEventList &events)
 		{

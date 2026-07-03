@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>405 — Método não permitido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0b0d;
+    --panel: #131519;
+    --panel-2: #0e1013;
+    --line: #232630;
+    --line-soft: #191c24;
+    --text: #e6e9ee;
+    --text-dim: #767c88;
+    --deny: #ef5b4a;
+    --deny-glow: rgba(239,91,74,0.5);
+    --allow: #45c2b5;
+    --allow-glow: rgba(69,194,181,0.4);
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(ellipse 800px 550px at 14% 16%, rgba(239,91,74,0.05), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 88%, rgba(69,194,181,0.06), transparent 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width: 1080px;
+    display:grid;
+    grid-template-columns: minmax(260px, 400px) 1fr;
+    gap: 64px;
+    align-items:center;
+  }
+
+  /* ---------- DOOR STAGE ---------- */
+  .door-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+  }
+
+  .door-frame{
+    position:relative;
+    width: 210px;
+    height: 240px;
+  }
+
+  .sign{
+    position:absolute;
+    top: -34px;
+    left:50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing:.1em;
+    color: var(--deny);
+    z-index: 2;
+  }
+
+  .frame-outer{
+    position:absolute;
+    inset:0;
+    border: 8px solid #1c1f26;
+    border-radius: 4px;
+    background: var(--panel-2);
+  }
+
+  .door{
+    position:absolute;
+    top: 8px; left:8px; right:8px; bottom:8px;
+    background: linear-gradient(160deg, #1c2029, #14171e);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    animation: doorShake 3.4s ease-in-out infinite;
+    transform-origin: left center;
+  }
+  @keyframes doorShake{
+    0%, 48%{ transform: rotate(0deg); }
+    50%{ transform: rotate(0.6deg); }
+    52%{ transform: rotate(-0.8deg); }
+    54%{ transform: rotate(0.5deg); }
+    56%{ transform: rotate(-0.3deg); }
+    58%, 100%{ transform: rotate(0deg); }
+  }
+
+  .panel-line{
+    position:absolute;
+    left: 14px; right: 14px;
+    height: 1px;
+    background: var(--line);
+  }
+  .panel-line.top{ top: 22%; }
+  .panel-line.bottom{ top: 68%; }
+
+  .handle{
+    position:absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px; height: 34px;
+    border-radius: 4px;
+    background: #3a4048;
+  }
+
+  .hand{
+    position:absolute;
+    left: -46px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size: 12px;
+    color: var(--deny);
+    background: rgba(239,91,74,0.1);
+    border: 1px solid var(--deny);
+    border-radius: 4px;
+    padding: 4px 8px;
+    animation: push 3.4s ease-in-out infinite;
+  }
+  @keyframes push{
+    0%, 30%{ transform: translateY(-50%) translateX(-18px); opacity: 0; }
+    38%{ opacity: 1; }
+    48%{ transform: translateY(-50%) translateX(20px); opacity: 1; }
+    58%{ transform: translateY(-50%) translateX(-18px); opacity: 0; }
+    100%{ transform: translateY(-50%) translateX(-18px); opacity: 0; }
+  }
+
+  .deny-x{
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) scale(0);
+    font-size: 34px;
+    color: var(--deny);
+    text-shadow: 0 0 14px var(--deny-glow);
+    animation: xPop 3.4s ease-in-out infinite;
+    z-index: 3;
+  }
+  @keyframes xPop{
+    0%, 48%{ transform: translate(-50%,-50%) scale(0); opacity:0; }
+    52%{ transform: translate(-50%,-50%) scale(1.2); opacity:1; }
+    58%{ transform: translate(-50%,-50%) scale(1); opacity:1; }
+    68%, 100%{ transform: translate(-50%,-50%) scale(0.6); opacity:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .door, .hand, .deny-x{ animation: none; }
+    .deny-x{ transform: translate(-50%,-50%) scale(1); opacity: 1; }
+  }
+
+  .methods{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .pill{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing:.06em;
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+  .pill.ok{
+    color: var(--allow);
+    border: 1px solid var(--allow);
+    background: rgba(69,194,181,0.08);
+  }
+  .pill.no{
+    color: var(--deny);
+    border: 1px solid var(--deny);
+    background: rgba(239,91,74,0.08);
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .methods-label{
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    letter-spacing:.08em;
+    margin-bottom: -4px;
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{ max-width: 520px; }
+
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--deny);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--deny);
+    border-radius:50%;
+    box-shadow: 0 0 8px var(--deny);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight:800;
+    font-size: clamp(64px, 9vw, 108px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    margin-bottom: 10px;
+  }
+  h1 .mid{ color: var(--allow); }
+
+  h2{
+    font-weight:600;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing:-0.01em;
+  }
+
+  p.desc{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .readout{
+    font-family: var(--font-display);
+    font-size:13px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--deny);
+    padding:14px 16px;
+    border-radius:4px;
+    margin-bottom: 32px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .readout b{ color: var(--text); font-weight:500; }
+  .readout .ok{ color: var(--allow); }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding: 13px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: transform .15s ease, border-color .15s ease, filter .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{ background: var(--allow); color: #052220; }
+  .btn-primary:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+
+  .btn-ghost{ background: transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--deny); color: var(--deny); }
+
+  .btn:focus-visible{ outline: 2px solid var(--allow); outline-offset: 3px; }
+
+  @media (max-width: 760px){
+    .wrap{ grid-template-columns: 1fr; gap:56px; text-align:center; }
+    .actions{ justify-content:center; }
+    .eyebrow{ justify-content:center; }
+    .hand{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="door-stage">
+      <div class="door-frame">
+        <div class="sign">SOMENTE PUXAR</div>
+        <div class="frame-outer"></div>
+        <div class="door">
+          <div class="panel-line top"></div>
+          <div class="panel-line bottom"></div>
+          <div class="handle"></div>
+          <div class="hand">POST →</div>
+        </div>
+        <div class="deny-x">✕</div>
+      </div>
+
+      <div class="methods">
+        <div class="methods-label" style="width:100%; text-align:center;">MÉTODOS ACEITOS NESTA ROTA</div>
+        <span class="pill no">POST</span>
+        <span class="pill ok">GET</span>
+        <span class="pill ok">HEAD</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="eyebrow">Método não permitido</div>
+      <h1>4<span class="mid">0</span>5</h1>
+      <h2>Você está usando a ação errada para essa porta.</h2>
+      <p class="desc">
+        O recurso existe e foi encontrado, mas não aceita o método HTTP usado na sua requisição.
+        Verifique o verbo utilizado (GET, POST, PUT, DELETE...) e tente com um método permitido.
+      </p>
+
+      <div class="readout">
+        MÉTODO ENVIADO: <b id="method" style="color:var(--deny)">POST</b><br>
+        MÉTODOS PERMITIDOS: <b class="ok">GET, HEAD</b><br>
+        ROTA SOLICITADA: <b id="path">/carregando...</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="retry">Repetir com GET</button>
+        <a href="/" class="btn btn-ghost">Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('path').textContent = window.location.pathname || '/desconhecido';
+
+  document.getElementById('retry').addEventListener('click', () => {
+    document.querySelectorAll('.door, .hand, .deny-x').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+  });
+</script>
+
+</body>
+</html>
