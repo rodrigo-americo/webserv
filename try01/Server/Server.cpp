@@ -53,7 +53,7 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
         size_t qpos = clean_path.find('?');
         if (qpos != std::string::npos)
         clean_path = clean_path.substr(0, qpos);
-        
+
         // extrair extensão
         size_t dot = clean_path.rfind('.');
         if (dot != std::string::npos)
@@ -72,6 +72,7 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
 
 void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 {
+	return _sendError(res, 500, "Internal Server Error");
     const ServerConfig* server = _config->match_server(req.port, req.headers.host());
     if (!server)
         return _sendError(res, 500, "Internal Server Error");
