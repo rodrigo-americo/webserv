@@ -78,7 +78,37 @@ class HttpResponse
 			}
 			if (!consersor) return;
 			consersor->convert(response);
-			_connection->write(response);
+			delete consersor;
+			// so enfileira: a escrita de verdade acontece no loop de eventos,
+			// quando o multiplexer avisar que o fd esta gravavel.
+			_connection->queueWrite(response);
+		}
+
+		// serve um arquivo do disco em streaming (sendfile), sem carregar o
+		// conteudo inteiro pra memoria. `size` deve vir de stat() e ja reflete
+		// o Content-Length. Retorna false se o arquivo nao pode ser aberto.
+		bool	sendFile(const std::string &path, size_t size, ResponseHTTPVersion::type http_version)
+		{
+			if (!_connection->queueFile(path, size))
+				return false;
+
+			headers.content_length(utils::to_string(size));
+			std::string	response;
+			HttpResponseConversor	*consersor = NULL;
+			switch (http_version)
+			{
+			case ResponseHTTPVersion::HTTP_1_1 :
+				consersor = new HttpResponseConversor_1_1(*this);
+				break;
+			default:
+				std::cerr << "Error on send request!" << std::endl;
+				break;
+			}
+			if (!consersor) return false;
+			consersor->convert(response);
+			delete consersor;
+			_connection->queueWrite(response);
+			return true;
 		}
 };
 
