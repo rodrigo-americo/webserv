@@ -15,96 +15,71 @@
 
 # include <string>
 # include <stdlib.h>
+# include <cerrno>
 # include "HttpRequest.hpp"
 # include "HttpHeaders.hpp"
 # include "SocketConnection.hpp"
+# include "WebServerConfig.hpp"
+# include "ServerConfig.hpp"
 
-// ISSO E UMA CLASSE MERDA DEPOIS TEM QUE MELHORAR
 class RequestBuilder
 {
 private:
-	HttpRequest										_req;
-	std::string										_buffer;
-	size_t											_body_start;
-	size_t											_is_request_line_processed;
-	bool											_is_complete;
-	size_t											_cursor;
+	HttpRequest	_req;
+	std::string	_buffer;
+	size_t		_body_start;
+	size_t		_is_request_line_processed;
+	bool		_is_complete;
+	size_t		_cursor;
 
-	void	_processHeader(size_t header_end)
+	enum ChunkState
 	{
-		if (!_is_request_line_processed)
-		{
-			_cursor = _buffer.find_first_of(' ');
-			std::string	line_method = _buffer.substr(0, _cursor); // method
-			if (line_method == "GET")
-				_req.method = RequestMethod::GET;
-			else if (line_method == "POST")
-				_req.method = RequestMethod::POST;
-			else if (line_method == "PUT")
-				_req.method = RequestMethod::PUT;
-			else if (line_method == "PATCH")
-				_req.method = RequestMethod::PATCH;
-			else if (line_method == "DELETE")
-				_req.method = RequestMethod::DELETE;
-			_cursor = _buffer.find_first_not_of(' ', _cursor); // path start
-			size_t path_end = _buffer.find_first_of(' ', _cursor);
-			_req.path = _buffer.substr(_cursor, path_end - _cursor);
-			_cursor = _buffer.find_first_not_of(' ', path_end); // http_version start
-			size_t ver_end = _buffer.find_first_of('\r', _cursor);
-			_req.http_version = _buffer.substr(_cursor, ver_end - _cursor);
-			_cursor = ver_end + 2; // pula \r\n da request line
-		}
-		_is_request_line_processed = true;
-		while (_cursor <= header_end)
-		{
-			size_t	begin = _cursor;
-			size_t	colon = _buffer.find_first_of(':', _cursor);
-			if (colon == std::string::npos || colon > header_end) break;
-			std::string	key = _buffer.substr(begin, colon - begin);
-			size_t	val_start = _buffer.find_first_not_of(' ', colon + 1);
-			size_t	val_end = _buffer.find_first_of('\r', colon + 1);
-			if (val_end == std::string::npos || val_end > header_end) break;
-			std::string	value = _buffer.substr(val_start, val_end - val_start);
-			_req.headers[key] = value;
-			_cursor = val_end + 2; // pula \r\n
-		}
-		_verifyCompletion();
-	}
+		CHUNK_SIZE,
+		CHUNK_DATA,
+		CHUNK_DATA_CRLF,
+		CHUNK_TRAILER
+	};
 
-	void	_verifyCompletion()
-	{
-		if (_body_start == 0) return;
+	static const size_t	MAX_CHUNK_SIZE = 100 * 1024 * 1024;
+	static const size_t	MAX_TRAILER_SIZE = 8 * 1024;
 
-		if (_req.method != RequestMethod::GET)
-		{
-			const std::string &cl = _req.headers.content_length();
-			int expected = cl.empty() ? 0 : std::atoi(cl.c_str());
-			int body_size = static_cast<int>(_buffer.size() - _body_start);
-			_req.body = _buffer.substr(_body_start, body_size);
-			if (expected > 0)
-				_is_complete = body_size >= expected;
-			else
-				_is_complete = true;
-		}
-		else
-			_is_complete = true;
-	}
+	bool			_is_chunked;
+	bool			_has_error;
+	int				_error_status;
+	std::string		_error_message;
+	size_t			_chunk_cursor;
+	size_t			_chunk_remaining;
+	ChunkState		_chunk_state;
+	const WebServerConfig	*_config;
+	size_t			_max_body_size;
+
+	void	_processHeader(size_t header_end);
+	void	_verifyCompletion();
+	void	_decodeChunkedBody();
+	bool	_decodeChunkSize();
+	bool	_decodeChunkData();
+	bool	_decodeChunkDataCrlf();
+	bool	_decodeChunkTrailer();
 
 public:
 	SocketConnection *connection;
-	RequestBuilder(SocketConnection *conn)
-		: _req(conn), _buffer(), _body_start(0), _is_request_line_processed(false), _is_complete(false), _cursor(0), connection(conn) {}
+
+	RequestBuilder(SocketConnection *conn, const WebServerConfig *config = NULL)
+		: _req(conn), _buffer(), _body_start(0), _is_request_line_processed(false), _is_complete(false), _cursor(0),
+		  _is_chunked(false), _has_error(false), _error_status(400), _error_message("Bad Request"),
+		  _chunk_cursor(0), _chunk_remaining(0), _chunk_state(CHUNK_SIZE),
+		  _config(config), _max_body_size(0),
+		  connection(conn) {}
 	~RequestBuilder() {}
 
 	HttpRequest	build() const { return _req; }
 
-	/* complete e true nesse metodos quando a quantidade lida e menor do que o `chunck-size` */
 	void	addToBuffer(const std::string &buff)
 	{
 		if (_is_complete) return;
 		_buffer += buff;
 		if (buff.size() > 0)
-		_verifyCompletion();
+			_verifyCompletion();
 		if (_body_start > 0) return;
 		size_t	idx = _buffer.find("\r\n\r\n");
 		if (idx != std::string::npos)
@@ -114,7 +89,11 @@ public:
 		}
 	}
 
-	bool	isComplete() const { return _is_complete; }
+	bool				isComplete() const { return _is_complete; }
+	bool				hasError() const { return _has_error; }
+	int					errorStatus() const { return _error_status; }
+	const std::string	&errorMessage() const { return _error_message; }
 };
+
 
 #endif

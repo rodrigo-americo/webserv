@@ -41,6 +41,7 @@ class Server
         Server(const WebServerConfig* config) : _config(config) {}
         ~Server() {}
 
+		const WebServerConfig *getConfig() const { return _config; }
         void handleRequest(const HttpRequest &req, HttpResponse &res);
         
 };

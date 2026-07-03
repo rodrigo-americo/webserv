@@ -24,8 +24,6 @@ struct RequestMethod
 	{
 		GET,
 		POST,
-		PUT,
-		PATCH,
 		DELETE
 	};
 };
@@ -33,8 +31,6 @@ struct RequestMethod
 static const char *RequestMethodStr[] = {
 	"GET",
 	"POST",
-	"PUT",
-	"PATCH",
 	"DELETE"
 };
 
