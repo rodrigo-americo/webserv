@@ -45,9 +45,6 @@ bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMeth
 void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
                const ServerConfig &server, const LocationConfig &location)
 {
-    //const std::map<std::string, std::string>& cgi = location.getCgi();
-    // if (cgi.count("fastcgi_pass"))
-    //     return _serveCgi(req, res, location);
     const std::map<std::string, std::string>& cgi_ext = location.getCgiExtensions();
     if (!cgi_ext.empty())
     {

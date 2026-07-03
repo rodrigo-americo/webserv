@@ -15,6 +15,8 @@
 
 # include <errno.h>
 # include <fcntl.h>
+# include <unistd.h>
+# include <sys/sendfile.h>
 
 # include "Socket.hpp"
 
@@ -22,9 +24,15 @@ class SocketConnection: public Socket
 {
 	private:
 		const Socket *_listenner;
+		std::string	_out_headers;
+		size_t		_out_headers_off;
+		int			_out_file_fd;
+		off_t		_out_file_off;
+		size_t		_out_file_left;
 
 	public:
-		SocketConnection(const Socket *listenner): Socket(SocketType::CONNECTION), _listenner(listenner)
+		SocketConnection(const Socket *listenner): Socket(SocketType::CONNECTION), _listenner(listenner),
+			_out_headers(), _out_headers_off(0), _out_file_fd(-1), _out_file_off(0), _out_file_left(0)
 		{
 			socklen_t	len = _addr.size();
 			fd(accept(_listenner->fd(), _addr.ptr(), &len));
@@ -44,10 +52,65 @@ class SocketConnection: public Socket
 			fcntl(fd(), F_SETFD, FD_CLOEXEC);
 			std::cout << "client connected! fd: " << fd() << std::endl;
 		}
-		SocketConnection(const SocketConnection& other): Socket(other), _listenner(other._listenner) { LOG_TRACE("copy contructor SocketConnection called " << other.fd() << "\n"); };
-		~SocketConnection() {}
+		SocketConnection(const SocketConnection& other): Socket(other), _listenner(other._listenner),
+			_out_headers(other._out_headers), _out_headers_off(other._out_headers_off),
+			_out_file_fd(-1), _out_file_off(0), _out_file_left(0)
+		{ LOG_TRACE("copy contructor SocketConnection called " << other.fd() << "\n"); };
+
+		~SocketConnection()
+		{
+			if (_out_file_fd >= 0)
+				close(_out_file_fd);
+		}
 
 		const Socket	*listenner() const { return _listenner; }
+
+		bool	hasPendingWrite() const
+		{
+			return _out_headers_off < _out_headers.size() || _out_file_fd >= 0;
+		}
+
+		void	queueWrite(const std::string &data)
+		{
+			_out_headers = data;
+			_out_headers_off = 0;
+		}
+
+		bool	queueFile(const std::string &path, size_t size)
+		{
+			_out_file_fd = open(path.c_str(), O_RDONLY);
+			if (_out_file_fd < 0)
+				return false;
+			_out_file_off = 0;
+			_out_file_left = size;
+			return true;
+		}
+
+		void	flushWrite()
+		{
+			if (_out_headers_off < _out_headers.size())
+			{
+				ssize_t n = ::write(fd(), _out_headers.data() + _out_headers_off, _out_headers.size() - _out_headers_off);
+				if (n > 0)
+					_out_headers_off += static_cast<size_t>(n);
+				return;
+			}
+			if (_out_file_fd < 0)
+				return;
+			ssize_t n = sendfile(fd(), _out_file_fd, &_out_file_off, _out_file_left);
+			if (n <= 0)
+			{
+				close(_out_file_fd);
+				_out_file_fd = -1;
+				return;
+			}
+			_out_file_left -= static_cast<size_t>(n);
+			if (_out_file_left == 0)
+			{
+				close(_out_file_fd);
+				_out_file_fd = -1;
+			}
+		}
 };
 
 #endif

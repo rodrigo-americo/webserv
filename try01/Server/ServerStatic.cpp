@@ -119,12 +119,14 @@ void Server::_serveStatic(const HttpRequest &req, HttpResponse &res,
             return _sendError(res, 403, "Forbidden", &req);
         }
     }
-    std::ifstream file(file_path.c_str(), std::ios::binary);
-    if (!file.is_open())
+    if (stat(file_path.c_str(), &st) != 0 || !S_ISREG(st.st_mode))
         return _sendError(res, 404, "Not Found", &req);
-    std::string content((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+
     res.statusCode(200, "OK");
     res.headers.content_type(_mimeType(file_path));
-    res.body(content);
-    res.send(ResponseHTTPVersion::HTTP_1_1);
+    // sendFile() so guarda o fd e o tamanho; o conteudo e lido do disco em
+    // pedacos e mandado pro socket via sendfile() conforme o loop de eventos
+    // for avisando que o fd do cliente esta gravavel (ver SocketConnection::flushWrite).
+    if (!res.sendFile(file_path, static_cast<size_t>(st.st_size), ResponseHTTPVersion::HTTP_1_1))
+        return _sendError(res, 404, "Not Found", &req);
 }

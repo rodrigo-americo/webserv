@@ -77,12 +77,5 @@ void WebServer::start(WebServerConfig* config)
 			pool.addListenner(sock, srv);
 		}
 	}
-
-	// int fds[2];
-	// pipe(fds);
-	// write(fds[1], "hello", 5);
-	// close(fds[1]);
-	// pool.addPipe(new SocketPipeRead(fds[0]));
-
 	pool.waitConnections();
 }

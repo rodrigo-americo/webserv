@@ -287,17 +287,31 @@ public:
 						std::list<CgiProcess*>::iterator cit = _findCgiByClient(conn);
 						if (cit != _running_cgis.end())
 							_cleanupCgi(cit, CGI_CLIENT_GONE);
-						
+
 						_multiplexer->remove(conn);
 						continue;
 					}
+
+					// ha uma resposta (headers e/ou arquivo) ainda sendo drenada pro
+					// socket. so tenta escrever de novo quando o multiplexer avisar
+					// que o fd esta gravavel; nao mistura com leitura de novo request
+					// enquanto a resposta atual nao terminou de sair.
+					if (conn->hasPendingWrite())
+					{
+						if (event.writable)
+							conn->flushWrite();
+						if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
+							_multiplexer->remove(conn);
+						continue;
+					}
+
 					RequestBuilder *existing = _findPending(conn);
 					if (existing)
 					{
 						if (_handleRequest(*existing))
 						{
 							_removePending(conn);
-							if (!_isConnectionOwnedByCgi(conn))
+							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
         						_multiplexer->remove(conn);
 						}
 					}
@@ -309,7 +323,7 @@ public:
 						if (_handleRequest(_pending_request.back()))
 						{
 							_pending_request.pop_back();
-							if (!_isConnectionOwnedByCgi(conn))
+							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
         						_multiplexer->remove(conn);
 						}
 					}
