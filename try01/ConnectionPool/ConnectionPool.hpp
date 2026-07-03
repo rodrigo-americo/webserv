@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:54:10 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/02 11:12:30 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/03 18:08:30 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,21 +205,6 @@ private:
 		if (reason != CGI_CLIENT_GONE)
 			_multiplexer->remove(conn);
 	}
-
-	// void	_processPendingRequests()
-	// {
-	// 	for (std::vector<RequestBuilder>::iterator it = _pending_request.begin(); it < _pending_request.end();)
-	// 	{
-	// 		if (_handleRequest(*it))
-	// 		{
-	// 			SocketConnection *conn = it->connection;
-	// 			it = _pending_request.erase(it);
-	// 			_multiplexer->remove(conn);
-	// 			continue;
-	// 		}
-	// 		++it;
-	// 	}
-	// }
 
 public:
 	ConnectionPool(): _multiplexer(NULL) { }

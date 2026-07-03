@@ -8,9 +8,9 @@
 
 int main(int argc, char* argv[])
 {
-    // Logger	&logger = Logger::getInstance();
-    // LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE);
-    // logger.addDestine(cgi_log);
+    Logger	&logger = Logger::getInstance();
+    LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE, LoggerLevel::DEBUG);
+    logger.addDestine(cgi_log);
 
     if (argc != 2)
     {

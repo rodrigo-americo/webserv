@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 23:18:30 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/02 11:25:40 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/03 19:20:11 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,9 +109,7 @@ void CgiProcess::buildAndSendResponse()
             }
         }
         else
-        {
             res.headers[key] = value;
-        }
     }
     res.body(body);
     res.send(ResponseHTTPVersion::HTTP_1_1);

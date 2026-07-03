@@ -24,11 +24,14 @@ void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const st
 {
     DIR *dir = opendir(dir_path.c_str());
     if (!dir)
+    {
+        std::cout << "!dir \n";
         return _sendError(res, 403, "Forbidden", &req);
+    }
 
     std::string body;
     body += "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">";
-    body += "<title>Index of " + req.path + "</title>";
+    body += "<title>Index of " + req.path.getCleanPath() + "</title>";
     body += "<style>";
     body += "body{background:#0d1117;color:#e6edf3;font-family:'Courier New',monospace;padding:2rem;}";
     body += "h1{color:#58a6ff;margin-bottom:1.5rem;font-size:1.4rem;}";
@@ -40,7 +43,7 @@ void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const st
     body += "a:hover{text-decoration:underline;}";
     body += ".size{color:#8b949e;font-size:0.85rem;}";
     body += "</style></head><body>";
-    body += "<h1>Index of " + req.path + "</h1>";
+    body += "<h1>Index of " + req.path.getCleanPath() + "</h1>";
     body += "<table><tr><th>nome</th><th>tamanho</th></tr>";
 
     struct dirent *entry;
@@ -71,7 +74,7 @@ void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const st
         }
 
         std::string display = is_dir ? name + "/" : name;
-        std::string href = req.path + display;
+        std::string href = req.path.getCleanPath().string() + display;
 
         body += "<tr><td><a href=\"" + href + "\">" + display + "</a></td>";
         body += "<td class=\"size\">" + size_str + "</td></tr>";
@@ -91,13 +94,13 @@ void Server::_serveStatic(const HttpRequest &req, HttpResponse &res,
                            const ServerConfig &, const LocationConfig &location)
 {
     std::string root = location.resolveRoot();
-    // Remove trailing slash from root to normalize path joining
-    if (!root.empty() && root[root.size() - 1] == '/')
-        root = root.substr(0, root.size() - 1);
     
-    std::string file_path = root + req.path;
-    if (file_path.find("..") != std::string::npos)
+    std::string file_path = root + req.path.getCleanPath();
+    if (!req.path.isNormalizable())
+    {
+        std::cout << "!req.path.isNormalizable() \n";
         return _sendError(res, 403, "Forbidden", &req);
+    }
     struct stat st;
     if (stat(file_path.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
     {

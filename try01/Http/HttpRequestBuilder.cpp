@@ -12,7 +12,7 @@ void RequestBuilder::_processHeader(size_t header_end){
 			_req.method = RequestMethod::DELETE;
 		_cursor = _buffer.find_first_not_of(' ', _cursor);
 		size_t path_end = _buffer.find_first_of(' ', _cursor);
-		_req.path = _buffer.substr(_cursor, path_end - _cursor);
+		_req.path = Path(_buffer.substr(_cursor, path_end - _cursor));
 		_cursor = _buffer.find_first_not_of(' ', path_end);
 		size_t ver_end = _buffer.find_first_of('\r', _cursor);
 		_req.http_version = _buffer.substr(_cursor, ver_end - _cursor);

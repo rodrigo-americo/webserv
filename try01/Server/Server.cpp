@@ -2,6 +2,7 @@
 #include <sstream>
 #include "Server.hpp"
 #include "Logger.hpp"
+#include "HttpResponseError.hpp"
 
 void Server::_sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req)
 {
@@ -48,20 +49,8 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
     const std::map<std::string, std::string>& cgi_ext = location.getCgiExtensions();
     if (!cgi_ext.empty())
     {
-        // extrair só o path "puro" (sem query string)
-        std::string clean_path = req.path;
-        size_t qpos = clean_path.find('?');
-        if (qpos != std::string::npos)
-        clean_path = clean_path.substr(0, qpos);
-
-        // extrair extensão
-        size_t dot = clean_path.rfind('.');
-        if (dot != std::string::npos)
-        {
-            std::string ext = clean_path.substr(dot);
-            if (cgi_ext.count(ext))
-                return _serveCgi(req, res, location, server);
-        }
+        if (cgi_ext.count(req.path.getExtension().string()))
+            return _serveCgi(req, res, location, server);
     }
     if (req.method == RequestMethod::POST && !location.getUploadDir().empty())
         return _serveUpload(req, res, location);
@@ -72,14 +61,17 @@ void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
 
 void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 {
-	return _sendError(res, 500, "Internal Server Error");
     const ServerConfig* server = _config->match_server(req.port, req.headers.host());
+	return HttpResponseError(res, 400, "Internal Server Error", server).send(ResponseHTTPVersion::HTTP_1_1);
     if (!server)
         return _sendError(res, 500, "Internal Server Error");
 
-    const LocationConfig* location = server->match_location(req.path);
+    const LocationConfig* location = server->match_location(req.path.getPath().string());
     if (!location)
+    {
+        std::cout << "Location not found \n";
         return _sendError(res, 404, "Not Found", &req);
+    }
 
     const std::list<HttpMethod>& methods = location->getMethods();
     if (!methods.empty() && !_methodAllowed(req.method, methods))
