@@ -7,7 +7,7 @@ void Server::_serveDelete(const HttpRequest &req, HttpResponse &res,
 {
     std::string upload_dir = location.getUploadDir();
 
-    std::string filename = req.path;
+    std::string filename = req.path.getFilename().string();
     size_t slash = filename.rfind('/');
     if (slash != std::string::npos)
         filename = filename.substr(slash + 1);

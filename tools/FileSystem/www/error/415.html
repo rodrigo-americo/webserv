@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>415 — Tipo de mídia não suportado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0a12;
+    --panel: #141220;
+    --panel-2: #100e1a;
+    --line: #282540;
+    --line-soft: #1d1a30;
+    --text: #eae7f2;
+    --text-dim: #847e9c;
+    --accept: #f2c94c;
+    --accept-glow: rgba(242,201,76,0.4);
+    --reject: #e0529c;
+    --reject-glow: rgba(224,82,156,0.55);
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(ellipse 800px 550px at 14% 16%, rgba(242,201,76,0.05), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 88%, rgba(224,82,156,0.06), transparent 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width: 1080px;
+    display:grid;
+    grid-template-columns: minmax(260px, 400px) 1fr;
+    gap: 64px;
+    align-items:center;
+  }
+
+  /* ---------- SORTER STAGE ---------- */
+  .sorter-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+
+  .board-frame{
+    position:relative;
+    width: 260px;
+    height: 200px;
+  }
+
+  .board{
+    position:absolute;
+    inset:0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
+  }
+
+  .hole{
+    position:absolute;
+    top:50%; left:50%;
+    width: 88px; height: 88px;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 2px dashed var(--accept);
+    box-shadow: 0 0 18px var(--accept-glow) inset, 0 0 12px var(--accept-glow);
+  }
+
+  .hole-tag{
+    position:absolute;
+    top: 6px; left: 0; right: 0;
+    text-align:center;
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing:.08em;
+    color: var(--accept);
+  }
+
+  .piece{
+    position:absolute;
+    top:50%; left:50%;
+    width: 60px; height: 60px;
+    margin-top: -60px;
+    margin-left: -30px;
+    background: linear-gradient(155deg, #eb6fb0, #c33d84);
+    border-radius: 6px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.06) inset;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-display);
+    font-size: 9px;
+    color: rgba(0,0,0,0.55);
+    font-weight:700;
+    letter-spacing:.04em;
+    animation: try-fit 3s cubic-bezier(.5,0,.3,1) infinite;
+  }
+
+  @keyframes try-fit{
+    0%   { transform: translateY(0) rotate(0deg); }
+    32%  { transform: translateY(64px) rotate(0deg); }
+    38%  { transform: translateY(58px) rotate(-6deg); }
+    44%  { transform: translateY(64px) rotate(5deg); }
+    50%  { transform: translateY(58px) rotate(-4deg); }
+    58%  { transform: translateY(60px) rotate(0deg); }
+    70%  { transform: translateY(-6px) rotate(-3deg); }
+    82%  { transform: translateY(0) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  .spark{
+    position:absolute;
+    top:50%; left:50%;
+    width:8px; height:8px;
+    border-radius:50%;
+    background: var(--reject);
+    box-shadow: 0 0 10px 2px var(--reject-glow);
+    opacity:0;
+    transform: translate(-50%, 4px);
+    animation: spark 3s ease-out infinite;
+  }
+  @keyframes spark{
+    0%, 55%{ opacity:0; }
+    58%{ opacity:1; transform: translate(-50%, 4px) scale(1); }
+    68%{ opacity:0; transform: translate(-50%, -30px) scale(0.4); }
+    100%{ opacity:0; }
+  }
+
+  .board-caption{
+    font-family: var(--font-display);
+    font-size: 11px;
+    line-height:1.8;
+    color: var(--text-dim);
+    text-align:center;
+  }
+  .board-caption b{ color: var(--reject); }
+  .board-caption em{ color: var(--accept); font-style:normal; }
+
+  @media (prefers-reduced-motion: reduce){
+    .piece{ animation:none; transform: translateY(60px); }
+    .spark{ animation:none; opacity:0; }
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{ max-width: 520px; }
+
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--reject);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--reject);
+    border-radius:50%;
+    box-shadow: 0 0 8px var(--reject);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight:800;
+    font-size: clamp(64px, 9vw, 108px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    margin-bottom: 10px;
+  }
+  h1 .mid{ color: var(--accept); }
+
+  h2{
+    font-weight:600;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing:-0.01em;
+  }
+
+  p.desc{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .readout{
+    font-family: var(--font-display);
+    font-size:13px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--reject);
+    padding:14px 16px;
+    border-radius:4px;
+    margin-bottom: 32px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .readout b{ color: var(--text); font-weight:500; }
+  .readout .ok{ color: var(--accept); }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding: 13px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: transform .15s ease, border-color .15s ease, filter .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{ background: var(--accept); color: #241c05; }
+  .btn-primary:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+
+  .btn-ghost{ background: transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--reject); color: var(--reject); }
+
+  .btn:focus-visible{ outline: 2px solid var(--accept); outline-offset: 3px; }
+
+  @media (max-width: 760px){
+    .wrap{ grid-template-columns: 1fr; gap:52px; text-align:center; }
+    .actions{ justify-content:center; }
+    .eyebrow{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="sorter-stage">
+      <div class="board-frame">
+        <div class="board"></div>
+        <div class="hole">
+          <div class="hole-tag">JPG · PNG · PDF</div>
+        </div>
+        <div class="piece">.PSD</div>
+        <div class="spark"></div>
+      </div>
+      <div class="board-caption">
+        RECEBIDO: <b>.PSD</b> — não entra no furo <em>aceito</em>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="eyebrow">Formato não suportado</div>
+      <h1>4<span class="mid">1</span>5</h1>
+      <h2>O formato do que você enviou não é aceito aqui.</h2>
+      <p class="desc">
+        O servidor entende o pedido, mas não sabe lidar com esse tipo de arquivo ou formato de dados.
+        Converta o conteúdo para um formato compatível e tente enviar novamente.
+      </p>
+
+      <div class="readout">
+        TIPO ENVIADO: <b>image/vnd.adobe.photoshop</b><br>
+        TIPOS ACEITOS: <b class="ok">image/jpeg, image/png, application/pdf</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="retry">Converter e tentar de novo</button>
+        <a href="/" class="btn btn-ghost">Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('retry').addEventListener('click', () => {
+    document.querySelectorAll('.piece, .spark').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+  });
+</script>
+
+</body>
+</html>

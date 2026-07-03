@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   FileSystem.hpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/03 08:00:59 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/03 11:34:27 by bruno-valer      ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef FILE_SYSTEM_HPP
 # define FILE_SYSTEM_HPP
 
@@ -19,13 +7,15 @@
 
 # include <sstream>
 # include <fstream>
+# include <iostream>
 
 # include "str.hpp"
+# include "Path.hpp"
 
 class FileSystem
 {
 private:
-	utils::str				_path;
+	Path					_path;
 	struct stat				_stat;
 	bool					_exists;
 	bool					_isfile;
@@ -33,32 +23,39 @@ private:
 	bool					_isreadable;
 	bool					_iswritable;
 	bool					_isexecutable;
-	std::vector<utils::str>	_children;
 
 	void	_init()
 	{
-		_exists = stat(_path.c_str(), &_stat) == 0;
+		_exists = stat(_path.getPath().c_str(), &_stat) == 0;
 		if (!_exists) return;
 		_isfile = S_ISREG(_stat.st_mode);
 		_isdir = S_ISDIR(_stat.st_mode);
-		_isreadable = access(_path.c_str(), R_OK) == 0;
-		_iswritable = access(_path.c_str(), W_OK) == 0;
-		_isexecutable = access(_path.c_str(), X_OK) == 0;
+		_isreadable = access(_path.getPath().c_str(), R_OK) == 0;
+		_iswritable = access(_path.getPath().c_str(), W_OK) == 0;
+		_isexecutable = access(_path.getPath().c_str(), X_OK) == 0;
 	}
 
 public:
 	FileSystem(const utils::str &path)
-		: _path(path), _stat(), _exists(false), _isfile(false), _isdir(false) { _init(); };
+		: _path(path), _stat(), _exists(false), _isfile(false), _isdir(false),
+		_isreadable(false), _iswritable(false), _isexecutable(false) { _init(); };
 	~FileSystem() {};
 
-	FileSystem	&cd(const utils::str &path)
+	FileSystem	&operator=(const FileSystem &other)
 	{
-		FileSystem	fs(path);
-		if (fs.isDir())
-			*this = fs;
+		if (this == &other) return *this;
+		_path = other._path;
+		_stat = other._stat;
+		_exists = other._exists;
+		_isfile = other._isfile;
+		_isdir = other._isdir;
+		_isreadable = other._isreadable;
+		_iswritable = other._iswritable;
+		_isexecutable = other._isexecutable;
 		return *this;
 	}
 
+	Path							path() { return _path; }
 	bool							exists() const { return _exists; }
 	bool							isFile() const { return _isfile; }
 	bool							isDir() const { return _isdir; }
@@ -66,26 +63,45 @@ public:
 	bool							isWritable() const { return _iswritable; }
 	bool							isExecutable() const { return _isexecutable; }
 
-	const std::vector<utils::str>	*ls()
+	FileSystem	&cd(const Path &path)
 	{
-		if (!isFile()) return NULL;
-		if (!_children.empty()) return &_children;
-		DIR	*dir = opendir(_path.c_str());
+		FileSystem	fs((_path + path).getPath());
+		if (isDir())
+			*this = fs;
+		_init();
+		return *this;
+	}
+
+	std::vector<Path>	ls()
+	{
+		std::vector<Path> result;
+		if (!isDir()) return result;
+		DIR	*dir = opendir(_path.getPath().c_str());
 
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL)
 		{
 			utils::str	name = entry->d_name;
 			if (name == "." || name == "..") continue;
-			_children.push_back(name);
+			result.push_back(Path(name));
 		}
-		return &_children;
+		return result;
+	}
+
+	bool	hasChild(const utils::str &name)
+	{
+		std::vector<Path>	childs = ls();
+		if (childs.empty()) return false;
+		for (size_t i = 0; i < childs.size(); i++)
+			if (childs[i].getPath() == name)
+				return true;
+		return false;
 	}
 
 	utils::str	content() const
 	{
 		if (!isFile() || !isReadable()) return "";
-		std::ifstream	file(_path.c_str());
+		std::ifstream	file(_path.getPath().c_str());
 		if (!file.is_open()) return "";
 		std::stringstream ss;
 		ss << file.rdbuf();
@@ -97,10 +113,10 @@ public:
 		if (!isFile() && !isDir()) return 0;
 		if (isFile()) return _stat.st_size;
 		size_t	total_size = 0;
-		const std::vector<utils::str>	*children = ls();
-		if (!children) return 0;
-		for (size_t i = 0; i < children->size(); i++)
-			total_size += FileSystem((*children)[i]).size();
+		const std::vector<Path>	children = ls();
+		if (children.empty()) return 0;
+		for (size_t i = 0; i < children.size(); i++)
+			total_size += FileSystem((children)[i].getPath()).size();
 		return total_size;
 	}
 };

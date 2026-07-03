@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:14:21 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 17:28:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/03 16:30:42 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ struct ResponseHTTPVersion
 
 class HttpResponse
 {
-	private:
+	protected:
 		SocketConnection	*_connection;
 		std::string			_body;
 

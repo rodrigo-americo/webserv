@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>408 — Tempo de requisição esgotado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0b10;
+    --panel: #12141c;
+    --panel-2: #0d0f15;
+    --line: #232634;
+    --line-soft: #191c26;
+    --text: #e7e8ee;
+    --text-dim: #767b8c;
+    --wait: #8b80f5;
+    --wait-glow: rgba(139,128,245,0.45);
+    --timeout: #f2703f;
+    --timeout-glow: rgba(242,112,63,0.55);
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(ellipse 800px 550px at 14% 18%, rgba(139,128,245,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 88%, rgba(242,112,63,0.05), transparent 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width: 1080px;
+    display:grid;
+    grid-template-columns: minmax(260px, 400px) 1fr;
+    gap: 64px;
+    align-items:center;
+  }
+
+  /* ---------- TIMER STAGE ---------- */
+  .timer-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+  }
+
+  .dial-frame{
+    position:relative;
+    width: 260px;
+    height: 260px;
+  }
+
+  .dial-frame svg{ width:100%; height:100%; transform: rotate(-90deg); }
+
+  .track{
+    fill:none;
+    stroke: var(--line-soft);
+    stroke-width: 6;
+  }
+
+  .progress{
+    fill:none;
+    stroke: var(--wait);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 691;
+    filter: drop-shadow(0 0 6px var(--wait-glow));
+    animation: fill-cycle 3.6s cubic-bezier(.45,0,.4,1) infinite;
+  }
+
+  @keyframes fill-cycle{
+    0%   { stroke-dashoffset: 691; stroke: var(--wait); }
+    82%  { stroke-dashoffset: 0; stroke: var(--wait); }
+    88%  { stroke-dashoffset: 0; stroke: var(--timeout); }
+    100% { stroke-dashoffset: 691; stroke: var(--timeout); opacity: 0; }
+  }
+  @keyframes fill-cycle-reset{
+    0%{ opacity: 0; }
+    3%{ opacity: 1; }
+  }
+  .progress{ animation: fill-cycle 3.6s cubic-bezier(.45,0,.4,1) infinite, fill-cycle-reset 3.6s linear infinite; }
+
+  .dial-center{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+  }
+
+  .dial-time{
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight:700;
+    color: var(--text);
+    letter-spacing:.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dial-status{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color: var(--wait);
+    transition: color .2s ease;
+  }
+  .dial-status.timeout{ color: var(--timeout); }
+
+  .log{
+    font-family: var(--font-display);
+    font-size:11px;
+    line-height:1.8;
+    color: var(--text-dim);
+    text-align:center;
+  }
+  .log b{ color: var(--timeout); }
+
+  @media (prefers-reduced-motion: reduce){
+    .progress{ animation:none; stroke-dashoffset: 300; }
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{ max-width: 520px; }
+
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--timeout);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--timeout);
+    border-radius:50%;
+    box-shadow: 0 0 8px var(--timeout);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight:800;
+    font-size: clamp(64px, 9vw, 108px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    margin-bottom: 10px;
+  }
+  h1 .mid{ color: var(--wait); }
+
+  h2{
+    font-weight:600;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing:-0.01em;
+  }
+
+  p.desc{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .readout{
+    font-family: var(--font-display);
+    font-size:13px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--timeout);
+    padding:14px 16px;
+    border-radius:4px;
+    margin-bottom: 32px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .readout b{ color: var(--text); font-weight:500; }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding: 13px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: transform .15s ease, border-color .15s ease, filter .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{ background: var(--timeout); color: #1a0d05; }
+  .btn-primary:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+
+  .btn-ghost{ background: transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--wait); color: var(--wait); }
+
+  .btn:focus-visible{ outline: 2px solid var(--timeout); outline-offset: 3px; }
+
+  @media (max-width: 760px){
+    .wrap{ grid-template-columns: 1fr; gap:52px; text-align:center; }
+    .actions{ justify-content:center; }
+    .eyebrow{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="timer-stage">
+      <div class="dial-frame">
+        <svg viewBox="0 0 240 240">
+          <circle class="track" cx="120" cy="120" r="110"></circle>
+          <circle class="progress" cx="120" cy="120" r="110"></circle>
+        </svg>
+        <div class="dial-center">
+          <div class="dial-time" id="dialTime">0.0s</div>
+          <div class="dial-status" id="dialStatus">Aguardando resposta</div>
+        </div>
+      </div>
+      <div class="log">
+        SERVIDOR: <b>SEM RESPOSTA</b><br>
+        LIMITE DE ESPERA EXCEDIDO
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="eyebrow">Tempo esgotado</div>
+      <h1>4<span class="mid">0</span>8</h1>
+      <h2>O servidor cansou de esperar sua requisição.</h2>
+      <p class="desc">
+        A conexão demorou demais para enviar os dados completos e foi encerrada.
+        Isso costuma acontecer por instabilidade na rede ou lentidão temporária do servidor.
+      </p>
+
+      <div class="readout">
+        ROTA SOLICITADA: <b id="path">/carregando...</b><br>
+        STATUS: <b style="color:var(--timeout)">REQUEST TIMEOUT</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="retry">Tentar novamente</button>
+        <a href="/" class="btn btn-ghost">Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('path').textContent = window.location.pathname || '/desconhecido';
+
+  const dialTime = document.getElementById('dialTime');
+  const dialStatus = document.getElementById('dialStatus');
+  const CYCLE_MS = 3600;
+  const TIMEOUT_AT = CYCLE_MS * 0.82; // combina com o momento em que o anel fecha na animação CSS
+
+  let cycleStart = performance.now();
+
+  function tick(now){
+    let elapsed = (now - cycleStart) % CYCLE_MS;
+    dialTime.textContent = (elapsed / 1000).toFixed(1) + 's';
+
+    if(elapsed >= TIMEOUT_AT){
+      dialStatus.textContent = 'Tempo esgotado';
+      dialStatus.classList.add('timeout');
+    } else {
+      dialStatus.textContent = 'Aguardando resposta';
+      dialStatus.classList.remove('timeout');
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  document.getElementById('retry').addEventListener('click', () => {
+    cycleStart = performance.now();
+    const progress = document.querySelector('.progress');
+    progress.style.animation = 'none';
+    void progress.offsetWidth;
+    progress.style.animation = '';
+  });
+</script>
+
+</body>
+</html>

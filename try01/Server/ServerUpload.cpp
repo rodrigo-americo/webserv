@@ -132,7 +132,7 @@ static void _handleOctetStream(const HttpRequest &req, HttpResponse &res,
                                 const std::string &upload_dir)
 {
     // nome do arquivo vem do path: POST /upload/foto.png -> "foto.png"
-    std::string filename = req.path;
+    std::string filename = req.path.getCleanPath().string();
     size_t slash = filename.rfind('/');
     if (slash != std::string::npos)
         filename = filename.substr(slash + 1);

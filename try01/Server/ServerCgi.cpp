@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ServerCgi.cpp                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 21:08:03 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/02 15:30:59 by ighannam         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 
 #include <string>
@@ -25,66 +14,38 @@
 #include "CgiProcess.hpp"
 #include "ConnectionPool.hpp"
 #include "Logger.hpp"
+#include "Path.hpp"
+#include "HttpResponseError.hpp"
+# include "FileSystem.hpp"
 
 void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
                         const LocationConfig &location, const ServerConfig &server)
-{
-    std::string clean_path = req.path;
-    std::string query_string;
-    size_t qpos = req.path.find('?');
-    if (qpos != std::string::npos)
-    {
-        clean_path = req.path.substr(0, qpos);
-        query_string = req.path.substr(qpos + 1);
-    }
-    
-    std::string root = location.getRoot().empty() ? server.getRoot() : location.getRoot();
-
-    if (!root.empty() && root[root.size() - 1] == '/')
-        root = root.substr(0, root.size() - 1);
-
-    std::string script_path = root + clean_path;
-    
-    if (script_path.find("..") != std::string::npos)
-        return _sendError(res, 403, "Forbidden", &req);
-
-    std::string script_dir;
-    size_t last_slash = script_path.rfind('/');
-    if (last_slash != std::string::npos)
-        script_dir = script_path.substr(0, last_slash + 1);
-    else
-        script_dir = "./";
-
-    std::string ext;
-    size_t dot = script_path.rfind('.');
-    if (dot != std::string::npos)
-        ext = script_path.substr(dot);
+{    
+    std::string root = location.resolveRoot();
+    Path script_path = Path(root) + req.path.getCleanPath();    
 
     const std::map<std::string, std::string>& cgi_map = location.getCgiExtensions();
-    std::map<std::string, std::string>::const_iterator it = cgi_map.find(ext);
+    std::map<std::string, std::string>::const_iterator it = cgi_map.find(req.path.getExtension().string());
     if (it == cgi_map.end())
-        return _sendError(res, 500, "Internal Server Error", &req);
+        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
     std::string interpreter = it->second;
-
-    struct stat st;
-    if (stat(script_path.c_str(), &st) != 0)
-        return _sendError(res, 404, "Not Found", &req);
-    if (!S_ISREG(st.st_mode))
-        return _sendError(res, 403, "Forbidden", &req);
+    FileSystem fileSystem(script_path.getCleanPath());
+    if (!fileSystem.exists())
+        return HttpResponseError(res, 404, "Not Found", &server).send(ResponseHTTPVersion::HTTP_1_1);
+    if (!fileSystem.isFile())
+        return HttpResponseError(res, 403, "Forbidden", &server).send(ResponseHTTPVersion::HTTP_1_1);
     
-    std::vector<std::string> env = _buildCgiEnv(req, server, script_path, clean_path, query_string);
+    std::vector<std::string> env = _buildCgiEnv(req, server, script_path.getCleanPath().string(), req.path.getCleanPath().string(), req.path.getQueryString().string());
 
     int fds_stdin[2];
     int fds_stdout[2];
     if (pipe(fds_stdin) == -1)
-    {
-        return _sendError(res, 500, "Internal Server Error", &req);
-    }
+        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
     if (pipe(fds_stdout) == -1)
     {
         close(fds_stdin[0]);
         close(fds_stdin[1]);
-        return _sendError(res, 500, "Internal Server Error", &req);
+        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
     }
     int pid_child = fork();
     if (pid_child == -1)
@@ -93,7 +54,7 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
         close(fds_stdin[1]);
         close(fds_stdout[0]);
         close(fds_stdout[1]);
-        return _sendError(res, 500, "Internal Server Error", &req);
+        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
     }
     else if(pid_child == 0)
     {
@@ -107,12 +68,12 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
             _exit(1);
         close(fds_stdin[0]);
         close(fds_stdout[1]);
-        if (chdir(script_dir.c_str()) == -1)
+        
+        if (chdir(script_path.getLastDir().c_str()) == -1)
             _exit(1);
-        std::string script_name = script_path.substr(last_slash + 1);
         std::vector<char *> argv;
         argv.push_back(const_cast<char *>(interpreter.c_str()));
-        argv.push_back(const_cast<char *>(script_name.c_str()));
+        argv.push_back(const_cast<char *>(req.path.getFilename().c_str()));
         argv.push_back(NULL);
         std::vector<char *> envp;
         for (size_t i = 0; i < env.size(); ++i)
@@ -134,7 +95,7 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
             delete stdout_pipe;
             ::kill(pid_child, SIGKILL);
             waitpid(pid_child, NULL, 0);
-            return _sendError(res, 500, "Internal Server Error", &req);
+            return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
         }
         CgiProcess *cgi = new CgiProcess(res.getConn(), req, stdin_pipe, stdout_pipe, pid_child);
         ConnectionPool::getInstance().addCgi(cgi);

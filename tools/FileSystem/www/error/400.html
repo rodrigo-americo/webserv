@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>400 — Requisição inválida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0b0d;
+    --panel: #111317;
+    --panel-2: #0c0e11;
+    --line: #1e2126;
+    --line-soft: #171a1f;
+    --text: #d7dbe0;
+    --text-dim: #6b7078;
+    --key: #7dd3fc;
+    --str: #f2b544;
+    --error: #ef4a4a;
+    --error-glow: rgba(239,74,74,0.5);
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(ellipse 800px 550px at 14% 16%, rgba(125,211,252,0.05), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 88%, rgba(239,74,74,0.06), transparent 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width: 1100px;
+    display:grid;
+    grid-template-columns: minmax(280px, 440px) 1fr;
+    gap: 64px;
+    align-items:center;
+  }
+
+  /* ---------- EDITOR STAGE ---------- */
+  .editor{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  .editor-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding: 12px 14px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .dot{ width:10px; height:10px; border-radius:50%; background: var(--line); }
+  .dot.red{ background:#4a3232; }
+  .dot.yellow{ background:#4a4432; }
+  .dot.green{ background:#324a37; }
+  .editor-title{
+    margin-left: 10px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing:.04em;
+  }
+
+  .editor-body{
+    display:flex;
+    font-family: var(--font-display);
+    font-size: 13px;
+    line-height: 1.85;
+    padding: 16px 0;
+  }
+
+  .gutter{
+    padding: 0 12px 0 16px;
+    text-align:right;
+    color: var(--line);
+    user-select:none;
+    border-right: 1px solid var(--line-soft);
+    position:relative;
+  }
+  .gutter div{ position:relative; height: 1.85em; }
+  .gutter .flag{
+    position:absolute;
+    left: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
+    border-radius:50%;
+    background: var(--error);
+    box-shadow: 0 0 6px var(--error-glow);
+    animation: flagPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes flagPulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  .code{
+    padding: 0 20px 0 16px;
+    white-space: pre;
+    position:relative;
+  }
+
+  .k{ color: var(--key); }
+  .s{ color: var(--str); }
+  .p{ color: var(--text-dim); }
+
+  .bad{
+    color: var(--text);
+    text-decoration: underline wavy var(--error);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    position: relative;
+  }
+
+  .cursor{
+    display:inline-block;
+    width: 7px;
+    height: 1em;
+    background: var(--str);
+    vertical-align: middle;
+    animation: blinkCursor 1s steps(1) infinite;
+    margin-left: 1px;
+  }
+  @keyframes blinkCursor{ 0%,50%{opacity:1;} 51%,100%{opacity:0;} }
+
+  .tooltip{
+    position:absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    background: #1a1010;
+    border: 1px solid var(--error);
+    color: var(--error);
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events:none;
+    animation: tipShow 4.4s ease-in-out infinite;
+  }
+  .tooltip::after{
+    content:"";
+    position:absolute;
+    top:100%; left:14px;
+    border: 4px solid transparent;
+    border-top-color: var(--error);
+  }
+  .tip-a{ animation-delay: 0s; }
+  .tip-b{ animation-delay: 2.2s; }
+
+  @keyframes tipShow{
+    0%, 4%{ opacity:0; transform: translateY(4px); }
+    8%, 42%{ opacity:1; transform: translateY(0); }
+    48%, 100%{ opacity:0; transform: translateY(4px); }
+  }
+
+  .editor-footer{
+    display:flex;
+    justify-content:space-between;
+    padding: 10px 16px;
+    border-top: 1px solid var(--line);
+    background: var(--panel-2);
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    color: var(--text-dim);
+  }
+  .editor-footer b{ color: var(--error); }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ animation:none; opacity:1; }
+    .tooltip{ animation:none; opacity:1; transform:none; }
+    .gutter .flag{ animation:none; }
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{ max-width: 520px; }
+
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--error);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--error);
+    border-radius:50%;
+    box-shadow: 0 0 8px var(--error);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight:800;
+    font-size: clamp(64px, 9vw, 108px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    margin-bottom: 10px;
+  }
+  h1 .mid{ color: var(--key); }
+
+  h2{
+    font-weight:600;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing:-0.01em;
+  }
+
+  p.desc{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .readout{
+    font-family: var(--font-display);
+    font-size:13px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--error);
+    padding:14px 16px;
+    border-radius:4px;
+    margin-bottom: 32px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .readout b{ color: var(--text); font-weight:500; }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding: 13px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: transform .15s ease, border-color .15s ease, filter .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{ background: var(--key); color: #061821; }
+  .btn-primary:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+
+  .btn-ghost{ background: transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--error); color: var(--error); }
+
+  .btn:focus-visible{ outline: 2px solid var(--key); outline-offset: 3px; }
+
+  @media (max-width: 760px){
+    .wrap{ grid-template-columns: 1fr; gap:52px; text-align:center; }
+    .actions{ justify-content:center; }
+    .eyebrow{ justify-content:center; }
+    .editor{ text-align:left; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="editor">
+      <div class="editor-bar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="editor-title">requisicao.json</span>
+      </div>
+      <div class="editor-body">
+        <div class="gutter">
+          <div>1</div>
+          <div>2<span class="flag"></span></div>
+          <div>3</div>
+          <div>4<span class="flag"></span></div>
+          <div>5</div>
+        </div>
+        <div class="code">{
+  <span class="k">"usuario"</span><span class="p">:</span> <span class="bad">tru<div class="tooltip tip-a">Token inesperado: "tru"</div></span><span class="p">,</span>
+  <span class="k">"idade"</span><span class="p">:</span> <span class="s">27</span><span class="p">,</span>
+  <span class="k">"ativo"</span><span class="p">:</span> <span class="bad">yes<div class="tooltip tip-b">Esperado true ou false</div><span class="cursor"></span></span>
+}</div>
+      </div>
+      <div class="editor-footer">
+        <span>Análise de sintaxe</span>
+        <span><b>2 erros</b> encontrados</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="eyebrow">Requisição inválida</div>
+      <h1>4<span class="mid">0</span>0</h1>
+      <h2>O servidor não entendeu o que você pediu.</h2>
+      <p class="desc">
+        Algo na sintaxe, no formato ou nos parâmetros da requisição está incorreto,
+        e o servidor não conseguiu processá-la. Revise os dados enviados e tente novamente.
+      </p>
+
+      <div class="readout">
+        ROTA SOLICITADA: <b id="path">/carregando...</b><br>
+        STATUS: <b style="color:var(--error)">BAD REQUEST</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="retry">Corrigir e reenviar</button>
+        <a href="/" class="btn btn-ghost">Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('path').textContent = window.location.pathname || '/desconhecido';
+
+  document.getElementById('retry').addEventListener('click', () => {
+    document.querySelectorAll('.tooltip, .cursor, .flag').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+  });
+</script>
+
+</body>
+</html>

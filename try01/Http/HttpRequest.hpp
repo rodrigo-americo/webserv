@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:13:29 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 12:21:30 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/03 15:27:23 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 # include "SocketConnection.hpp"
 # include "HttpHeaders.hpp"
+# include "Path.hpp"
 
 struct RequestMethod
 {
@@ -48,14 +49,14 @@ class HttpRequest
 	public:
 		typedef RequestMethod::type		Method;
 		Method		method;
-		std::string	path;
+		Path		path;
 		std::string	http_version;
 		std::string	body;
 		HttpHeaders	headers;
-		uint16_t port;
+		uint16_t	port;
 
 		HttpRequest(SocketConnection *conn)
-			: _connection(conn), method(), path(), http_version(),
+			: _connection(conn), method(), path(""), http_version(),
 			 body(), headers(), port(conn->listenner()->addr().port()) {}
 		SocketConnection *connection() const { return _connection; }
 
