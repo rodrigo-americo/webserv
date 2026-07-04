@@ -8,11 +8,12 @@
 #include "Router.hpp"
 #include "Server.hpp"
 
-static std::string _mimeType(const std::string& path)
+static std::string _mimeType(const FileSystem fs)
 {
-    size_t dot = path.rfind('.');
+	LOG_INFO("mime_type...");
+    size_t dot = fs.path().getPath().rfind('.');
     if (dot == std::string::npos) return "application/octet-stream";
-    std::string ext = path.substr(dot);
+    utils::str ext = fs.path().getPath().substr(dot);
     if (ext == ".html") return "text/html";
     if (ext == ".css")  return "text/css";
     if (ext == ".js")   return "application/javascript";
@@ -152,7 +153,7 @@ void Server::_serveStatic(const Router &router)
         return router.error.notFound();
 
     router.res.statusCode(200, "OK");
-    router.res.headers.content_type(_mimeType(file_path));
+    router.res.headers.content_type(_mimeType(fs));
     // sendFile() so guarda o fd e o tamanho; o conteudo e lido do disco em
     // pedacos e mandado pro socket via sendfile() conforme o loop de eventos
     // for avisando que o fd do cliente esta gravavel (ver SocketConnection::flushWrite).
