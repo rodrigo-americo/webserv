@@ -84,6 +84,7 @@ struct ParserTokenType
 		PT_SSL_CIPHERS,
 		PT_CLIENT_MAX_BODY_SIZE,
 		PT_UPLOAD_DIR,
+		PT_ALLOW_METHODS,
 
 		// modificadores de location
 		PT_MOD_EXACT,        // =
@@ -164,6 +165,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_SSL_CIPHERS",
 	"PT_CLIENT_MAX_BODY_SIZE",
 	"PT_UPLOAD_DIR",
+	"PT_ALLOW_METHODS",
 
 	// modificadores de location
 	"PT_MOD_EXACT",        // =
