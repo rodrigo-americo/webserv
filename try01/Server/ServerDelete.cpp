@@ -1,33 +1,34 @@
-#include "Server.hpp"
 #include <sys/stat.h>
 #include <cstdio>
 
-void Server::_serveDelete(const HttpRequest &req, HttpResponse &res,
-                           const LocationConfig &location)
-{
-    std::string upload_dir = location.getUploadDir();
+#include "Router.hpp"
+#include "Server.hpp"
 
-    std::string filename = req.path.getFilename().string();
+void Server::_serveDelete(const Router &router)
+{
+    std::string upload_dir = router.config_location->getUploadDir();
+
+    std::string filename = router.req.path.getFilename().string();
     size_t slash = filename.rfind('/');
     if (slash != std::string::npos)
         filename = filename.substr(slash + 1);
 
     if (filename.empty())
-        return _sendError(res, 400, "Bad Request", &req);
+        return router.error.badRequest();
 
     std::string file_path = upload_dir + "/" + filename;
 
     if (file_path.find("..") != std::string::npos)
-        return _sendError(res, 403, "Forbidden", &req);
+        return router.error.forbiden();
 
     struct stat st;
     if (stat(file_path.c_str(), &st) != 0 || !S_ISREG(st.st_mode))
-        return _sendError(res, 404, "Not Found", &req);
+        return router.error.notFound();
 
     if (std::remove(file_path.c_str()) != 0)
-        return _sendError(res, 500, "Internal Server Error", &req);
+        return router.error.internalServerError();
 
-    res.statusCode(200, "OK");
-    res.body("Deleted\n");
-    res.send(ResponseHTTPVersion::HTTP_1_1);
+    router.res.statusCode(200, "OK");
+    router.res.body("Deleted\n");
+    router.res.send(ResponseHTTPVersion::HTTP_1_1);
 }

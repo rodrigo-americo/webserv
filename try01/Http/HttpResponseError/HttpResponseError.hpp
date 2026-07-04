@@ -2,10 +2,12 @@
 #ifndef HTTP_RESPONSE_ERROR_HPP
 # define HTTP_RESPONSE_ERROR_HPP
 
+# include "str.hpp"
 # include "Logger.hpp"
 # include "utils.hpp"
 # include "HttpResponse.hpp"
 # include "FileSystem.hpp"
+# include "ServerConfig.hpp"
 
 class HttpResponseError: public	HttpResponse
 {
@@ -35,7 +37,6 @@ private:
 			ss << file.rdbuf();
 			body(ss.str());
 		}
-		LOG_DEBUG("error body: " << body());
 	}
 
 	void	_defaultErrorPage()
@@ -45,8 +46,8 @@ private:
 		LOG_DEBUG("path " << fs.path().getPath() << " exists: " << fs.exists());
 		if (!fs.exists())
 			return _errorMessage();
-		
-		std::vector<Path> children = fs.ls();
+
+		std::vector<FileSystem> children = fs.ls();
 		LOG_DEBUG("children size " << children.size());
 		if (children.empty())
 			return _errorMessage();
@@ -73,7 +74,7 @@ private:
 		body(status_code_message + "\n");
 	}
 
-	void	_buildError() 
+	void	_buildError()
 	{
 		LOG_DEBUG("has serber config: " << !!_server_config);
 		if (!_server_config)
@@ -82,11 +83,11 @@ private:
 	}
 
 public:
-	HttpResponseError(const HttpResponse &res, int code, const std::string &msg, const ServerConfig* server)
+	HttpResponseError(const HttpResponse &res, int code, const utils::str &msg, const ServerConfig* server)
 		: HttpResponse(res), _server_config(server)
 	{
 		status_code = code;
-		status_code_message = msg;
+		status_code_message = msg.string();
 		_buildError();
 	};
 	~HttpResponseError() {};

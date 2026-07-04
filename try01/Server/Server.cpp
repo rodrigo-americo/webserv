@@ -1,8 +1,10 @@
 #include <fstream>
 #include <sstream>
+
 #include "Server.hpp"
 #include "Logger.hpp"
 #include "HttpResponseError.hpp"
+# include "Router.hpp"
 
 void Server::_sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req)
 {
@@ -43,52 +45,55 @@ bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMeth
     return false;
 }
 
-void Server::_dispatch(const HttpRequest &req, HttpResponse &res,
-               const ServerConfig &server, const LocationConfig &location)
+void Server::_dispatch(const Router &router)
 {
-    const std::map<std::string, std::string>& cgi_ext = location.getCgiExtensions();
+	LOG_INFO("dispatch.");
+    const std::map<std::string, std::string>& cgi_ext = router.config_location->getCgiExtensions();
     if (!cgi_ext.empty())
     {
-        if (cgi_ext.count(req.path.getExtension().string()))
-            return _serveCgi(req, res, location, server);
+		LOG_INFO("pass to cgi.");
+        if (cgi_ext.count(router.req.path.getExtension().string()))
+            return _serveCgi(router);
     }
-    if (req.method == RequestMethod::POST && !location.getUploadDir().empty())
-        return _serveUpload(req, res, location);
-    if (req.method == RequestMethod::DELETE && !location.getUploadDir().empty())
-        return _serveDelete(req, res, location);
-    _serveStatic(req, res, server, location);
+    if (router.req.method == RequestMethod::POST && !router.config_location->getUploadDir().empty())
+        return _serveUpload(router);
+    if (router.req.method == RequestMethod::DELETE && !router.config_location->getUploadDir().empty())
+        return _serveDelete(router);
+    _serveStatic(router);
 }
 
 void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 {
-    const ServerConfig* server = _config->match_server(req.port, req.headers.host());
-	//return HttpResponseError(res, 400, "Internal Server Error", server).send(ResponseHTTPVersion::HTTP_1_1);
-    if (!server)
-        return _sendError(res, 500, "Internal Server Error");
+	LOG_INFO("route handler.");
+	Router	router(req, res, _config);
 
-    const LocationConfig* location = server->match_location(req.path.getPath().string());
-    if (!location)
+	if (!router.config_server)
+		return router.error.internalServerError();
+	LOG_INFO("server config ok.");
+    if (!router.config_location)
     {
-        std::cout << "Location not found \n";
-        return _sendError(res, 404, "Not Found", &req);
+		LOG_ERROR("Location not found");
+        return router.error.notFound();
     }
+	LOG_INFO("location config ok.");
+	const std::list<HttpMethod>& methods = router.config_location->getMethods();
+	if (!methods.empty() && !_methodAllowed(req.method, methods))
+		return router.error.methodNotAllowed();
+	LOG_INFO("methods allowed.");
+	size_t max = router.config_server->getClientMaxBodySize();
+	if (max > 0 && req.body.size() > max)
+		return router.error.contentLarge();
+	LOG_INFO("content length ok.");
 
-    const std::list<HttpMethod>& methods = location->getMethods();
-    if (!methods.empty() && !_methodAllowed(req.method, methods))
-        return _sendError(res, 405, "Method Not Allowed", &req);
-
-    size_t max = server->getClientMaxBodySize();
-    if (max > 0 && req.body.size() > max)
-        return _sendError(res, 413, "Content Too Large", &req);
-
-    const std::pair<int, std::string>& redir = location->getRedirect();
+    const std::pair<int, std::string>& redir = router.config_location->getRedirect();
     if (!redir.second.empty())
     {
+		LOG_INFO("sending redirect.");
         res.statusCode(redir.first, "Moved");
         res.headers["Location"] = redir.second;
         res.send(ResponseHTTPVersion::HTTP_1_1);
         return;
     }
-    _dispatch(req, res, *server, *location);
+    _dispatch(router);
 }
 

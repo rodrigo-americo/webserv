@@ -3,6 +3,8 @@
 #include <sstream>
 #include <sys/stat.h>
 
+# include "Router.hpp"
+
 static std::string _uniquePath(const std::string &dir, const std::string &filename)
 {
     std::string base = filename;
@@ -57,16 +59,16 @@ static bool _saveFile(const std::string &path, const std::string &data)
     return file.good();
 }
 
-static void _handleMultipart(const HttpRequest &req, HttpResponse &res,
+static void _handleMultipart(const Router &router,
                               const std::string &upload_dir, const std::string &boundary)
 {
-    const std::string &body = req.body;
+    const std::string &body = router.req.body;
     std::string delimiter = boundary + "\r\n";
     std::string end_marker = boundary + "--";
 
     size_t pos = body.find(delimiter);
     if (pos == std::string::npos)
-        return (void)res; // corpo malformado, mas já validado antes
+        return (void)router.res; // corpo malformado, mas já validado antes
 
     int saved = 0;
     while (pos != std::string::npos)
@@ -106,83 +108,62 @@ static void _handleMultipart(const HttpRequest &req, HttpResponse &res,
 
         std::string final_path = _uniquePath(upload_dir, filename);
         if (!_saveFile(final_path, part_data))
-        {
-            res.statusCode(500, "Internal Server Error");
-            res.body("Failed to save file\n");
-            res.send(ResponseHTTPVersion::HTTP_1_1);
-            return;
-        }
+			return router.error.internalServerError("Failed to save file\n");
         saved++;
         pos = body.find(delimiter, next);
     }
 
     if (saved == 0)
-    {
-        res.statusCode(400, "Bad Request");
-        res.body("No valid file found in multipart body\n");
-        res.send(ResponseHTTPVersion::HTTP_1_1);
-        return;
-    }
-    res.statusCode(201, "Created");
-    res.body("Upload OK\n");
-    res.send(ResponseHTTPVersion::HTTP_1_1);
+		return router.error.badRequest("Failed to save file\n");
+
+    router.res.statusCode(201, "Created");
+    router.res.body("Upload OK\n");
+    router.res.send(ResponseHTTPVersion::HTTP_1_1);
 }
 
-static void _handleOctetStream(const HttpRequest &req, HttpResponse &res,
+static void _handleOctetStream(const Router &router,
                                 const std::string &upload_dir)
 {
     // nome do arquivo vem do path: POST /upload/foto.png -> "foto.png"
-    std::string filename = req.path.getCleanPath().string();
+    std::string filename = router.req.path.getCleanPath().string();
     size_t slash = filename.rfind('/');
     if (slash != std::string::npos)
         filename = filename.substr(slash + 1);
 
     if (filename.empty())
-    {
-        res.statusCode(400, "Bad Request");
-        res.body("No filename in path\n");
-        res.send(ResponseHTTPVersion::HTTP_1_1);
-        return;
-    }
+		return router.error.badRequest("No filename in path\n");
 
     std::string final_path = _uniquePath(upload_dir, filename);
-    if (!_saveFile(final_path, req.body))
-    {
-        res.statusCode(500, "Internal Server Error");
-        res.body("Failed to save file\n");
-        res.send(ResponseHTTPVersion::HTTP_1_1);
-        return;
-    }
-    res.statusCode(201, "Created");
-    res.body("Upload OK\n");
-    res.send(ResponseHTTPVersion::HTTP_1_1);
+    if (!_saveFile(final_path, router.req.body))
+		return router.error.internalServerError("Failed to save file\n");
+    router.res.statusCode(201, "Created");
+    router.res.body("Upload OK\n");
+    router.res.send(ResponseHTTPVersion::HTTP_1_1);
 }
 
-void Server::_serveUpload(const HttpRequest &req, HttpResponse &res,
-                           const LocationConfig &location)
+void Server::_serveUpload(const Router &router)
 {
-    std::string upload_dir = location.getUploadDir();
+    std::string upload_dir = router.config_location->getUploadDir();
 
-    struct stat st;
-    if (stat(upload_dir.c_str(), &st) != 0)
+	FileSystem	fs(upload_dir);
+    if (!fs.exists())
     {
+		// mkdir - e uma funcao proibida
         if (mkdir(upload_dir.c_str(), 0755) != 0)
-            return _sendError(res, 500, "Internal Server Error", &req);
+            return router.error.internalServerError();
     }
-    else if (!S_ISDIR(st.st_mode))
-        return _sendError(res, 500, "Internal Server Error", &req);
+    else if (!fs.isDir())
+        return router.error.internalServerError();
 
-    const std::string &ct = req.headers.content_type();
+    const std::string &ct = router.req.headers.content_type();
 
     if (ct.find("multipart/form-data") != std::string::npos)
     {
         std::string boundary = _extractBoundary(ct);
         if (boundary.empty())
-            return _sendError(res, 400, "Bad Request", &req);
-        _handleMultipart(req, res, upload_dir, boundary);
+            return router.error.badRequest();
+        _handleMultipart(router, upload_dir, boundary);
     }
     else
-    {
-        _handleOctetStream(req, res, upload_dir);
-    }
+        _handleOctetStream(router, upload_dir);
 }
