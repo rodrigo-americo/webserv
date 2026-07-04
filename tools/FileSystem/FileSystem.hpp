@@ -8,6 +8,7 @@
 # include <sstream>
 # include <fstream>
 # include <iostream>
+# include <iomanip>
 
 # include "str.hpp"
 # include "Path.hpp"
@@ -55,7 +56,8 @@ public:
 		return *this;
 	}
 
-	Path							path() { return _path; }
+	Path							&path() { return _path; }
+	const Path						&path() const { return _path; }
 	bool							exists() const { return _exists; }
 	bool							isFile() const { return _isfile; }
 	bool							isDir() const { return _isdir; }
@@ -72,9 +74,9 @@ public:
 		return *this;
 	}
 
-	std::vector<Path>	ls()
+	std::vector<FileSystem>	ls() const
 	{
-		std::vector<Path> result;
+		std::vector<FileSystem> result;
 		if (!isDir()) return result;
 		DIR	*dir = opendir(_path.getPath().c_str());
 
@@ -83,17 +85,18 @@ public:
 		{
 			utils::str	name = entry->d_name;
 			if (name == "." || name == "..") continue;
-			result.push_back(Path(name));
+			result.push_back(FileSystem((_path + Path(name)).getPath()));
 		}
+		closedir(dir);
 		return result;
 	}
 
 	bool	hasChild(const utils::str &name)
 	{
-		std::vector<Path>	childs = ls();
+		std::vector<FileSystem>	childs = ls();
 		if (childs.empty()) return false;
 		for (size_t i = 0; i < childs.size(); i++)
-			if (childs[i].getPath() == name)
+			if (childs[i].path().getFilename() == name)
 				return true;
 		return false;
 	}
@@ -108,16 +111,32 @@ public:
 		return ss.str();
 	}
 
-	size_t	size()
+	size_t	size() const
 	{
 		if (!isFile() && !isDir()) return 0;
 		if (isFile()) return _stat.st_size;
 		size_t	total_size = 0;
-		const std::vector<Path>	children = ls();
+		const std::vector<FileSystem>	children = ls();
 		if (children.empty()) return 0;
 		for (size_t i = 0; i < children.size(); i++)
-			total_size += FileSystem((children)[i].getPath()).size();
+			total_size += FileSystem((children)[i].path().getPath()).size();
 		return total_size;
+	}
+
+	utils::str	sizeStr() const
+	{
+		const char* units_db[] = {"B", "KB", "MB", "GB", "TB"};
+
+		double	bytes = size();
+		size_t	unit;
+		while (bytes >= 1024 && unit < 4)
+		{
+			bytes /= 1024;
+			unit++;
+		}
+		std::stringstream	ss;
+		ss << std::fixed << std::setprecision(2) << bytes << " " << units_db[unit];
+		return ss.str();
 	}
 };
 

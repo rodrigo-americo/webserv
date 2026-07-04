@@ -3,16 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:14:21 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/03 16:30:42 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/04 03:00:29 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTP_RESPONSE_HPP
 # define HTTP_RESPONSE_HPP
 
+# include "str.hpp"
+# include "Logger.hpp"
+# include "FileSystem.hpp"
 # include "SocketConnection.hpp"
 # include "HttpHeaders.hpp"
 # include "HttpResponseConversor_1_1.hpp"
@@ -31,36 +34,38 @@ class HttpResponse
 {
 	protected:
 		SocketConnection	*_connection;
-		std::string			_body;
+		utils::str			_body;
 
 	public:
 		HttpHeaders			headers;
 		int					status_code;
-		std::string			status_code_message;
+		utils::str			status_code_message;
 		HttpResponse(SocketConnection *conn): _connection(conn), _body(), headers(), status_code(500), status_code_message("Internal Server Error.") {}
 		~HttpResponse() {}
-		
+
 		int getFd() const { return _connection->fd(); }
 
 		SocketConnection	*getConn() const { return _connection; }
-		
-		void	statusCode(int status, const std::string &msg)
+
+		HttpResponse	&statusCode(int status, const utils::str &msg)
 		{
 			status_code = status;
 			status_code_message = msg;
+			return *this;
 		}
 
-		void	body(const std::string &body)
+		HttpResponse	&body(const utils::str &body)
 		{
 			_body = body;
 			headers.content_length(utils::to_string(body.size()));
+			return *this;
 		}
 
-		const std::string	&body() const { return _body; }
+		const utils::str	&body() const { return _body; }
 
 		void	send(ResponseHTTPVersion::type http_version)
 		{
-			std::string	response;
+			utils::str	response;
 			HttpResponseConversor	*consersor = NULL;
 			// convert headers and body to a http version
 			switch (http_version)
@@ -87,13 +92,14 @@ class HttpResponse
 		// serve um arquivo do disco em streaming (sendfile), sem carregar o
 		// conteudo inteiro pra memoria. `size` deve vir de stat() e ja reflete
 		// o Content-Length. Retorna false se o arquivo nao pode ser aberto.
-		bool	sendFile(const std::string &path, size_t size, ResponseHTTPVersion::type http_version)
+		bool	sendFile(const FileSystem &fs, ResponseHTTPVersion::type http_version)
 		{
-			if (!_connection->queueFile(path, size))
+			LOG_INFO("sendFile: " << fs.path().getPath());
+			if (!_connection->queueFile(fs.path().getPath(), fs.size()))
 				return false;
 
-			headers.content_length(utils::to_string(size));
-			std::string	response;
+			headers.content_length(utils::to_string(fs.size()));
+			utils::str	response;
 			HttpResponseConversor	*consersor = NULL;
 			switch (http_version)
 			{

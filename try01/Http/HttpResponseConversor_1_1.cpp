@@ -6,14 +6,14 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:08:30 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 16:10:25 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/04 00:33:38 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "HttpResponseConversor_1_1.hpp"
 # include "HttpResponse.hpp"
 
-void	HttpResponseConversor_1_1::_convert_set_cookies(std::string &res) const
+void	HttpResponseConversor_1_1::_convert_set_cookies(utils::str &res) const
 {
 	const std::vector<SetCookie> &set_cookies = _res.headers.set_cookies();
 	for (size_t cook = 0; cook < set_cookies.size(); cook++)
@@ -30,7 +30,7 @@ void	HttpResponseConversor_1_1::_convert_set_cookies(std::string &res) const
 	}
 }
 
-void	HttpResponseConversor_1_1::convert(std::string &res) const
+void	HttpResponseConversor_1_1::convert(utils::str &res) const
 	{
 		res.clear();
 		res += "HTTP/1.1 ";

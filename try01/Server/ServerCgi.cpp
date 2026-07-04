@@ -17,35 +17,35 @@
 #include "Path.hpp"
 #include "HttpResponseError.hpp"
 # include "FileSystem.hpp"
+# include "Router.hpp"
 
-void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
-                        const LocationConfig &location, const ServerConfig &server)
-{    
-    std::string root = location.resolveRoot();
-    Path script_path = Path(root) + req.path.getCleanPath();    
+void Server::_serveCgi(const Router &router)
+{
+    std::string root = router.config_location->resolveRoot();
+    Path script_path = Path(root) + router.req.path.getCleanPath();
 
-    const std::map<std::string, std::string>& cgi_map = location.getCgiExtensions();
-    std::map<std::string, std::string>::const_iterator it = cgi_map.find(req.path.getExtension().string());
+    const std::map<std::string, std::string>& cgi_map = router.config_location->getCgiExtensions();
+    std::map<std::string, std::string>::const_iterator it = cgi_map.find(router.req.path.getExtension().string());
     if (it == cgi_map.end())
-        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
+        return router.error.internalServerError();
     std::string interpreter = it->second;
     FileSystem fileSystem(script_path.getCleanPath());
     if (!fileSystem.exists())
-        return HttpResponseError(res, 404, "Not Found", &server).send(ResponseHTTPVersion::HTTP_1_1);
+        return HttpResponseError(router.res, 404, "Not Found", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
     if (!fileSystem.isFile())
-        return HttpResponseError(res, 403, "Forbidden", &server).send(ResponseHTTPVersion::HTTP_1_1);
-    
-    std::vector<std::string> env = _buildCgiEnv(req, server, script_path.getCleanPath().string(), req.path.getCleanPath().string(), req.path.getQueryString().string());
+        return HttpResponseError(router.res, 403, "Forbidden", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
+
+    std::vector<std::string> env = _buildCgiEnv(router.req, *router.config_server, script_path.getCleanPath().string(), router.req.path.getCleanPath().string(), router.req.path.getQueryString().string());
 
     int fds_stdin[2];
     int fds_stdout[2];
     if (pipe(fds_stdin) == -1)
-        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
+        return router.error.internalServerError();
     if (pipe(fds_stdout) == -1)
     {
         close(fds_stdin[0]);
         close(fds_stdin[1]);
-        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
+        return router.error.internalServerError();
     }
     int pid_child = fork();
     if (pid_child == -1)
@@ -54,7 +54,7 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
         close(fds_stdin[1]);
         close(fds_stdout[0]);
         close(fds_stdout[1]);
-        return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
+        return router.error.internalServerError();
     }
     else if(pid_child == 0)
     {
@@ -68,12 +68,12 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
             _exit(1);
         close(fds_stdin[0]);
         close(fds_stdout[1]);
-        
+
         if (chdir(script_path.getLastDir().c_str()) == -1)
             _exit(1);
         std::vector<char *> argv;
         argv.push_back(const_cast<char *>(interpreter.c_str()));
-        argv.push_back(const_cast<char *>(req.path.getFilename().c_str()));
+        argv.push_back(const_cast<char *>(router.req.path.getFilename().c_str()));
         argv.push_back(NULL);
         std::vector<char *> envp;
         for (size_t i = 0; i < env.size(); ++i)
@@ -95,9 +95,9 @@ void Server::_serveCgi(const HttpRequest &req, HttpResponse &res,
             delete stdout_pipe;
             ::kill(pid_child, SIGKILL);
             waitpid(pid_child, NULL, 0);
-            return HttpResponseError(res, 500, "Internal Server Error", &server).send(ResponseHTTPVersion::HTTP_1_1);
+            return HttpResponseError(router.res, 500, "Internal Server Error", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
         }
-        CgiProcess *cgi = new CgiProcess(res.getConn(), req, stdin_pipe, stdout_pipe, pid_child);
+        CgiProcess *cgi = new CgiProcess(router.res.getConn(), router.req, stdin_pipe, stdout_pipe, pid_child);
         ConnectionPool::getInstance().addCgi(cgi);
     }
 }

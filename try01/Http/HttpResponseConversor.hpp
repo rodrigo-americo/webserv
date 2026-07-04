@@ -6,14 +6,14 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 11:27:57 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 16:19:13 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/04 00:34:20 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTP_RESPONSE_CONVERSOR_HPP
 # define HTTP_RESPONSE_CONVERSOR_HPP
 
-# include <string>
+# include "str.hpp"
 
 class HttpResponse;
 
@@ -25,7 +25,7 @@ class HttpResponseConversor
 		HttpResponseConversor(const HttpResponse &res): _res(res) {};
 		virtual ~HttpResponseConversor() {};
 
-		virtual void	convert(std::string &response) const = 0;
+		virtual void	convert(utils::str &res) const = 0;
 };
 
 #endif

@@ -9,7 +9,7 @@
 int main(int argc, char* argv[])
 {
     Logger	&logger = Logger::getInstance();
-    LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE, LoggerLevel::DEBUG);
+    LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE, LoggerLevel::FATAL);
     logger.addDestine(cgi_log);
 
     if (argc != 2)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketConnection.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 18:50:50 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/04 00:35:24 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <unistd.h>
 # include <sys/sendfile.h>
 
+# include "str.hpp"
 # include "Socket.hpp"
 
 class SocketConnection: public Socket
@@ -70,13 +71,13 @@ class SocketConnection: public Socket
 			return _out_headers_off < _out_headers.size() || _out_file_fd >= 0;
 		}
 
-		void	queueWrite(const std::string &data)
+		void	queueWrite(const utils::str &data)
 		{
-			_out_headers = data;
+			_out_headers = data.string();
 			_out_headers_off = 0;
 		}
 
-		bool	queueFile(const std::string &path, size_t size)
+		bool	queueFile(const utils::str &path, size_t size)
 		{
 			_out_file_fd = open(path.c_str(), O_RDONLY);
 			if (_out_file_fd < 0)

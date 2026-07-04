@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:08:12 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/02 14:38:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/04 02:46:31 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include "WebServerConfig.hpp"
 # include "ServerConfig.hpp"
 # include "LocationConfig.hpp"
+# include "Router.hpp"
 
 class Server
 {
@@ -29,12 +30,12 @@ class Server
 
         void _sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req = NULL);
         bool _methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed);
-        void _dispatch(const HttpRequest &req, HttpResponse &res, const ServerConfig &server, const LocationConfig &location);
-        void _serveCgi(const HttpRequest &req, HttpResponse &res, const LocationConfig &location, const ServerConfig &server);
-        void _serveUpload(const HttpRequest &req, HttpResponse &res, const LocationConfig &location);
-        void _serveDelete(const HttpRequest &req, HttpResponse &res, const LocationConfig &location);
-        void _serveStatic(const HttpRequest &req, HttpResponse &res, const ServerConfig &server, const LocationConfig &location);
-        void _serveAutoIndex(const HttpRequest &req, HttpResponse &res, const std::string &dir_path);
+        void _dispatch(const Router &router);
+        void _serveCgi(const Router &router);
+        void _serveUpload(const Router &router);
+        void _serveDelete(const Router &router);
+        void _serveStatic(const Router &router);
+        void _serveAutoIndex(const Router &router, const FileSystem &fs);
         std::vector<std::string> _buildCgiEnv(const HttpRequest &req, const ServerConfig &server, const std::string &script_path, const std::string &clean_path, const std::string &query_string);
 
     public:
@@ -43,7 +44,7 @@ class Server
 
 		const WebServerConfig *getConfig() const { return _config; }
         void handleRequest(const HttpRequest &req, HttpResponse &res);
-        
+
 };
 
 #endif
