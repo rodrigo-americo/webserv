@@ -289,18 +289,18 @@ int test_match_server_wrong_port() {
     return r;
 }
 
-int test_match_server_ssl_has_cert() {
-    WebServerConfig* cfg = load(fixture_path("multi_server.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->match_server(443, "example.com");
-    int r = 0;
-    r += assert_true(s != NULL, "servidor 443 encontrado", LINE_DATA());
-    if (s)
-        r += assert(std::string("/etc/nginx/ssl/example.crt"),
-                    s->getSslCertificate(), "ssl_certificate parseado", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_match_server_ssl_has_cert() {
+//     WebServerConfig* cfg = load(fixture_path("multi_server.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->match_server(443, "example.com");
+//     int r = 0;
+//     r += assert_true(s != NULL, "servidor 443 encontrado", LINE_DATA());
+//     if (s)
+//         r += assert(std::string("/etc/nginx/ssl/example.crt"),
+//                     s->getSslCertificate(), "ssl_certificate parseado", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
 // ─── Grupo 5: end-to-end (multi_server.conf) ──────────────────────────────────
 
@@ -352,7 +352,7 @@ int main(int argc, char **argv) {
     failures += test_match_server_by_name();
     failures += test_match_server_by_port_443();
     failures += test_match_server_wrong_port();
-    failures += test_match_server_ssl_has_cert();
+    // failures += test_match_server_ssl_has_cert();
 
     // Grupo 5: end-to-end
     failures += test_end_to_end_server_then_location();

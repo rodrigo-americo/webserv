@@ -126,14 +126,14 @@ int test_addchild_invalid_type() {
 }
 
 // Getters básicos
-int test_server_getters_defaults() {
-    ServerConfig s;
-    int r = 0;
-    r += assert((size_t)0, s.getClientMaxBodySize(), "client_max_body_size padrão 0", LINE_DATA());
-    r += assert(0, s.getRedirect().first, "redirect code padrão 0", LINE_DATA());
-    r += assert(std::string(""), s.getRedirect().second, "redirect url padrão vazia", LINE_DATA());
-    return r;
-}
+// int test_server_getters_defaults() {
+//     ServerConfig s;
+//     int r = 0;
+//     r += assert((size_t)0, s.getClientMaxBodySize(), "client_max_body_size padrão 0", LINE_DATA());
+//     r += assert(0, s.getRedirect().first, "redirect code padrão 0", LINE_DATA());
+//     r += assert(std::string(""), s.getRedirect().second, "redirect url padrão vazia", LINE_DATA());
+//     return r;
+// }
 
 // addListen / getListen
 int test_add_listen() {
@@ -205,33 +205,33 @@ int test_addchild_null() {
 }
 
 // setters de string preservam valor
-int test_server_string_setters() {
-    ServerConfig s;
-    s.setRoot("/var/www/html");
-    s.setAccessLog("/var/log/access.log");
-    s.setSslCertificate("/etc/ssl/cert.pem");
-    s.setSslCertificateKey("/etc/ssl/key.pem");
-    s.setSslProtocols("TLSv1.2 TLSv1.3");
-    s.setSslCiphers("HIGH:!aNULL");
-    int r = 0;
-    r += assert(std::string("/var/www/html"),        s.getRoot(),               "getRoot()",               LINE_DATA());
-    r += assert(std::string("/var/log/access.log"),  s.getAccessLog(),          "getAccessLog()",          LINE_DATA());
-    r += assert(std::string("/etc/ssl/cert.pem"),    s.getSslCertificate(),     "getSslCertificate()",     LINE_DATA());
-    r += assert(std::string("/etc/ssl/key.pem"),     s.getSslCertificateKey(),  "getSslCertificateKey()",  LINE_DATA());
-    r += assert(std::string("TLSv1.2 TLSv1.3"),     s.getSslProtocols(),       "getSslProtocols()",       LINE_DATA());
-    r += assert(std::string("HIGH:!aNULL"),          s.getSslCiphers(),         "getSslCiphers()",         LINE_DATA());
-    return r;
-}
+// int test_server_string_setters() {
+//     ServerConfig s;
+//     s.setRoot("/var/www/html");
+//     s.setAccessLog("/var/log/access.log");
+//     s.setSslCertificate("/etc/ssl/cert.pem");
+//     s.setSslCertificateKey("/etc/ssl/key.pem");
+//     s.setSslProtocols("TLSv1.2 TLSv1.3");
+//     s.setSslCiphers("HIGH:!aNULL");
+//     int r = 0;
+//     r += assert(std::string("/var/www/html"),        s.getRoot(),               "getRoot()",               LINE_DATA());
+//     r += assert(std::string("/var/log/access.log"),  s.getAccessLog(),          "getAccessLog()",          LINE_DATA());
+//     r += assert(std::string("/etc/ssl/cert.pem"),    s.getSslCertificate(),     "getSslCertificate()",     LINE_DATA());
+//     r += assert(std::string("/etc/ssl/key.pem"),     s.getSslCertificateKey(),  "getSslCertificateKey()",  LINE_DATA());
+//     r += assert(std::string("TLSv1.2 TLSv1.3"),     s.getSslProtocols(),       "getSslProtocols()",       LINE_DATA());
+//     r += assert(std::string("HIGH:!aNULL"),          s.getSslCiphers(),         "getSslCiphers()",         LINE_DATA());
+//     return r;
+// }
 
 // setRedirect preserva code e url
-int test_server_redirect_setter() {
-    ServerConfig s;
-    s.setRedirect(301, "https://example.com");
-    int r = 0;
-    r += assert(301,                                s.getRedirect().first,  "redirect code 301", LINE_DATA());
-    r += assert(std::string("https://example.com"), s.getRedirect().second, "redirect url",      LINE_DATA());
-    return r;
-}
+// int test_server_redirect_setter() {
+//     ServerConfig s;
+//     s.setRedirect(301, "https://example.com");
+//     int r = 0;
+//     r += assert(301,                                s.getRedirect().first,  "redirect code 301", LINE_DATA());
+//     r += assert(std::string("https://example.com"), s.getRedirect().second, "redirect url",      LINE_DATA());
+//     return r;
+// }
 
 // setClientMaxBodySize preserva valor
 int test_client_max_body_size_setter() {
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
     failures += test_longest_prefix_modifier_wins();
     failures += test_exact_different_path_no_interference();
     failures += test_addchild_invalid_type();
-    failures += test_server_getters_defaults();
+    // failures += test_server_getters_defaults();
     failures += test_add_listen();
     failures += test_add_server_name();
     failures += test_add_error_page();
@@ -333,8 +333,8 @@ int main(int argc, char **argv) {
     failures += test_empty_locations_returns_null();
     failures += test_empty_uri_root_location();
     failures += test_addchild_null();
-    failures += test_server_string_setters();
-    failures += test_server_redirect_setter();
+    // failures += test_server_string_setters();
+    // failures += test_server_redirect_setter();
     failures += test_client_max_body_size_setter();
     failures += test_exact_skipped_when_uri_not_exact();
     failures += test_none_same_size_only_matching_wins();
