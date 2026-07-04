@@ -74,7 +74,10 @@ void Server::_serveAutoIndex(const HttpRequest &req, HttpResponse &res, const st
         }
 
         std::string display = is_dir ? name + "/" : name;
-        std::string href = req.path.getCleanPath().string() + display;
+        std::string base = req.path.getCleanPath().string();
+        if (base.empty() || base[base.size() - 1] != '/')
+            base += '/';
+        std::string href = base + display;
 
         body += "<tr><td><a href=\"" + href + "\">" + display + "</a></td>";
         body += "<td class=\"size\">" + size_str + "</td></tr>";
