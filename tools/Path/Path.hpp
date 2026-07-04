@@ -76,23 +76,27 @@ private:
     {
         if (_clean_path.empty() || _ext_pos == utils::str::npos)
             return;
-        if (_ext_pos > _last_slash_pos)
-            _extension = _clean_path.substr(_ext_pos, _clean_path.size() - _ext_pos);        
+        if (_last_slash_pos == utils::str::npos || _ext_pos > _last_slash_pos)
+            _extension = _clean_path.substr(_ext_pos, _clean_path.size() - _ext_pos);
     }
 
     void buildFilename()
     {
-        if (_clean_path.empty() || _last_slash_pos == utils::str::npos)
+        if (_clean_path.empty())
             return;
-        _filename = _clean_path.substr(_last_slash_pos + 1, _clean_path.size() - _last_slash_pos);
+        size_t start = (_last_slash_pos == utils::str::npos) ? 0 : _last_slash_pos + 1;
+        _filename = _clean_path.substr(start, _clean_path.size() - start);
     }
-    
+
     void buildBasename()
     {
         if (_filename.empty())
             return;
-        else if (_ext_pos > _last_slash_pos)
-            _basename = _clean_path.substr(_last_slash_pos + 1, _ext_pos - _last_slash_pos - 1);
+        size_t start = (_last_slash_pos == utils::str::npos) ? 0 : _last_slash_pos + 1;
+        bool has_extension = (_ext_pos != utils::str::npos) &&
+                            (_last_slash_pos == utils::str::npos || _ext_pos > _last_slash_pos);
+        if (has_extension)
+            _basename = _clean_path.substr(start, _ext_pos - start);
         else
             _basename = _filename;
     }
