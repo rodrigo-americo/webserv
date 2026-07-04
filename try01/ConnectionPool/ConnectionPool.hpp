@@ -196,14 +196,18 @@ private:
 		::kill(pid, SIGKILL);
 		waitpid(pid, NULL, 0);
 		
-		_multiplexer->remove(cgi->stdinPipe());
+		if (!cgi->isStdinClosed())
+			_multiplexer->remove(cgi->stdinPipe());
 		_multiplexer->remove(cgi->stdoutPipe());
 		
 		_running_cgis.erase(it);
 		delete cgi;
 		
-		if (reason != CGI_CLIENT_GONE)
-			_multiplexer->remove(conn);
+		if (reason == CGI_CLIENT_GONE)
+			return;
+		_removePending(conn);
+        if (!conn->hasPendingWrite())
+            _multiplexer->remove(conn);
 	}
 
 public:
@@ -347,6 +351,11 @@ public:
 					
 					if (event.writable)
 						(*cit)->onStdinWritable();
+					if (!(*cit)->isStdinClosed() && (*cit)->stdinWriteFinished())
+					{
+						_multiplexer->remove((*cit)->stdinPipe()); // fecha o fd -> EOF pro filho
+						(*cit)->markStdinClosed();
+					}
 				}
 				else
 				{
