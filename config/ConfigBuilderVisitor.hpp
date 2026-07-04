@@ -27,7 +27,6 @@ class ConfigBuilderVisitor : public ParserVisitorBase {
 			}
 			return child;
 		}
-		void _handleGlobalDirective(Directive& d, GlobalConfig* gc);
 		void _handleEventsDirective(Directive& d, EventsConfig* ec);
 		void _handleHttpDirective(Directive& d, HttpConfig* hc);
 		void _handleServerDirective(Directive& d, ServerConfig* sc);

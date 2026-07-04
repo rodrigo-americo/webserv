@@ -44,8 +44,8 @@ void ConfigBuilderVisitor::visit(Block& block)
             LocationConfig* lc = _createChild<LocationConfig>("location");
             if (block.values.size() == 1)
                 lc->setPath(Path(block.values[0].getContent()));
-            else if (block.values.size() >= 2)
-                lc->setPath(Path(block.values[1].getContent()));
+            else
+                _addError("location: esperado exatamente um caminho");
             node = lc;
             break;
         }
@@ -75,8 +75,10 @@ void ConfigBuilderVisitor::visit(Directive& directive)
 
     ConfigNode* top = _stack.top();
 
-    if (GlobalConfig* gc = dynamic_cast<GlobalConfig*>(top))
-        _handleGlobalDirective(directive, gc);
+    if (dynamic_cast<GlobalConfig*>(top))
+    {
+        // contexto global (main): nao possui diretivas proprias no nosso subset
+    }
     else if (EventsConfig* ec = dynamic_cast<EventsConfig*>(top))
         _handleEventsDirective(directive, ec);
     else if (HttpConfig* hc = dynamic_cast<HttpConfig*>(top))
@@ -86,7 +88,8 @@ void ConfigBuilderVisitor::visit(Directive& directive)
     else if (LocationConfig* lc = dynamic_cast<LocationConfig*>(top))
         _handleLocationDirective(directive, lc);
     else
-        _addError("ConfigBuilderVisitor: tipo de contexto desconhecido");
+        _addError("ConfigBuilderVisitor: diretiva '" + directive.name.getContent()
+                  + "' em contexto nao reconhecido");
 }
 
 
@@ -96,9 +99,6 @@ void ConfigBuilderVisitor::_handleEventsDirective(Directive& d, EventsConfig* ec
     {
         case ParserTokenType::PT_WORKER_CONNECTIONS:
             ec->setWorkerConnections(std::atoi(d.values[0].getContent().c_str()));
-            break;
-        case ParserTokenType::MULTI_ACCEPT:
-            ec->setMultiAccept(d.values[0].getContent() == "on");
             break;
         case ParserTokenType::PT_USE:
         {
@@ -152,7 +152,7 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
                 sc->addServerName(d.values[i].getContent());
             break;
         case ParserTokenType::PT_ROOT:
-            sc->setRoot(d.values[0].getContent());
+            sc->setRoot(Path(d.values[0].getContent()));
             break;
         default:
             break;

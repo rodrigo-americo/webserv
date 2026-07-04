@@ -82,8 +82,9 @@ void Server::_serveStatic(const Router &router)
     Path path = router.config_location->resolveRoot() + router.req.path;
     std::string file_path =  path.getCleanPath().string(); //root + router.req.path.getCleanPath();
     if (!router.req.path.isNormalizable())
+    {
         return router.error.forbiden();
-
+    }
 	LOG_INFO("path '" << router.req.path << "' is normalized");
 
 	FileSystem	fs(file_path);
