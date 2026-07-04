@@ -21,19 +21,18 @@
 
 void Server::_serveCgi(const Router &router)
 {
-    std::string root = router.config_location->resolveRoot();
-    Path script_path = Path(root) + router.req.path.getCleanPath();
+    Path script_path = Path(router.config_location->resolveRoot()) + router.req.path;
 
     const std::map<std::string, std::string>& cgi_map = router.config_location->getCgiExtensions();
     std::map<std::string, std::string>::const_iterator it = cgi_map.find(router.req.path.getExtension().string());
     if (it == cgi_map.end())
         return router.error.internalServerError();
     std::string interpreter = it->second;
-    FileSystem fileSystem(script_path.getCleanPath());
-    if (!fileSystem.exists())
-        return HttpResponseError(router.res, 404, "Not Found", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
-    if (!fileSystem.isFile())
-        return HttpResponseError(router.res, 403, "Forbidden", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
+    FileSystem fs(script_path.getCleanPath());
+    if (!fs.exists())
+        return router.error.notFound();
+    if (!fs.isFile())
+        return router.error.forbiden();
 
     std::vector<std::string> env = _buildCgiEnv(router.req, *router.config_server, script_path.getCleanPath().string(), router.req.path.getCleanPath().string(), router.req.path.getQueryString().string());
 
@@ -95,7 +94,7 @@ void Server::_serveCgi(const Router &router)
             delete stdout_pipe;
             ::kill(pid_child, SIGKILL);
             waitpid(pid_child, NULL, 0);
-            return HttpResponseError(router.res, 500, "Internal Server Error", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
+            return router.error.internalServerError();
         }
         CgiProcess *cgi = new CgiProcess(router.res.getConn(), router.req, stdin_pipe, stdout_pipe, pid_child);
         ConnectionPool::getInstance().addCgi(cgi);

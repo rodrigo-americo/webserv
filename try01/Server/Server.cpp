@@ -6,34 +6,6 @@
 #include "HttpResponseError.hpp"
 # include "Router.hpp"
 
-void Server::_sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req)
-{
-    res.statusCode(code, msg);
-    if (req && _config)
-    {
-        const ServerConfig* server = _config->match_server(req->port, req->headers.host());
-        if (server)
-        {
-            const std::map<int, std::string>& pages = server->getErrorPages();
-            std::map<int, std::string>::const_iterator it = pages.find(code);
-            if (it != pages.end())
-            {
-                std::ifstream file(it->second.c_str());
-                if (file.is_open())
-                {
-                    std::ostringstream ss;
-                    ss << file.rdbuf();
-                    res.body(ss.str());
-                    res.send(ResponseHTTPVersion::HTTP_1_1);
-                    return;
-                }
-            }
-        }
-    }
-    res.body(msg + "\n");
-    res.send(ResponseHTTPVersion::HTTP_1_1);
-}
-
 bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed)
 {
     for (std::list<HttpMethod>::const_iterator it = allowed.begin(); it != allowed.end(); ++it)
@@ -47,11 +19,9 @@ bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMeth
 
 void Server::_dispatch(const Router &router)
 {
-	LOG_INFO("dispatch.");
     const std::map<std::string, std::string>& cgi_ext = router.config_location->getCgiExtensions();
     if (!cgi_ext.empty())
     {
-		LOG_INFO("pass to cgi.");
         if (cgi_ext.count(router.req.path.getExtension().string()))
             return _serveCgi(router);
     }

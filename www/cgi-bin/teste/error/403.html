@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403 — Acesso proibido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a0d;
+    --panel: #141319;
+    --panel-2: #0f0e13;
+    --line: #26242e;
+    --line-soft: #1b1a22;
+    --text: #e9e7ee;
+    --text-dim: #847e93;
+    --verified: #e8b94a;
+    --verified-glow: rgba(232,185,74,0.4);
+    --forbidden: #e14f5c;
+    --forbidden-glow: rgba(225,79,92,0.55);
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(ellipse 800px 550px at 14% 16%, rgba(232,185,74,0.05), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 88%, rgba(225,79,92,0.06), transparent 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width: 1080px;
+    display:grid;
+    grid-template-columns: minmax(260px, 400px) 1fr;
+    gap: 64px;
+    align-items:center;
+  }
+
+  /* ---------- GATE STAGE ---------- */
+  .gate-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+
+  .gate-frame{
+    position:relative;
+    width: 240px;
+    height: 190px;
+  }
+
+  .post{
+    position:absolute;
+    top: 30px; bottom: 0;
+    width: 16px;
+    background: linear-gradient(180deg, #232130, #17151d);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+  .post.left{ left: 10px; }
+  .post.right{ right: 10px; }
+
+  .reader{
+    position:absolute;
+    left: 10px;
+    top: 30px;
+    width: 16px;
+    height: 46px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .reader-led{
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--verified);
+    box-shadow: 0 0 8px var(--verified-glow);
+    animation: verifyBlink 3.6s ease-in-out infinite;
+  }
+  @keyframes verifyBlink{
+    0%, 20%{ opacity: 0.25; }
+    24%, 40%{ opacity: 1; }
+    45%, 100%{ opacity: 0.25; }
+  }
+
+  .card{
+    position:absolute;
+    left: -18px;
+    top: 38px;
+    width: 30px; height: 20px;
+    border-radius: 3px;
+    background: linear-gradient(155deg, #3a3448, #241f30);
+    border: 1px solid #453e57;
+    animation: tap 3.6s ease-in-out infinite;
+  }
+  @keyframes tap{
+    0%, 8%{ transform: translateX(0); opacity: 0; }
+    12%{ opacity: 1; }
+    22%{ transform: translateX(30px); opacity: 1; }
+    40%{ transform: translateX(30px); opacity: 1; }
+    48%{ transform: translateX(0); opacity: 0; }
+    100%{ transform: translateX(0); opacity: 0; }
+  }
+
+  .check{
+    position:absolute;
+    left: 6px;
+    top: 14px;
+    color: var(--verified);
+    font-size: 16px;
+    font-weight: 800;
+    opacity: 0;
+    animation: checkShow 3.6s ease-in-out infinite;
+  }
+  @keyframes checkShow{
+    0%, 23%{ opacity: 0; transform: scale(0.5); }
+    27%{ opacity: 1; transform: scale(1.15); }
+    32%, 45%{ opacity: 1; transform: scale(1); }
+    50%, 100%{ opacity: 0; transform: scale(0.6); }
+  }
+
+  .barrier{
+    position:absolute;
+    left: 22px;
+    top: 34px;
+    width: 190px;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--forbidden) 0 14px, #16151a 14px 20px);
+    border-radius: 4px;
+    transform-origin: left center;
+    box-shadow: 0 0 10px var(--forbidden-glow);
+    animation: barrierBlock 3.6s ease-in-out infinite;
+  }
+  @keyframes barrierBlock{
+    0%, 50%{ transform: rotate(0deg); }
+    58%{ transform: rotate(-14deg); }
+    64%{ transform: rotate(-9deg); }
+    70%{ transform: rotate(0deg); }
+    100%{ transform: rotate(0deg); }
+  }
+
+  .x-flash{
+    position:absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    color: var(--forbidden);
+    font-size: 26px;
+    font-weight: 800;
+    text-shadow: 0 0 12px var(--forbidden-glow);
+    animation: xFlash 3.6s ease-in-out infinite;
+  }
+  @keyframes xFlash{
+    0%, 66%{ opacity: 0; transform: translateX(-50%) scale(0); }
+    70%{ opacity: 1; transform: translateX(-50%) scale(1.2); }
+    76%, 88%{ opacity: 1; transform: translateX(-50%) scale(1); }
+    94%, 100%{ opacity: 0; transform: translateX(-50%) scale(0.6); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card, .check, .barrier, .x-flash, .reader-led{ animation: none; }
+    .barrier{ transform: rotate(-10deg); }
+    .x-flash{ opacity: 1; transform: translateX(-50%) scale(1); }
+  }
+
+  /* ---------- CLEARANCE METER ---------- */
+  .clearance{
+    width: 100%;
+    max-width: 300px;
+  }
+  .clearance-labels{
+    display:flex;
+    justify-content:space-between;
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .clearance-labels b{ color: var(--text); font-weight: 600; }
+  .clearance-track{
+    position:relative;
+    height: 10px;
+    border-radius: 6px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .clearance-fill{
+    position:absolute;
+    top:0; left:0; bottom:0;
+    width: 40%;
+    border-radius: 6px 0 0 6px;
+    background: var(--verified);
+    box-shadow: 0 0 8px var(--verified-glow);
+  }
+  .clearance-marker{
+    position:absolute;
+    top:-4px; bottom:-4px;
+    left: 85%;
+    width: 2px;
+    background: var(--forbidden);
+  }
+  .clearance-marker::after{
+    content: "EXIGIDO";
+    position:absolute;
+    top: -18px;
+    right: 0;
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing: .06em;
+    color: var(--forbidden);
+    white-space: nowrap;
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{ max-width: 520px; }
+
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--forbidden);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--forbidden);
+    border-radius:50%;
+    box-shadow: 0 0 8px var(--forbidden);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight:800;
+    font-size: clamp(64px, 9vw, 108px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    margin-bottom: 10px;
+  }
+  h1 .mid{ color: var(--verified); }
+
+  h2{
+    font-weight:600;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing:-0.01em;
+  }
+
+  p.desc{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .readout{
+    font-family: var(--font-display);
+    font-size:13px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--forbidden);
+    padding:14px 16px;
+    border-radius:4px;
+    margin-bottom: 32px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .readout b{ color: var(--text); font-weight:500; }
+  .readout .ok{ color: var(--verified); }
+
+  .actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding: 13px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: transform .15s ease, border-color .15s ease, filter .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{ background: var(--verified); color: #241a04; }
+  .btn-primary:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+
+  .btn-ghost{ background: transparent; border-color: var(--line); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--forbidden); color: var(--forbidden); }
+
+  .btn:focus-visible{ outline: 2px solid var(--verified); outline-offset: 3px; }
+
+  @media (max-width: 760px){
+    .wrap{ grid-template-columns: 1fr; gap:52px; text-align:center; }
+    .actions{ justify-content:center; }
+    .eyebrow{ justify-content:center; }
+    .clearance{ margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="gate-stage">
+      <div class="gate-frame">
+        <div class="post left"></div>
+        <div class="post right"></div>
+        <div class="reader"><div class="reader-led"></div></div>
+        <div class="card"></div>
+        <div class="check">✓</div>
+        <div class="barrier"></div>
+        <div class="x-flash">✕</div>
+      </div>
+
+      <div class="clearance">
+        <div class="clearance-labels">Seu nível de acesso <b>2 / 5</b></div>
+        <div class="clearance-track">
+          <div class="clearance-fill"></div>
+          <div class="clearance-marker"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="eyebrow">Acesso proibido</div>
+      <h1>4<span class="mid">0</span>3</h1>
+      <h2>Sabemos quem você é — mas isso ainda não é permitido.</h2>
+      <p class="desc">
+        Sua identidade foi reconhecida com sucesso, mas sua conta não tem permissão suficiente
+        para acessar este recurso. Diferente de um login ausente, aqui o problema é o nível de acesso.
+      </p>
+
+      <div class="readout">
+        IDENTIDADE: <b class="ok">VERIFICADA</b><br>
+        PERMISSÃO: <b style="color:var(--forbidden)">INSUFICIENTE</b><br>
+        ROTA SOLICITADA: <b id="path">/carregando...</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="retry">Solicitar acesso</button>
+        <a href="/" class="btn btn-ghost">Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('path').textContent = window.location.pathname || '/desconhecido';
+
+  document.getElementById('retry').addEventListener('click', () => {
+    document.querySelectorAll('.card, .check, .barrier, .x-flash, .reader-led').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+  });
+</script>
+
+</body>
+</html>

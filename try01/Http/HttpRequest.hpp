@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 02:13:29 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/03 15:27:23 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/04 15:41:18 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class HttpRequest
 		uint16_t	port;
 
 		HttpRequest(SocketConnection *conn)
-			: _connection(conn), method(), path(""), http_version(),
+			: _connection(conn), method(), path(utils::str("")), http_version(),
 			 body(), headers(), port(conn->listenner()->addr().port()) {}
 		SocketConnection *connection() const { return _connection; }
 

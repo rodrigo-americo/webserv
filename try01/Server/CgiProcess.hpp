@@ -1,16 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   CgiProcess.hpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/28 22:19:23 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/01 17:29:31 by ighannam         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#ifndef CGIPROCESS_HPP
+# ifndef CGIPROCESS_HPP
 #define CGIPROCESS_HPP
 
 #include <string>
@@ -18,6 +6,7 @@
 #include <sys/types.h>
 
 #include "HttpRequest.hpp"
+#include "Router.hpp"
 
 class SocketConnection;
 class SocketPipeRead;
@@ -39,6 +28,7 @@ private:
     HttpRequest _request;
     CgiProcess(const CgiProcess&);
     CgiProcess& operator=(const CgiProcess&);
+    //Router _router;
 public:
     CgiProcess(SocketConnection *client, const HttpRequest &req,
                SocketPipeWrite *stdin_pipe, SocketPipeRead *stdout_pipe,

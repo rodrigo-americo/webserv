@@ -32,7 +32,6 @@ class ConfigBuilderVisitor : public ParserVisitorBase {
 		void _handleHttpDirective(Directive& d, HttpConfig* hc);
 		void _handleServerDirective(Directive& d, ServerConfig* sc);
 		void _handleLocationDirective(Directive& d, LocationConfig* lc);
-		void _handleUpstreamDirective(Directive& d, UpstreamConfig* uc);
 	public:
 		ConfigBuilderVisitor(): _result(NULL){};
 		~ConfigBuilderVisitor();

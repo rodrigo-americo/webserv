@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/10 02:08:12 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/04 02:46:31 by bruno-valer      ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
@@ -28,7 +16,6 @@ class Server
     private:
         const WebServerConfig* _config;
 
-        void _sendError(HttpResponse &res, int code, const std::string &msg, const HttpRequest *req = NULL);
         bool _methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed);
         void _dispatch(const Router &router);
         void _serveCgi(const Router &router);

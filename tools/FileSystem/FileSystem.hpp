@@ -128,7 +128,7 @@ public:
 		const char* units_db[] = {"B", "KB", "MB", "GB", "TB"};
 
 		double	bytes = size();
-		size_t	unit;
+		size_t	unit = 0;
 		while (bytes >= 1024 && unit < 4)
 		{
 			bytes /= 1024;

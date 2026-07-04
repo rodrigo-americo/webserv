@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketConnection.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/04 00:35:24 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/04 15:05:28 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ class SocketConnection: public Socket
 		~SocketConnection()
 		{
 			if (_out_file_fd >= 0)
-				close(_out_file_fd);
+				::close(_out_file_fd);
 		}
 
 		const Socket	*listenner() const { return _listenner; }
@@ -101,14 +101,14 @@ class SocketConnection: public Socket
 			ssize_t n = sendfile(fd(), _out_file_fd, &_out_file_off, _out_file_left);
 			if (n <= 0)
 			{
-				close(_out_file_fd);
+				::close(_out_file_fd);
 				_out_file_fd = -1;
 				return;
 			}
 			_out_file_left -= static_cast<size_t>(n);
 			if (_out_file_left == 0)
 			{
-				close(_out_file_fd);
+				::close(_out_file_fd);
 				_out_file_fd = -1;
 			}
 		}

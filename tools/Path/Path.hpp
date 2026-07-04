@@ -108,9 +108,8 @@ private:
         if (_last_slash_pos != utils::str::npos)
             _last_dir = _clean_path.substr(0, _last_slash_pos + 1);
     }
-    
-public:
-    Path(const utils::str& path_) : _path(path_)
+
+    void init()
     {
         normalizePath();
         if (_normalized_path.empty())
@@ -124,8 +123,14 @@ public:
         buildFilename();
         buildBasename();
         builLastDir();
-    };
+    }
     
+public:
+    Path(): _ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos), _q_pos(utils::str::npos){};
+    Path(const utils::str& path_) : _path(path_) ,_ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos),
+      _q_pos(utils::str::npos) { init(); }
+    Path(const std::string& path_) : _path(utils::str(path_)) ,_ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos),
+      _q_pos(utils::str::npos) { init(); }
     ~Path() {};
     utils::str getFilename() const { return _filename; }
     utils::str getBasename() const { return _basename; }
@@ -144,7 +149,7 @@ public:
     {
         utils::str result_path_str;
         if (_clean_path.empty() || other._clean_path.empty())
-            return Path("");
+            return Path(utils::str(""));
         
         if (_clean_path[_clean_path.size() - 1] == '/')
         {
