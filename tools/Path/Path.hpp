@@ -29,6 +29,7 @@ private:
 
         if (_path.empty())
             return;
+        bool is_absolute = (_path[0] == '/');
         while (std::getline(ss, component.string(), '/'))
         {
             if (component.empty() || component == ".") {
@@ -41,7 +42,7 @@ private:
                 stack.push_back(component);
             }
         }
-        _normalized_path = "";
+        _normalized_path = is_absolute ? "/" : "";
         for (size_t i = 0; i < stack.size(); ++i)
         {
             _normalized_path += stack[i];

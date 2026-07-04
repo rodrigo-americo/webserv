@@ -130,7 +130,7 @@ void ConfigBuilderVisitor::_handleEventsDirective(Directive& d, EventsConfig* ec
             ec->setWorkerConnections(std::atoi(d.values[0].getContent().c_str()));
             break;
         case ParserTokenType::MULTI_ACCEPT:
-            ec->setMultiAccept(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
+            ec->setMultiAccept(d.values[0].getContent() == "on");
             break;
         case ParserTokenType::PT_USE:
         {
@@ -157,7 +157,7 @@ void ConfigBuilderVisitor::_handleHttpDirective(Directive& d, HttpConfig* hc)
             hc->setKeepaliveTimeout(std::atoi(d.values[0].getContent().c_str()));
             break;
         case ParserTokenType::SENDFILE:
-            hc->setSendfile(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
+            hc->setSendfile(d.values[0].getContent() == "on");
             break;
         case ParserTokenType::DEFAULT_TYPE:
             hc->setDefaultType(d.values[0].getContent());
@@ -214,7 +214,7 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
             lc->setRoot(d.values[0].getContent());
             break;
         case ParserTokenType::PT_AUTOINDEX:
-            lc->setAutoindex(d.values[0].getType() == ParserTokenType::PT_BOOL_ON);
+            lc->setAutoindex(d.values[0].getContent() == "on");
             break;
         case ParserTokenType::PT_INDEX:
             for (size_t i = 0; i < d.values.size(); ++i)
@@ -266,6 +266,15 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
 			break;
         case ParserTokenType::PT_UPLOAD_DIR:
             lc->setUploadDir(d.values[0].getContent());
+            break;
+        case ParserTokenType::PT_ALLOW_METHODS:
+            for (size_t i = 0; i < d.values.size(); ++i)
+            {
+                const std::string& m = d.values[i].getContent();
+                if (m == "GET")         lc->addMethod(GET);
+                else if (m == "POST")   lc->addMethod(POST);
+                else if (m == "DELETE") lc->addMethod(DELETE);
+            }
             break;
         default:
             break;

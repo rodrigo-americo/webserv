@@ -116,6 +116,7 @@ public:
 		_parser.addDirectiveKeyword("ssl_protocols", ParserTokenType::PT_SSL_PROTOCOLS);
 		_parser.addDirectiveKeyword("ssl_ciphers", ParserTokenType::PT_SSL_CIPHERS);
 		_parser.addDirectiveKeyword("upload_dir", ParserTokenType::PT_UPLOAD_DIR);
+		_parser.addDirectiveKeyword("allow_methods", ParserTokenType::PT_ALLOW_METHODS);
 		return *this;
 	}
 

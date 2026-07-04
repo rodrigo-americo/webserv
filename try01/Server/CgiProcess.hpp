@@ -35,6 +35,7 @@ private:
     std::string _stdout_buffer;
     time_t _start_time;
     bool   _stdout_closed;
+    bool   _stdin_closed;
     HttpRequest _request;
     CgiProcess(const CgiProcess&);
     CgiProcess& operator=(const CgiProcess&);
@@ -51,6 +52,9 @@ public:
     bool isDone() const;
     bool isExpired(time_t now, time_t timeout_secs) const;
     SocketPipeWrite *stdinPipe()  const { return _stdin_pipe; }
+    bool stdinWriteFinished() const { return _body_write_offset >= _body_to_write.size(); }
+    bool isStdinClosed()      const { return _stdin_closed; }
+    void markStdinClosed()          { _stdin_closed = true; _stdin_pipe = NULL; }
     SocketPipeRead  *stdoutPipe() const { return _stdout_pipe; }
     pid_t            pid()        const { return _child_pid; }
     SocketConnection *clientConn() const { return _client_conn; }
