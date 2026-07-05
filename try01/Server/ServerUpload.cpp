@@ -39,17 +39,17 @@ static std::string _extractBoundary(const std::string &content_type)
     return "--" + content_type.substr(pos + 9);
 }
 
-// static std::string _extractFilename(const std::string &disposition)
-// {
-//     size_t pos = disposition.find("filename=\"");
-//     if (pos == std::string::npos)
-//         return "";
-//     pos += 10;
-//     size_t end = disposition.find("\"", pos);
-//     if (end == std::string::npos)
-//         return "";
-//     return disposition.substr(pos, end - pos);
-// }
+static std::string _extractFilename(const std::string &disposition)
+{
+    size_t pos = disposition.find("filename=\"");
+    if (pos == std::string::npos)
+        return "";
+    pos += 10;
+    size_t end = disposition.find("\"", pos);
+    if (end == std::string::npos)
+        return "";
+    return disposition.substr(pos, end - pos);
+}
 
 static bool _saveFile(const std::string &path, const std::string &data)
 {
@@ -98,7 +98,7 @@ static void _handleMultipart(const Router &router,
         }
         size_t disp_end = part_headers.find("\r\n", disp_pos);
         std::string disposition = part_headers.substr(disp_pos, disp_end - disp_pos);
-        std::string filename = Path(disposition).getFilename().string();
+        std::string filename = _extractFilename(disposition);
 
         if (filename.empty())
         {
