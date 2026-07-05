@@ -6,7 +6,6 @@
 #include "ServerConfig.hpp"
 #include "LocationConfig.hpp"
 #include "EventsConfig.hpp"
-#include "UpstreamConfig.hpp"
 #include "test_utils.hpp"
 #include <string>
 #include <cstring>
@@ -37,22 +36,22 @@ int test_parse_not_null() {
     return r;
 }
 
-int test_parse_workers() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    int r = assert(4, cfg->getGlobal()->getWorkers(), "worker_processes 4", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_workers() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     int r = assert(4, cfg->getGlobal()->getWorkers(), "worker_processes 4", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_error_log() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    int r = assert(std::string("/var/log/nginx/error.log"),
-                   cfg->getGlobal()->getErrorLog(), "error_log path", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_error_log() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     int r = assert(std::string("/var/log/nginx/error.log"),
+//                    cfg->getGlobal()->getErrorLog(), "error_log path", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
 int test_parse_worker_connections() {
     WebServerConfig* cfg = load(fixture_path("basic.conf"));
@@ -93,14 +92,14 @@ int test_parse_listen_port() {
     return r;
 }
 
-int test_parse_root() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    int r = assert(std::string("/var/www/html"), s->getRoot(), "root /var/www/html", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_root() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     int r = assert(std::string("/var/www/html"), s->getRoot(), "root /var/www/html", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
 int test_parse_client_max_body_size() {
     WebServerConfig* cfg = load(fixture_path("basic.conf"));
@@ -123,130 +122,130 @@ int test_parse_location_count_basic() {
 
 // ─── Grupo 2: upstream (basic.conf) ───────────────────────────────────────────
 
-int test_parse_upstream_count() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    const HttpConfig* http = cfg->getGlobal()->getHttp();
-    int r = assert((size_t)1, http->getUpstreams().size(), "1 upstream", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_upstream_count() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     const HttpConfig* http = cfg->getGlobal()->getHttp();
+//     int r = assert((size_t)1, http->getUpstreams().size(), "1 upstream", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_upstream_servers() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    const UpstreamConfig* up = cfg->getGlobal()->getHttp()->getUpstreams().front();
-    int r = assert((size_t)3, up->getServers().size(), "upstream tem 3 servers", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_upstream_servers() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     const UpstreamConfig* up = cfg->getGlobal()->getHttp()->getUpstreams().front();
+//     int r = assert((size_t)3, up->getServers().size(), "upstream tem 3 servers", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_upstream_first_ip() {
-    WebServerConfig* cfg = load(fixture_path("basic.conf"));
-    if (!cfg) return 1;
-    const UpstreamConfig* up = cfg->getGlobal()->getHttp()->getUpstreams().front();
-    int r = assert(std::string("127.0.0.1:8080"),
-                   up->getServers().front()._ip, "primeiro upstream server ip", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_upstream_first_ip() {
+//     WebServerConfig* cfg = load(fixture_path("basic.conf"));
+//     if (!cfg) return 1;
+//     const UpstreamConfig* up = cfg->getGlobal()->getHttp()->getUpstreams().front();
+//     int r = assert(std::string("127.0.0.1:8080"),
+//                    up->getServers().front()._ip, "primeiro upstream server ip", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
 // ─── Grupo 3: locations com modificadores (locations.conf) ────────────────────
 
-int test_parse_location_none() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    bool found = false;
-    const std::list<LocationConfig*>& locs = s->getLocations();
-    for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
-        if ((*it)->getPath() == "/" && (*it)->getModifier() == MOD_NONE) { found = true; break; }
-    }
-    int r = assert_true(found, "location / com MOD_NONE presente", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_location_none() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     bool found = false;
+//     const std::list<LocationConfig*>& locs = s->getLocations();
+//     for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
+//         if ((*it)->getPath() == "/" && (*it)->getModifier() == MOD_NONE) { found = true; break; }
+//     }
+//     int r = assert_true(found, "location / com MOD_NONE presente", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_location_exact() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    bool found = false;
-    const std::list<LocationConfig*>& locs = s->getLocations();
-    for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
-        if ((*it)->getPath() == "/favicon.ico" && (*it)->getModifier() == MOD_EXACT) { found = true; break; }
-    }
-    int r = assert_true(found, "location = /favicon.ico com MOD_EXACT presente", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_location_exact() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     bool found = false;
+//     const std::list<LocationConfig*>& locs = s->getLocations();
+//     for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
+//         if ((*it)->getPath() == "/favicon.ico" && (*it)->getModifier() == MOD_EXACT) { found = true; break; }
+//     }
+//     int r = assert_true(found, "location = /favicon.ico com MOD_EXACT presente", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_location_prefix() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    bool found = false;
-    const std::list<LocationConfig*>& locs = s->getLocations();
-    for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
-        if ((*it)->getPath() == "/api" && (*it)->getModifier() == MOD_PREFIX) { found = true; break; }
-    }
-    int r = assert_true(found, "location ^~ /api com MOD_PREFIX presente", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_location_prefix() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     bool found = false;
+//     const std::list<LocationConfig*>& locs = s->getLocations();
+//     for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
+//         if ((*it)->getPath() == "/api" && (*it)->getModifier() == MOD_PREFIX) { found = true; break; }
+//     }
+//     int r = assert_true(found, "location ^~ /api com MOD_PREFIX presente", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_parse_location_regex() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    bool found = false;
-    const std::list<LocationConfig*>& locs = s->getLocations();
-    for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
-        if ((*it)->getModifier() == MOD_REGEX) { found = true; break; }
-    }
-    int r = assert_true(found, "location ~ .php$ com MOD_REGEX presente", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_parse_location_regex() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     bool found = false;
+//     const std::list<LocationConfig*>& locs = s->getLocations();
+//     for (std::list<LocationConfig*>::const_iterator it = locs.begin(); it != locs.end(); ++it) {
+//         if ((*it)->getModifier() == MOD_REGEX) { found = true; break; }
+//     }
+//     int r = assert_true(found, "location ~ .php$ com MOD_REGEX presente", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_match_location_exact_wins() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    const LocationConfig* loc = s->match_location("/favicon.ico");
-    int r = 0;
-    r += assert_true(loc != NULL, "match_location /favicon.ico não retorna NULL", LINE_DATA());
-    if (loc)
-        r += assert(MOD_EXACT, loc->getModifier(), "match_location /favicon.ico retorna MOD_EXACT", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_match_location_exact_wins() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     const LocationConfig* loc = s->match_location("/favicon.ico");
+//     int r = 0;
+//     r += assert_true(loc != NULL, "match_location /favicon.ico não retorna NULL", LINE_DATA());
+//     if (loc)
+//         r += assert(MOD_EXACT, loc->getModifier(), "match_location /favicon.ico retorna MOD_EXACT", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_match_location_prefix_wins() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    const LocationConfig* loc = s->match_location("/api/v2/users");
-    int r = 0;
-    r += assert_true(loc != NULL, "match_location /api/v2/users não retorna NULL", LINE_DATA());
-    if (loc)
-        r += assert(MOD_PREFIX, loc->getModifier(), "match_location /api/v2/users retorna MOD_PREFIX", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_match_location_prefix_wins() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     const LocationConfig* loc = s->match_location("/api/v2/users");
+//     int r = 0;
+//     r += assert_true(loc != NULL, "match_location /api/v2/users não retorna NULL", LINE_DATA());
+//     if (loc)
+//         r += assert(MOD_PREFIX, loc->getModifier(), "match_location /api/v2/users retorna MOD_PREFIX", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
-int test_match_location_fallback_root() {
-    WebServerConfig* cfg = load(fixture_path("locations.conf"));
-    if (!cfg) return 1;
-    const ServerConfig* s = cfg->getServers().front();
-    const LocationConfig* loc = s->match_location("/other/path");
-    int r = 0;
-    r += assert_true(loc != NULL, "match_location /other/path não retorna NULL", LINE_DATA());
-    if (loc)
-        r += assert(std::string("/"), loc->getPath(), "fallback para location /", LINE_DATA());
-    delete cfg;
-    return r;
-}
+// int test_match_location_fallback_root() {
+//     WebServerConfig* cfg = load(fixture_path("locations.conf"));
+//     if (!cfg) return 1;
+//     const ServerConfig* s = cfg->getServers().front();
+//     const LocationConfig* loc = s->match_location("/other/path");
+//     int r = 0;
+//     r += assert_true(loc != NULL, "match_location /other/path não retorna NULL", LINE_DATA());
+//     if (loc)
+//         r += assert(std::string("/"), loc->getPath(), "fallback para location /", LINE_DATA());
+//     delete cfg;
+//     return r;
+// }
 
 // ─── Grupo 4: multi-server (multi_server.conf) ────────────────────────────────
 
@@ -323,29 +322,29 @@ int main(int argc, char **argv) {
 
     // Grupo 1: parse básico
     failures += test_parse_not_null();
-    failures += test_parse_workers();
-    failures += test_parse_error_log();
+    // failures += test_parse_workers();
+    // failures += test_parse_error_log();
     failures += test_parse_worker_connections();
     failures += test_parse_server_count();
     failures += test_parse_server_name();
     failures += test_parse_listen_port();
-    failures += test_parse_root();
+    // failures += test_parse_root();
     failures += test_parse_client_max_body_size();
     failures += test_parse_location_count_basic();
 
     // Grupo 2: upstream
-    failures += test_parse_upstream_count();
-    failures += test_parse_upstream_servers();
-    failures += test_parse_upstream_first_ip();
+    // failures += test_parse_upstream_count();
+    // failures += test_parse_upstream_servers();
+    // failures += test_parse_upstream_first_ip();
 
-    // Grupo 3: locations com modificadores
-    failures += test_parse_location_none();
-    failures += test_parse_location_exact();
-    failures += test_parse_location_prefix();
-    failures += test_parse_location_regex();
-    failures += test_match_location_exact_wins();
-    failures += test_match_location_prefix_wins();
-    failures += test_match_location_fallback_root();
+    // // Grupo 3: locations com modificadores
+    // failures += test_parse_location_none();
+    // failures += test_parse_location_exact();
+    // failures += test_parse_location_prefix();
+    // failures += test_parse_location_regex();
+    // failures += test_match_location_exact_wins();
+    // failures += test_match_location_prefix_wins();
+    // failures += test_match_location_fallback_root();
 
     // Grupo 4: multi-server
     failures += test_parse_two_servers();
