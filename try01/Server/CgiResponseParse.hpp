@@ -14,10 +14,10 @@ private:
     bool _malformed;
     int _status_code;
     utils::str _status_message;
-    std::vector<std::pair<utils::str, utils::str> > _headers;
-    utils::str _body;
     size_t _delim_pos;
     size_t _delim_size;
+    std::vector<std::pair<utils::str, utils::str> > _headers;
+    utils::str _body;
     void _setBoolMalformed()
     {
         size_t rnrn_pos = _raw.find("\r\n\r\n");
@@ -66,8 +66,9 @@ public:
                 if (space != utils::str::npos)
                 {
                     char* endptr;
-                    long code = std::strtol(value.substr(0, space).c_str(), &endptr, 10);
-                    if (endptr != value.substr(0, space).c_str())
+                    utils::str code_str = value.substr(0, space);
+                    long code = std::strtol(code_str.c_str(), &endptr, 10);
+                    if (endptr != code_str.c_str())
                     {
                         _status_code = static_cast<int>(code);
                         _status_message = value.substr(space + 1);
@@ -80,10 +81,10 @@ public:
     };
     ~CgiResponseParse() {};
     bool isMalformed()  const  { return _malformed; }
-    size_t getStatusCode()  const { return _status_code; }
+    int getStatusCode() const { return _status_code; }
     utils::str getStatusMsg()  const { return _status_message; }
     utils::str getBody()  const { return _body; }
-    std::vector<std::pair<utils::str, utils::str> > getHeaders() const  { return _headers; }
+    const std::vector<std::pair<utils::str, utils::str> >& getHeaders() const { return _headers; }
 };
 
 

@@ -70,9 +70,10 @@ void Server::_serveCgi(const Router &router)
 
         if (chdir(script_path.getLastDir().c_str()) == -1)
             _exit(1);
+        utils::str filename = router.req.path.getFilename();
         std::vector<char *> argv;
         argv.push_back(const_cast<char *>(interpreter.c_str()));
-        argv.push_back(const_cast<char *>(router.req.path.getFilename().c_str()));
+        argv.push_back(const_cast<char *>(const_cast<char *>(filename.c_str())));
         argv.push_back(NULL);
         std::vector<char *> envp;
         for (size_t i = 0; i < env.size(); ++i)
