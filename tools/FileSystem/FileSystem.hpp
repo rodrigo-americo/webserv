@@ -40,6 +40,9 @@ public:
 	FileSystem(const utils::str &path)
 		: _path(path), _stat(), _exists(false), _isfile(false), _isdir(false),
 		_isreadable(false), _iswritable(false), _isexecutable(false) { _init(); };
+	FileSystem()
+		: _path(), _stat(), _exists(false), _isfile(false), _isdir(false),
+		_isreadable(false), _iswritable(false), _isexecutable(false) {};
 	~FileSystem() {};
 
 	FileSystem	&operator=(const FileSystem &other)
@@ -64,6 +67,13 @@ public:
 	bool							isReadable() const { return _isreadable; }
 	bool							isWritable() const { return _iswritable; }
 	bool							isExecutable() const { return _isexecutable; }
+
+	FileSystem	&resetTo(const Path &path)
+	{
+		_path = path;
+		_init();
+		return *this;
+	}
 
 	FileSystem	&cd(const Path &path)
 	{

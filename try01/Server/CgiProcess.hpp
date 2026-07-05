@@ -9,15 +9,14 @@
 #include "Router.hpp"
 
 class SocketConnection;
-class SocketPipeRead;
-class SocketPipeWrite;
+class PipeChannel;
 
 class CgiProcess
 {
 private:
     SocketConnection *_client_conn;
-    SocketPipeWrite  *_stdin_pipe;
-    SocketPipeRead   *_stdout_pipe;
+    PipeChannel  *_stdin_pipe;
+    PipeChannel   *_stdout_pipe;
     pid_t _child_pid;
     std::string _body_to_write;
     size_t      _body_write_offset;
@@ -31,7 +30,7 @@ private:
     //Router _router;
 public:
     CgiProcess(SocketConnection *client, const HttpRequest &req,
-               SocketPipeWrite *stdin_pipe, SocketPipeRead *stdout_pipe,
+               PipeChannel *stdin_pipe, PipeChannel *stdout_pipe,
                pid_t pid);
     ~CgiProcess();
     const std::string &stdoutBuffer() const { return _stdout_buffer; }
@@ -41,11 +40,11 @@ public:
     void onStdoutReadable();
     bool isDone() const;
     bool isExpired(time_t now, time_t timeout_secs) const;
-    SocketPipeWrite *stdinPipe()  const { return _stdin_pipe; }
+    PipeChannel *stdinPipe()  const { return _stdin_pipe; }
     bool stdinWriteFinished() const { return _body_write_offset >= _body_to_write.size(); }
     bool isStdinClosed()      const { return _stdin_closed; }
     void markStdinClosed()          { _stdin_closed = true; _stdin_pipe = NULL; }
-    SocketPipeRead  *stdoutPipe() const { return _stdout_pipe; }
+    PipeChannel  *stdoutPipe() const { return _stdout_pipe; }
     pid_t            pid()        const { return _child_pid; }
     SocketConnection *clientConn() const { return _client_conn; }
     void buildAndSendResponse();

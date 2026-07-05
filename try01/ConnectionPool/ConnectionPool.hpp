@@ -160,10 +160,11 @@ private:
 
 	void _cleanupCgi(std::list<CgiProcess*>::iterator it, CgiCleanupReason reason)
 	{
+		LOG_TRACE("_cleanupCgi");
 		CgiProcess *cgi = *it;
 		SocketConnection *conn = cgi->clientConn();
 		pid_t pid = cgi->pid();
-		
+
 		if (reason == CGI_NORMAL)
 		{
 			cgi->buildAndSendResponse();
@@ -185,14 +186,14 @@ private:
 
 		::kill(pid, SIGKILL);
 		waitpid(pid, NULL, 0);
-		
+
 		if (!cgi->isStdinClosed())
 			_multiplexer->remove(cgi->stdinPipe());
 		_multiplexer->remove(cgi->stdoutPipe());
-		
+
 		_running_cgis.erase(it);
 		delete cgi;
-		
+
 		if (reason == CGI_CLIENT_GONE)
 			return;
 		_removePending(conn);
@@ -219,7 +220,7 @@ public:
 
 	bool addPipe(Socket *pipe_socket)
 	{
-		if (!pipe_socket || !pipe_socket->isValid()) 
+		if (!pipe_socket || !pipe_socket->isValid())
 			return false;
 		_multiplexer->add(pipe_socket);
 		return true;
@@ -236,6 +237,7 @@ public:
 			{
 				if ((*cit)->isExpired(now, 30))
 				{
+					LOG_TRACE("CGI expired");
 					std::list<CgiProcess*>::iterator victim = cit;
 					++cit;
 					_cleanupCgi(victim, CGI_TIMEOUT);
@@ -320,13 +322,14 @@ public:
 					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.socket);
 					if (cit == _running_cgis.end())
 					{
+						LOG_TRACE("CGI pipe read not found: " << event.socket->fd());
 						_multiplexer->remove(event.socket);
 						continue;
 					}
-					
+					LOG_TRACE("PIPE_READ: " << event);
 					if (event.readable || event.eof)
 						(*cit)->onStdoutReadable();
-					
+
 					if ((*cit)->isDone())
 						_cleanupCgi(cit, CGI_NORMAL);
 				}
@@ -335,14 +338,16 @@ public:
 					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.socket);
 					if (cit == _running_cgis.end())
 					{
+						LOG_TRACE("CGI pipe write not found: " << event.socket->fd());
 						_multiplexer->remove(event.socket);
 						continue;
 					}
-					
+					LOG_TRACE("PIPE_WRITE: " << event);
 					if (event.writable)
 						(*cit)->onStdinWritable();
 					if (!(*cit)->isStdinClosed() && (*cit)->stdinWriteFinished())
 					{
+						LOG_TRACE("CGI write finished. Closing.");
 						_multiplexer->remove((*cit)->stdinPipe()); // fecha o fd -> EOF pro filho
 						(*cit)->markStdinClosed();
 					}
@@ -350,7 +355,7 @@ public:
 				else
 				{
 					std::cerr << "unknown socket type " << event.socket->getType() << "\n";
-				}		
+				}
 			}
 			_multiplexer->flushRemovals();
 		}

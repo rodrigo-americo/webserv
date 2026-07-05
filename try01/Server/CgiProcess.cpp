@@ -4,41 +4,53 @@
 
 #include "CgiProcess.hpp"
 #include "SocketConnection.hpp"
-#include "SocketPipeRead.hpp"
-#include "SocketPipeWrite.hpp"
+#include "PipeChannel.hpp"
+#include "PipeChannel.hpp"
 #include "HttpResponse.hpp"
 #include "Logger.hpp"
 #include "CgiResponseParse.hpp"
+#include "PipeChannel.hpp"
 
-CgiProcess::CgiProcess(SocketConnection *client, const HttpRequest &req, SocketPipeWrite *stdin_pipe, SocketPipeRead *stdout_pipe, pid_t pid)
+CgiProcess::CgiProcess(SocketConnection *client, const HttpRequest &req, PipeChannel *stdin_pipe, PipeChannel *stdout_pipe, pid_t pid)
     : _client_conn(client), _stdin_pipe(stdin_pipe), _stdout_pipe(stdout_pipe), _child_pid(pid), _body_to_write(req.body), _body_write_offset(0),_stdout_buffer(), _start_time(time(NULL)), _stdout_closed(false), _stdin_closed(false), _request(req)
 {
-    
+	LOG_TRACE("CgiProcessConstructor(conn(" << client->fd() << "), " << *stdin_pipe << ", " << *stdout_pipe << ", PID " << pid << ")");
 }
 
 CgiProcess::~CgiProcess() {}
 
 void CgiProcess::onStdinWritable()
 {
+	LOG_TRACE("CGI begin write.");
     if (_body_write_offset >= _body_to_write.size())
+	{
+		LOG_TRACE("CGI cannot write: _body_write_offset(" << _body_write_offset << "), _body_to_write.size(" << _body_to_write.size() << ")" );
         return;
-    
+	}
+
     size_t remaining = _body_to_write.size() - _body_write_offset;
+	LOG_TRACE("CGI writting on " << *_stdin_pipe);
     ssize_t n = ::write(_stdin_pipe->fd(), _body_to_write.data() + _body_write_offset, remaining);
     if (n < 0)
     {
+		LOG_TRACE("CGI nothing to write on: " << *_stdin_pipe << "scheduling closing");
         _stdout_closed = true;
         return;
     }
     _body_write_offset += n;
-     
+
 }
 void CgiProcess::onStdoutReadable()
 {
     static const size_t buffer_size = 1024;
+	LOG_TRACE("CGI reading from: " << *_stdout_pipe);
     ssize_t n = _stdout_pipe->read(buffer_size, _stdout_buffer);
     if (n <= 0)
+	{
+		LOG_TRACE("CGI nothing to read from : " << *_stdout_pipe << "scheduling closing");
         _stdout_closed = true;
+	}
+	LOG_TRACE("CGI data: " << _stdout_buffer);
 }
 bool CgiProcess::isDone() const { return _stdout_closed; }
 
