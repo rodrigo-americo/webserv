@@ -195,6 +195,9 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
                 else if (m == "DELETE") lc->addMethod(DELETE);
             }
             break;
+        case ParserTokenType::PT_REQUIRE_AUTH:
+            lc->setRequireAuth(d.values[0].getContent() == "on");
+            break;
         default:
             break;
     }

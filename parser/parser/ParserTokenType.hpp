@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 11:52:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 12:19:24 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 18:55:59 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ struct ParserTokenType
 		PT_CLIENT_MAX_BODY_SIZE,
 		PT_UPLOAD_DIR,
 		PT_ALLOW_METHODS,
+		PT_REQUIRE_AUTH,
 
 		// modificadores de location
 		PT_MOD_EXACT,        // =
@@ -166,6 +167,7 @@ static const char* ParserTokenTypeStr[] =
 	"PT_CLIENT_MAX_BODY_SIZE",
 	"PT_UPLOAD_DIR",
 	"PT_ALLOW_METHODS",
+	"PT_REQUIRE_AUTH",
 
 	// modificadores de location
 	"PT_MOD_EXACT",        // =

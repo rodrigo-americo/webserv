@@ -2,7 +2,7 @@
 # include "Router.hpp"
 
 
-CgiEnv::CgiEnv(const Router &router, utils::str script_path): _router(router), _script_path(script_path), _data() {}
+CgiEnv::CgiEnv(const Router &router, utils::str script_path): _router(router), _script_path(script_path), _data() { _init(); }
 CgiEnv::~CgiEnv()
 {
 	for (size_t i = 0; i < _data.size(); i++)

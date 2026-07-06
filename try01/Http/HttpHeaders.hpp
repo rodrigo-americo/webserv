@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 21:56:02 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/05 13:54:41 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 18:34:20 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,24 @@ class HttpHeaders
 
 		void				addSetCookie(const SetCookie &set_cookie) { _set_cookies.push_back(set_cookie); }
 		const std::vector<SetCookie>	&set_cookies() const { return _set_cookies; }
+		std::string getCookieValue(const std::string& name) const
+		{
+			const std::string& raw = cookie();
+			size_t start = 0;
+			while (start <= raw.size())
+			{
+				size_t semi = raw.find(';', start);
+				std::string segment = (semi == std::string::npos) ? raw.substr(start) : raw.substr(start, semi - start);
+				size_t f = segment.find_first_not_of(' ');
+				if (f != std::string::npos) segment.erase(0, f);
+				size_t eq = segment.find('=');
+				if (eq != std::string::npos && segment.substr(0, eq) == name)
+					return segment.substr(eq + 1);
+				if (semi == std::string::npos) break;
+				start = semi + 1;
+			}
+			return "";
+		}
 };
 
 #endif
