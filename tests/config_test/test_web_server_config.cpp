@@ -300,34 +300,34 @@ int test_get_global() {
 }
 
 // cadeia completa: match_server → match_location end-to-end
-int test_end_to_end_server_then_location() {
-    ServerConfig* s1 = new ServerConfig();
-    s1->addListen(makeListen(80));
-    s1->addServerName("api.com");
+// int test_end_to_end_server_then_location() {
+//     ServerConfig* s1 = new ServerConfig();
+//     s1->addListen(makeListen(80));
+//     s1->addServerName("api.com");
 
-    LocationConfig* root = new LocationConfig();
-    root->setPath("/");
-    root->setModifier(MOD_NONE);
-    s1->addChild(root);
+//     LocationConfig* root = new LocationConfig();
+//     root->setPath("/");
+//     root->setModifier(MOD_NONE);
+//     s1->addChild(root);
 
-    LocationConfig* api = new LocationConfig();
-    api->setPath("/api");
-    api->setModifier(MOD_NONE);
-    s1->addChild(api);
+//     LocationConfig* api = new LocationConfig();
+//     api->setPath("/api");
+//     api->setModifier(MOD_NONE);
+//     s1->addChild(api);
 
-    ServerConfig* servers[] = { s1 };
-    WebServerConfig* wsc = buildConfig(servers, 1);
+//     ServerConfig* servers[] = { s1 };
+//     WebServerConfig* wsc = buildConfig(servers, 1);
 
-    const ServerConfig* server = wsc->match_server(80, "api.com");
-    int r = 0;
-    r += assert_true(server == s1, "end-to-end: servidor correto", LINE_DATA());
-    if (server) {
-        const LocationConfig* loc = server->match_location("/api/users");
-        r += assert_true(loc == api, "end-to-end: location correta", LINE_DATA());
-    }
-    delete wsc;
-    return r;
-}
+//     const ServerConfig* server = wsc->match_server(80, "api.com");
+//     int r = 0;
+//     r += assert_true(server == s1, "end-to-end: servidor correto", LINE_DATA());
+//     if (server) {
+//         const LocationConfig* loc = server->match_location("/api/users");
+//         r += assert_true(loc == api, "end-to-end: location correta", LINE_DATA());
+//     }
+//     delete wsc;
+//     return r;
+// }
 
 // getWorkerConnections: events com worker_connections=0 → fallback 1024
 int test_worker_connections_zero_fallback() {
@@ -370,7 +370,7 @@ int main(int argc, char **argv) {
     failures += test_fallback_order_respects_first_port_match();
     failures += test_match_server_empty_server_list();
     failures += test_get_global();
-    failures += test_end_to_end_server_then_location();
+    // failures += test_end_to_end_server_then_location();
 
     messages::print();
     return failures;

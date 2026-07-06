@@ -16,24 +16,24 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "HttpResponseError.hpp"
-# include "FileSystem.hpp"
-# include "Router.hpp"
+#include "FileSystem.hpp"
+#include "Router.hpp"
+#include "Cgi.hpp"
 
 void Server::_serveCgi(const Router &router)
 {
-    std::string root = router.config_location->resolveRoot();
-    Path script_path = Path(root) + router.req.path.getCleanPath();
+    Path script_path = Path(router.config_location->resolveRoot()) + router.req.path;
 
     const std::map<std::string, std::string>& cgi_map = router.config_location->getCgiExtensions();
     std::map<std::string, std::string>::const_iterator it = cgi_map.find(router.req.path.getExtension().string());
     if (it == cgi_map.end())
         return router.error.internalServerError();
     std::string interpreter = it->second;
-    FileSystem fileSystem(script_path.getCleanPath());
-    if (!fileSystem.exists())
-        return HttpResponseError(router.res, 404, "Not Found", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
-    if (!fileSystem.isFile())
-        return HttpResponseError(router.res, 403, "Forbidden", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
+    FileSystem fs(script_path.getCleanPath());
+    if (!fs.exists())
+        return router.error.notFound();
+    if (!fs.isFile())
+        return router.error.forbiden();
 
     std::vector<std::string> env = _buildCgiEnv(router.req, *router.config_server, script_path.getCleanPath().string(), router.req.path.getCleanPath().string(), router.req.path.getQueryString().string());
 
@@ -69,17 +69,21 @@ void Server::_serveCgi(const Router &router)
         close(fds_stdin[0]);
         close(fds_stdout[1]);
 
+		LOG_TRACE("CHILD_PROCESS: execute CGI CD to " << script_path.getLastDir().c_str());
         if (chdir(script_path.getLastDir().c_str()) == -1)
             _exit(1);
+        utils::str filename = router.req.path.getFilename();
         std::vector<char *> argv;
         argv.push_back(const_cast<char *>(interpreter.c_str()));
-        argv.push_back(const_cast<char *>(router.req.path.getFilename().c_str()));
+        argv.push_back(const_cast<char *>(const_cast<char *>(filename.c_str())));
         argv.push_back(NULL);
         std::vector<char *> envp;
         for (size_t i = 0; i < env.size(); ++i)
             envp.push_back(const_cast<char *>(env[i].c_str()));
         envp.push_back(NULL);
+		// LOG_TRACE("execve CGI child process.");
         execve(interpreter.c_str(), &argv[0], &envp[0]);
+		// LOG_ERROR("execve CGI Error.");
         _exit(1);
     }
     else
@@ -95,11 +99,16 @@ void Server::_serveCgi(const Router &router)
             delete stdout_pipe;
             ::kill(pid_child, SIGKILL);
             waitpid(pid_child, NULL, 0);
-            return HttpResponseError(router.res, 500, "Internal Server Error", router.config_server).send(ResponseHTTPVersion::HTTP_1_1);
+            return router.error.internalServerError();
         }
         CgiProcess *cgi = new CgiProcess(router.res.getConn(), router.req, stdin_pipe, stdout_pipe, pid_child);
         ConnectionPool::getInstance().addCgi(cgi);
     }
+}
+
+void Server::_serveCgi2(Router &router)
+{
+	router.cgi.createProcess();
 }
 
 static std::string _envEntry(const std::string &key, const std::string &value)

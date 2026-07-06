@@ -8,11 +8,5 @@ void HttpConfig::addChild(ConfigNode* child)
         _servers.push_back(server);
         return;
     }
-    UpstreamConfig* upstream = dynamic_cast<UpstreamConfig*>(child);
-    if (upstream)
-    {
-        _upstreams.push_back(upstream);
-        return;
-    }
-    addError("HttpConfig: filho inválido, esperado ServerConfig ou UpstreamConfig");
+    addError("HttpConfig: filho inválido, esperado ServerConfig");
 }

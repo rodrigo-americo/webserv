@@ -1,6 +1,7 @@
 #include "ConfigBuilderVisitor.hpp"
 #include <cstdlib>
 #include "ConfigServer.hpp"
+#include "Path.hpp"
 #include "ServerListenParser.hpp"
 
 
@@ -42,28 +43,14 @@ void ConfigBuilderVisitor::visit(Block& block)
         {
             LocationConfig* lc = _createChild<LocationConfig>("location");
             if (block.values.size() == 1)
-            {
-                lc->setPath(block.values[0].getContent());
-                lc->setModifier(MOD_NONE);
-            }
-            else if (block.values.size() >= 2)
-            {
-                ParserTokenType::type mod = block.values[0].getType();
-                if (mod == ParserTokenType::PT_MOD_EXACT)        lc->setModifier(MOD_EXACT);
-                else if (mod == ParserTokenType::PT_MOD_PREFIX)  lc->setModifier(MOD_PREFIX);
-                else if (mod == ParserTokenType::PT_MOD_REGEX)   lc->setModifier(MOD_REGEX);
-                else if (mod == ParserTokenType::PT_MOD_REGEX_CI) lc->setModifier(MOD_REGEX_CI);
-                else                                             lc->setModifier(MOD_NONE);
-                lc->setPath(block.values[1].getContent());
-            }
+                lc->setPath(Path(block.values[0].getContent()));
+            else
+                _addError("location: esperado exatamente um caminho");
             node = lc;
             break;
         }
         case ParserTokenType::PT_SERVER:
             node = _createChild<ServerConfig>("server");
-            break;
-        case ParserTokenType::PT_UPSTREAM:
-            node = _createChild<UpstreamConfig>("upstream");
             break;
         default:
             _addError("ConfigBuilderVisitor: bloco desconhecido");
@@ -88,8 +75,10 @@ void ConfigBuilderVisitor::visit(Directive& directive)
 
     ConfigNode* top = _stack.top();
 
-    if (GlobalConfig* gc = dynamic_cast<GlobalConfig*>(top))
-        _handleGlobalDirective(directive, gc);
+    if (dynamic_cast<GlobalConfig*>(top))
+    {
+        // contexto global (main): nao possui diretivas proprias no nosso subset
+    }
     else if (EventsConfig* ec = dynamic_cast<EventsConfig*>(top))
         _handleEventsDirective(directive, ec);
     else if (HttpConfig* hc = dynamic_cast<HttpConfig*>(top))
@@ -98,29 +87,11 @@ void ConfigBuilderVisitor::visit(Directive& directive)
         _handleServerDirective(directive, sc);
     else if (LocationConfig* lc = dynamic_cast<LocationConfig*>(top))
         _handleLocationDirective(directive, lc);
-    else if (UpstreamConfig* uc = dynamic_cast<UpstreamConfig*>(top))
-        _handleUpstreamDirective(directive, uc);
     else
-        _addError("ConfigBuilderVisitor: tipo de contexto desconhecido");
+        _addError("ConfigBuilderVisitor: diretiva '" + directive.name.getContent()
+                  + "' em contexto nao reconhecido");
 }
 
-void ConfigBuilderVisitor::_handleGlobalDirective(Directive& d, GlobalConfig* gc)
-{
-    switch (d.name.getType())
-    {
-        case ParserTokenType::PT_WORKER_PROCESSES:
-            gc->setWorkers(std::atoi(d.values[0].getContent().c_str()));
-            break;
-        case ParserTokenType::PT_ERROR_LOG:
-            gc->setErrorLog(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_PID:
-            gc->setPid(std::atoi(d.values[0].getContent().c_str()));
-            break;
-        default:
-            break;
-    }
-}
 
 void ConfigBuilderVisitor::_handleEventsDirective(Directive& d, EventsConfig* ec)
 {
@@ -128,9 +99,6 @@ void ConfigBuilderVisitor::_handleEventsDirective(Directive& d, EventsConfig* ec
     {
         case ParserTokenType::PT_WORKER_CONNECTIONS:
             ec->setWorkerConnections(std::atoi(d.values[0].getContent().c_str()));
-            break;
-        case ParserTokenType::MULTI_ACCEPT:
-            ec->setMultiAccept(d.values[0].getContent() == "on");
             break;
         case ParserTokenType::PT_USE:
         {
@@ -150,23 +118,8 @@ void ConfigBuilderVisitor::_handleHttpDirective(Directive& d, HttpConfig* hc)
 {
     switch (d.name.getType())
     {
-        case ParserTokenType::PT_INCLUDE:
-            hc->setInclude(d.values[0].getContent());
-            break;
         case ParserTokenType::KEEPALIVE_TIMEOUT:
             hc->setKeepaliveTimeout(std::atoi(d.values[0].getContent().c_str()));
-            break;
-        case ParserTokenType::SENDFILE:
-            hc->setSendfile(d.values[0].getContent() == "on");
-            break;
-        case ParserTokenType::DEFAULT_TYPE:
-            hc->setDefaultType(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_LOG_FORMAT:
-            hc->setLogFormat(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_ACCESS_LOG:
-            hc->setAccessLog(d.values[0].getContent());
             break;
         default:
             break;
@@ -199,7 +152,7 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
                 sc->addServerName(d.values[i].getContent());
             break;
         case ParserTokenType::PT_ROOT:
-            sc->setRoot(d.values[0].getContent());
+            sc->setRoot(Path(d.values[0].getContent()));
             break;
         default:
             break;
@@ -211,7 +164,7 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
     switch (d.name.getType())
     {
         case ParserTokenType::PT_ROOT:
-            lc->setRoot(d.values[0].getContent());
+            lc->setRoot(Path(d.values[0].getContent()));
             break;
         case ParserTokenType::PT_AUTOINDEX:
             lc->setAutoindex(d.values[0].getContent() == "on");
@@ -220,43 +173,9 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
             for (size_t i = 0; i < d.values.size(); ++i)
                 lc->addIndex(d.values[i].getContent());
             break;
-        case ParserTokenType::PT_FASTCGI_PASS:
-            lc->addCgi(std::make_pair(std::string("fastcgi_pass"), d.values[0].getContent()));
-            break;
-        case ParserTokenType::PT_FASTCGI_PARAM:
-            if (d.values.size() >= 2)
-                lc->addCgi(std::make_pair(d.values[0].getContent(), 
-                                        d.values[1].getContent()));
-            break;
-        case ParserTokenType::PT_FASTCGI_INDEX:
-            lc->setFastcgiIndex(d.values[0].getContent());
-            break;
         case ParserTokenType::PT_CGI_EXTENSION:
             lc->addCgiExtension(std::make_pair(d.values[0].getContent(), 
                                         d.values[1].getContent()));
-            break;
-        case ParserTokenType::PT_TRY_FILES:
-            for (size_t i = 0; i < d.values.size(); ++i)
-                lc->addTryFile(d.values[i].getContent());
-            break;
-        case ParserTokenType::PT_ADD_HEADER:
-            if (d.values.size() >= 2)
-                lc->addAddHeader(d.values[0].getContent(), 
-                               d.values[1].getContent());
-            break;
-        case ParserTokenType::PT_PROXY_PASS:
-            lc->setProxyPass(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_PROXY_SET_HEADER:
-            if (d.values.size() >= 2)
-                lc->addProxySetHeader(d.values[0].getContent(), 
-                                     d.values[1].getContent());
-            break;
-        case ParserTokenType::PT_PROXY_CACHE_BYPASS:
-            lc->setProxyCacheBypass(d.values[0].getContent());
-            break;
-        case ParserTokenType::PT_EXPIRES:
-            lc->setExpires(d.values[0].getContent());
             break;
 		case ParserTokenType::PT_RETURN:
    			 if (d.values.size() == 2)
@@ -274,25 +193,6 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
                 if (m == "GET")         lc->addMethod(GET);
                 else if (m == "POST")   lc->addMethod(POST);
                 else if (m == "DELETE") lc->addMethod(DELETE);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-void ConfigBuilderVisitor::_handleUpstreamDirective(Directive& d, UpstreamConfig* uc)
-{
-    switch (d.name.getType())
-    {
-        case ParserTokenType::PT_SERVER_DIRECTIVE:
-            if (!d.values.empty())
-            {
-                UpstreamServer us;
-                us._ip = d.values[0].getContent();
-                if (d.values.size() > 1)
-                    us._weight = std::atoi(d.values[1].getContent().c_str());
-                uc->addServer(us);
             }
             break;
         default:

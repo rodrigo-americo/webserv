@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketEvent.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:16:18 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:37:28 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/05 16:43:24 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <vector>
 # include <string>
+# include <iostream>
 
 class Socket;
 
@@ -30,6 +31,8 @@ struct SocketEvent
 };
 
 typedef std::vector<SocketEvent>	SocketEventList;
+
+std::ostream	&operator<<(std::ostream &os, const SocketEvent &ev);
 
 
 #endif

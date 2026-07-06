@@ -14,28 +14,19 @@ void ServerConfig::addChild(ConfigNode* child)
 
 const LocationConfig* ServerConfig::match_location(const std::string& uri) const
 {
-    const LocationConfig* best_prefix = NULL;
-    const LocationConfig* best_none = NULL;
+    const LocationConfig* best = NULL;
+    size_t best_len = 0;
 
     for (std::list<LocationConfig*>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
     {
         if (!(*it)->matches(uri))
             continue;
-        LocationModifier mod = (*it)->getModifier();
-        if (mod == MOD_EXACT)
-            return *it;
-        if (mod == MOD_PREFIX)
+        size_t len = (*it)->getPath().getCleanPath().string().size();
+        if (!best || len > best_len)
         {
-            if (!best_prefix || (*it)->getPath().size() > best_prefix->getPath().size())
-                best_prefix = *it;
-        }
-        else
-        {
-            if (!best_none || (*it)->getPath().size() > best_none->getPath().size())
-                best_none = *it;
+            best = *it;
+            best_len = len;
         }
     }
-    if (best_prefix)
-        return best_prefix;
-    return best_none;
+    return (best);
 }

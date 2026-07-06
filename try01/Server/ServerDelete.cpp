@@ -6,26 +6,23 @@
 
 void Server::_serveDelete(const Router &router)
 {
-    std::string upload_dir = router.config_location->getUploadDir();
-
-    std::string filename = router.req.path.getFilename().string();
-    size_t slash = filename.rfind('/');
-    if (slash != std::string::npos)
-        filename = filename.substr(slash + 1);
-
-    if (filename.empty())
+    Path upload_dir = Path(router.config_location->getUploadDir());
+    Path filename = Path(router.req.path.getFilename());
+    if (!filename.isNormalizable())
         return router.error.badRequest();
 
-    std::string file_path = upload_dir + "/" + filename;
+    Path file_path = upload_dir + filename;
 
-    if (file_path.find("..") != std::string::npos)
+    if (!file_path.isNormalizable())
         return router.error.forbiden();
 
-    struct stat st;
-    if (stat(file_path.c_str(), &st) != 0 || !S_ISREG(st.st_mode))
+    FileSystem fs(file_path.getCleanPath());
+    if (!fs.exists())
         return router.error.notFound();
+    if (!fs.isFile())
+        return router.error.forbiden();
 
-    if (std::remove(file_path.c_str()) != 0)
+    if (std::remove(file_path.getPath().c_str()) != 0)
         return router.error.internalServerError();
 
     router.res.statusCode(200, "OK");

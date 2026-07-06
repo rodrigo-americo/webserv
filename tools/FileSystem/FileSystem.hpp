@@ -40,6 +40,9 @@ public:
 	FileSystem(const utils::str &path)
 		: _path(path), _stat(), _exists(false), _isfile(false), _isdir(false),
 		_isreadable(false), _iswritable(false), _isexecutable(false) { _init(); };
+	FileSystem()
+		: _path(), _stat(), _exists(false), _isfile(false), _isdir(false),
+		_isreadable(false), _iswritable(false), _isexecutable(false) {};
 	~FileSystem() {};
 
 	FileSystem	&operator=(const FileSystem &other)
@@ -64,6 +67,13 @@ public:
 	bool							isReadable() const { return _isreadable; }
 	bool							isWritable() const { return _iswritable; }
 	bool							isExecutable() const { return _isexecutable; }
+
+	FileSystem	&resetTo(const Path &path)
+	{
+		_path = path;
+		_init();
+		return *this;
+	}
 
 	FileSystem	&cd(const Path &path)
 	{
@@ -128,7 +138,7 @@ public:
 		const char* units_db[] = {"B", "KB", "MB", "GB", "TB"};
 
 		double	bytes = size();
-		size_t	unit;
+		size_t	unit = 0;
 		while (bytes >= 1024 && unit < 4)
 		{
 			bytes /= 1024;
@@ -137,6 +147,24 @@ public:
 		std::stringstream	ss;
 		ss << std::fixed << std::setprecision(2) << bytes << " " << units_db[unit];
 		return ss.str();
+	}
+
+	Path	getUniquePathTo(const Path &incomming)
+	{
+		utils::str	basename = incomming.getBasename();
+		Path		new_path = (_path + incomming);
+		utils::str	path = new_path.getPath();
+		utils::str	dir = new_path.getLastDir();
+		struct stat st;
+		int n = 1;
+		while (stat(path.c_str(), &st) == 0)
+		{
+			std::ostringstream oss;
+			oss << dir << "/" << basename << "(" << n << ")" << incomming.getExtension();
+			path = oss.str();
+			n++;
+		}
+		return Path(path);
 	}
 };
 

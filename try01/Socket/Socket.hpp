@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Socket.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/09 11:21:30 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 18:58:56 by ighannam         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
@@ -47,20 +35,11 @@ class Socket: public segregation::has_type<SocketType::type>
 		SocketAddress				_addr;
 		std::vector<std::string>	_errors;
 
-	void	_close() 
-	{ 
-		if (_fd > 2)
-		{
-			LOG_TRACE("is closing fd: " << _fd << "\n");
-			::close(_fd);
-		} 
-	}
-
 	public:
 		Socket(type _type): base(_type), _fd(-1), _addr(), _errors() {};
 		Socket(type _type, int fd): base(_type), _fd(fd), _addr(), _errors() {};
 		Socket(const Socket& other): base(other._type), _fd(other._fd), _addr(other._addr), _errors(other._errors) {LOG_TRACE("copy contructor Socket called " << other._fd << "\n");};
-		~Socket() { _close(); };
+		~Socket() { close(); };
 
 		ssize_t	read(size_t bytes, std::string &buff) const
 		{
@@ -69,6 +48,18 @@ class Socket: public segregation::has_type<SocketType::type>
 			if (bytes_read > 0)
 				buff += std::string(buffer, bytes_read);
 			return bytes_read;
+		}
+
+		int	close()
+		{
+			if (_fd > 2)
+			{
+				LOG_TRACE("is closing fd: " << _fd);
+				int status = ::close(_fd);
+				_fd = -1;
+				return status;
+			}
+			return 0;
 		}
 
 		void	write(const std::string &data) const

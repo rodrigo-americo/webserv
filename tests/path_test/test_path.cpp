@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 10:16:15 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/04 10:35:41 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/05 14:27:13 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,63 +20,63 @@
 
 int test_normalize_simple_absolute_path()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getNormalizedPath() == "/foo/bar",
 		"test_normalize_simple_absolute_path", LINE_DATA());
 }
 
 int test_normalize_root_path()
 {
-	Path p("/");
+	Path p(utils::str("/"));
 	return assert_true(p.getNormalizedPath() == "/",
 		"test_normalize_root_path", LINE_DATA());
 }
 
 int test_normalize_removes_dot_segments()
 {
-	Path p("/foo/./bar");
+	Path p(utils::str("/foo/./bar"));
 	return assert_true(p.getNormalizedPath() == "/foo/bar",
 		"test_normalize_removes_dot_segments", LINE_DATA());
 }
 
 int test_normalize_resolves_dotdot_segments()
 {
-	Path p("/foo/bar/../baz");
+	Path p(utils::str("/foo/bar/../baz"));
 	return assert_true(p.getNormalizedPath() == "/foo/baz",
 		"test_normalize_resolves_dotdot_segments", LINE_DATA());
 }
 
 int test_normalize_collapses_double_slashes()
 {
-	Path p("//foo//bar");
+	Path p(utils::str("//foo//bar"));
 	return assert_true(p.getNormalizedPath() == "/foo/bar",
 		"test_normalize_collapses_double_slashes", LINE_DATA());
 }
 
 int test_normalize_strips_trailing_slash()
 {
-	Path p("/foo/bar/");
+	Path p(utils::str("/foo/bar/"));
 	return assert_true(p.getNormalizedPath() == "/foo/bar",
 		"test_normalize_strips_trailing_slash", LINE_DATA());
 }
 
 int test_normalize_rejects_traversal_above_root()
 {
-	Path p("/../foo");
+	Path p(utils::str("/../foo"));
 	return assert_true(p.getNormalizedPath().empty(),
 		"test_normalize_rejects_traversal_above_root", LINE_DATA());
 }
 
 int test_normalize_rejects_multiple_traversal_above_root()
 {
-	Path p("/foo/../..");
+	Path p(utils::str("/foo/../.."));
 	return assert_true(p.getNormalizedPath().empty(),
 		"test_normalize_rejects_multiple_traversal_above_root", LINE_DATA());
 }
 
 int test_normalize_empty_input_stays_empty()
 {
-	Path p("");
+	Path p(utils::str(""));
 	return assert_true(p.getNormalizedPath().empty(),
 		"test_normalize_empty_input_stays_empty", LINE_DATA());
 }
@@ -85,21 +85,21 @@ int test_normalize_empty_input_stays_empty()
 
 int test_normalize_relative_path_stays_relative()
 {
-	Path p("foo/bar");
+	Path p(utils::str("foo/bar"));
 	return assert_true(p.getNormalizedPath() == "foo/bar",
 		"test_normalize_relative_path_stays_relative", LINE_DATA());
 }
 
 int test_normalize_relative_dot_segment_removed()
 {
-	Path p("foo/./bar");
+	Path p(utils::str("foo/./bar"));
 	return assert_true(p.getNormalizedPath() == "foo/bar",
 		"test_normalize_relative_dot_segment_removed", LINE_DATA());
 }
 
 int test_normalize_relative_dotdot_resolves()
 {
-	Path p("foo/bar/../baz");
+	Path p(utils::str("foo/bar/../baz"));
 	return assert_true(p.getNormalizedPath() == "foo/baz",
 		"test_normalize_relative_dotdot_resolves", LINE_DATA());
 }
@@ -111,7 +111,7 @@ int test_normalize_relative_dotdot_resolves()
 // decida que ele precisa mudar.
 int test_normalize_relative_fully_resolved_becomes_absolute_root_quirk()
 {
-	Path p("a/..");
+	Path p(utils::str("a/.."));
 	return assert_true(p.getNormalizedPath() == "/",
 		"test_normalize_relative_fully_resolved_becomes_absolute_root_quirk", LINE_DATA());
 }
@@ -120,21 +120,21 @@ int test_normalize_relative_fully_resolved_becomes_absolute_root_quirk()
 
 int test_is_normalizable_valid_path_returns_true()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.isNormalizable(),
 		"test_is_normalizable_valid_path_returns_true", LINE_DATA());
 }
 
 int test_is_normalizable_traversal_above_root_returns_false()
 {
-	Path p("/../foo");
+	Path p(utils::str("/../foo"));
 	return assert_true(!p.isNormalizable(),
 		"test_is_normalizable_traversal_above_root_returns_false", LINE_DATA());
 }
 
 int test_is_normalizable_empty_input_returns_false()
 {
-	Path p("");
+	Path p(utils::str(""));
 	return assert_true(!p.isNormalizable(),
 		"test_is_normalizable_empty_input_returns_false", LINE_DATA());
 }
@@ -143,7 +143,7 @@ int test_is_normalizable_empty_input_returns_false()
 
 int test_get_path_returns_original_unmodified_input()
 {
-	Path p("/foo/../bar");
+	Path p(utils::str("/foo/../bar"));
 	return assert_true(p.getPath() == "/foo/../bar",
 		"test_get_path_returns_original_unmodified_input", LINE_DATA());
 }
@@ -152,28 +152,28 @@ int test_get_path_returns_original_unmodified_input()
 
 int test_query_string_extracted_after_question_mark()
 {
-	Path p("/foo/bar?x=1");
+	Path p(utils::str("/foo/bar?x=1"));
 	return assert_true(p.getQueryString() == "x=1",
 		"test_query_string_extracted_after_question_mark", LINE_DATA());
 }
 
 int test_query_string_empty_when_no_question_mark()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getQueryString().empty(),
 		"test_query_string_empty_when_no_question_mark", LINE_DATA());
 }
 
 int test_clean_path_strips_query_string()
 {
-	Path p("/foo/bar?x=1");
+	Path p(utils::str("/foo/bar?x=1"));
 	return assert_true(p.getCleanPath() == "/foo/bar",
 		"test_clean_path_strips_query_string", LINE_DATA());
 }
 
 int test_clean_path_equals_normalized_when_no_query()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getCleanPath() == p.getNormalizedPath(),
 		"test_clean_path_equals_normalized_when_no_query", LINE_DATA());
 }
@@ -182,63 +182,63 @@ int test_clean_path_equals_normalized_when_no_query()
 
 int test_filename_simple_case()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	return assert_true(p.getFilename() == "bar.html",
 		"test_filename_simple_case", LINE_DATA());
 }
 
 int test_filename_excludes_leading_slash()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	return assert_true(p.getFilename()[0] != '/',
 		"test_filename_excludes_leading_slash", LINE_DATA());
 }
 
 int test_filename_no_extension()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getFilename() == "bar",
 		"test_filename_no_extension", LINE_DATA());
 }
 
 int test_filename_root_path_is_empty()
 {
-	Path p("/");
+	Path p(utils::str("/"));
 	return assert_true(p.getFilename().empty(),
 		"test_filename_root_path_is_empty", LINE_DATA());
 }
 
 int test_filename_dot_in_directory_not_treated_as_file_dot()
 {
-	Path p("/foo.bar/baz");
+	Path p(utils::str("/foo.bar/baz"));
 	return assert_true(p.getFilename() == "baz",
 		"test_filename_dot_in_directory_not_treated_as_file_dot", LINE_DATA());
 }
 
 int test_filename_not_corrupted_by_query_string()
 {
-	Path p("/foo/bar?file=a.txt");
+	Path p(utils::str("/foo/bar?file=a.txt"));
 	return assert_true(p.getFilename() == "bar",
 		"test_filename_not_corrupted_by_query_string", LINE_DATA());
 }
 
 int test_filename_not_corrupted_by_slash_in_query_string()
 {
-	Path p("/foo/bar?redirect=/home");
+	Path p(utils::str("/foo/bar?redirect=/home"));
 	return assert_true(p.getFilename() == "bar",
 		"test_filename_not_corrupted_by_slash_in_query_string", LINE_DATA());
 }
 
 int test_filename_relative_without_slash_with_extension()
 {
-	Path p("bar.txt");
+	Path p(utils::str("bar.txt"));
 	return assert_true(p.getFilename() == "bar.txt",
 		"test_filename_relative_without_slash_with_extension", LINE_DATA());
 }
 
 int test_filename_relative_without_slash_no_extension()
 {
-	Path p("bar");
+	Path p(utils::str("bar"));
 	return assert_true(p.getFilename() == "bar",
 		"test_filename_relative_without_slash_no_extension", LINE_DATA());
 }
@@ -247,49 +247,49 @@ int test_filename_relative_without_slash_no_extension()
 
 int test_extension_simple_case()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	return assert_true(p.getExtension() == ".html",
 		"test_extension_simple_case", LINE_DATA());
 }
 
 int test_extension_empty_when_no_dot()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getExtension().empty(),
 		"test_extension_empty_when_no_dot", LINE_DATA());
 }
 
 int test_extension_ignores_dot_in_directory_name()
 {
-	Path p("/foo.bar/baz");
+	Path p(utils::str("/foo.bar/baz"));
 	return assert_true(p.getExtension().empty(),
 		"test_extension_ignores_dot_in_directory_name", LINE_DATA());
 }
 
 int test_extension_not_leaked_from_query_string()
 {
-	Path p("/foo/bar?file=a.txt");
+	Path p(utils::str("/foo/bar?file=a.txt"));
 	return assert_true(p.getExtension().empty(),
 		"test_extension_not_leaked_from_query_string", LINE_DATA());
 }
 
 int test_extension_correct_alongside_query_string()
 {
-	Path p("/foo/bar.js?v=2");
+	Path p(utils::str("/foo/bar.js?v=2"));
 	return assert_true(p.getExtension() == ".js",
 		"test_extension_correct_alongside_query_string", LINE_DATA());
 }
 
 int test_extension_relative_without_slash()
 {
-	Path p("bar.txt");
+	Path p(utils::str("bar.txt"));
 	return assert_true(p.getExtension() == ".txt",
 		"test_extension_relative_without_slash", LINE_DATA());
 }
 
 int test_extension_relative_without_slash_no_dot()
 {
-	Path p("bar");
+	Path p(utils::str("bar"));
 	return assert_true(p.getExtension().empty(),
 		"test_extension_relative_without_slash_no_dot", LINE_DATA());
 }
@@ -300,7 +300,7 @@ int test_extension_relative_without_slash_no_dot()
 // e o basename correspondente fica vazio. Ver test_basename_dotfile_without_slash_quirk.
 int test_extension_dotfile_without_slash_quirk()
 {
-	Path p(".htaccess");
+	Path p(utils::str(".htaccess"));
 	return assert_true(p.getExtension() == ".htaccess",
 		"test_extension_dotfile_without_slash_quirk", LINE_DATA());
 }
@@ -309,49 +309,49 @@ int test_extension_dotfile_without_slash_quirk()
 
 int test_basename_simple_case()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	return assert_true(p.getBasename() == "bar",
 		"test_basename_simple_case", LINE_DATA());
 }
 
 int test_basename_equals_filename_when_no_extension()
 {
-	Path p("/foo/bar");
+	Path p(utils::str("/foo/bar"));
 	return assert_true(p.getBasename() == "bar",
 		"test_basename_equals_filename_when_no_extension", LINE_DATA());
 }
 
 int test_basename_root_path_is_empty()
 {
-	Path p("/");
+	Path p(utils::str("/"));
 	return assert_true(p.getBasename().empty(),
 		"test_basename_root_path_is_empty", LINE_DATA());
 }
 
 int test_basename_ignores_dot_in_directory_name()
 {
-	Path p("/foo.bar/baz");
+	Path p(utils::str("/foo.bar/baz"));
 	return assert_true(p.getBasename() == "baz",
 		"test_basename_ignores_dot_in_directory_name", LINE_DATA());
 }
 
 int test_basename_relative_without_slash_with_extension()
 {
-	Path p("bar.txt");
+	Path p(utils::str("bar.txt"));
 	return assert_true(p.getBasename() == "bar",
 		"test_basename_relative_without_slash_with_extension", LINE_DATA());
 }
 
 int test_basename_relative_without_slash_no_extension()
 {
-	Path p("bar");
+	Path p(utils::str("bar"));
 	return assert_true(p.getBasename() == "bar",
 		"test_basename_relative_without_slash_no_extension", LINE_DATA());
 }
 
 int test_basename_dotfile_without_slash_quirk()
 {
-	Path p(".htaccess");
+	Path p(utils::str(".htaccess"));
 	return assert_true(p.getBasename().empty(),
 		"test_basename_dotfile_without_slash_quirk", LINE_DATA());
 }
@@ -360,35 +360,35 @@ int test_basename_dotfile_without_slash_quirk()
 
 int test_last_dir_simple_case()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	return assert_true(p.getLastDir() == "/foo/",
 		"test_last_dir_simple_case", LINE_DATA());
 }
 
 int test_last_dir_nested()
 {
-	Path p("/a/b/c.txt");
+	Path p(utils::str("/a/b/c.txt"));
 	return assert_true(p.getLastDir() == "/a/b/",
 		"test_last_dir_nested", LINE_DATA());
 }
 
 int test_last_dir_root_path()
 {
-	Path p("/");
+	Path p(utils::str("/"));
 	return assert_true(p.getLastDir() == "/",
 		"test_last_dir_root_path", LINE_DATA());
 }
 
 int test_last_dir_ignores_dot_in_directory_name()
 {
-	Path p("/foo.bar/baz");
+	Path p(utils::str("/foo.bar/baz"));
 	return assert_true(p.getLastDir() == "/foo.bar/",
 		"test_last_dir_ignores_dot_in_directory_name", LINE_DATA());
 }
 
 int test_last_dir_relative_without_slash_stays_empty()
 {
-	Path p("bar.txt");
+	Path p(utils::str("bar.txt"));
 	return assert_true(p.getLastDir().empty(),
 		"test_last_dir_relative_without_slash_stays_empty", LINE_DATA());
 }
@@ -397,8 +397,8 @@ int test_last_dir_relative_without_slash_stays_empty()
 
 int test_concat_no_slashes_adds_separator()
 {
-	Path base("/foo");
-	Path rel("bar");
+	Path base(utils::str("/foo"));
+	Path rel(utils::str("bar"));
 	Path result = base + rel;
 	return assert_true(result.getNormalizedPath() == "/foo/bar",
 		"test_concat_no_slashes_adds_separator", LINE_DATA());
@@ -406,8 +406,8 @@ int test_concat_no_slashes_adds_separator()
 
 int test_concat_right_leading_slash_no_double_slash()
 {
-	Path base("/foo");
-	Path rel("/bar");
+	Path base(utils::str("/foo"));
+	Path rel(utils::str("/bar"));
 	Path result = base + rel;
 	return assert_true(result.getNormalizedPath() == "/foo/bar",
 		"test_concat_right_leading_slash_no_double_slash", LINE_DATA());
@@ -415,8 +415,8 @@ int test_concat_right_leading_slash_no_double_slash()
 
 int test_concat_left_root_no_double_slash()
 {
-	Path base("/");
-	Path rel("/bar");
+	Path base(utils::str("/"));
+	Path rel(utils::str("/bar"));
 	Path result = base + rel;
 	return assert_true(result.getNormalizedPath() == "/bar",
 		"test_concat_left_root_no_double_slash", LINE_DATA());
@@ -424,8 +424,8 @@ int test_concat_left_root_no_double_slash()
 
 int test_concat_left_clean_path_trailing_slash_no_double_slash()
 {
-	Path base("/foo/?x=1");
-	Path rel("/bar");
+	Path base(utils::str("/foo/?x=1"));
+	Path rel(utils::str("/bar"));
 	Path result = base + rel;
 	return assert_true(result.getNormalizedPath() == "/foo/bar",
 		"test_concat_left_clean_path_trailing_slash_no_double_slash", LINE_DATA());
@@ -433,8 +433,8 @@ int test_concat_left_clean_path_trailing_slash_no_double_slash()
 
 int test_concat_invalid_left_operand_yields_invalid_result()
 {
-	Path invalid("/../foo");
-	Path valid("/bar");
+	Path invalid(utils::str("/../foo"));
+	Path valid(utils::str("/bar"));
 	Path result = invalid + valid;
 	return assert_true(!result.isNormalizable(),
 		"test_concat_invalid_left_operand_yields_invalid_result", LINE_DATA());
@@ -442,8 +442,8 @@ int test_concat_invalid_left_operand_yields_invalid_result()
 
 int test_concat_invalid_right_operand_yields_invalid_result()
 {
-	Path valid("/foo");
-	Path invalid("/../bar");
+	Path valid(utils::str("/foo"));
+	Path invalid(utils::str("/../bar"));
 	Path result = valid + invalid;
 	return assert_true(!result.isNormalizable(),
 		"test_concat_invalid_right_operand_yields_invalid_result", LINE_DATA());
@@ -453,7 +453,7 @@ int test_concat_invalid_right_operand_yields_invalid_result()
 
 int test_print_contains_normalized_path()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	std::ostringstream oss;
 	oss << p;
 	return assert_true(oss.str().find("/foo/bar.html") != std::string::npos,
@@ -462,7 +462,7 @@ int test_print_contains_normalized_path()
 
 int test_print_contains_filename()
 {
-	Path p("/foo/bar.html");
+	Path p(utils::str("/foo/bar.html"));
 	std::ostringstream oss;
 	oss << p;
 	return assert_true(oss.str().find("filename=bar.html") != std::string::npos,
@@ -471,7 +471,7 @@ int test_print_contains_filename()
 
 int test_print_contains_query_string()
 {
-	Path p("/foo/bar?x=1");
+	Path p(utils::str("/foo/bar?x=1"));
 	std::ostringstream oss;
 	oss << p;
 	return assert_true(oss.str().find("query string=x=1") != std::string::npos,

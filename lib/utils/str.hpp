@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   str.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/18 17:02:24 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/05 13:56:59 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,10 +106,10 @@ namespace utils
 		 * make all the characters `lowercase`.
 		 * @attention modifies the current `str`
 		 */
-		str				&tolower()
+		str &tolower()
 		{
 			for (size_t i = 0; i < size(); i++)
-				_str[i] = std::tolower(_str[i]);
+				_str[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(_str[i])));
 			return *this;
 		}
 		/**

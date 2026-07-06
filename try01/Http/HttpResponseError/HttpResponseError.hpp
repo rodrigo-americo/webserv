@@ -36,7 +36,10 @@ private:
 			std::ostringstream ss;
 			ss << file.rdbuf();
 			body(ss.str());
+			headers.content_type("text/html");
+			LOG_DEBUG("body error: " << body());
 		}
+
 	}
 
 	void	_defaultErrorPage()
@@ -64,6 +67,7 @@ private:
 		const std::map<int, std::string>& pages = _server_config->getErrorPages();
 		LOG_DEBUG("pages size: " << pages.size());
 		std::map<int, std::string>::const_iterator it = pages.find(status_code);
+		LOG_DEBUG("found custom error page: " << (it != pages.end()));
 		if (it == pages.end())
 			return _defaultErrorPage();
 		_addFileContent(it->second);
@@ -76,7 +80,7 @@ private:
 
 	void	_buildError()
 	{
-		LOG_DEBUG("has serber config: " << !!_server_config);
+		LOG_DEBUG("has server config: " << !!_server_config);
 		if (!_server_config)
 			return _defaultErrorPage();
 		_errorPage();

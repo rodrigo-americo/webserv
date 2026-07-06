@@ -52,7 +52,7 @@ private:
         {
            _normalized_path = "/";
         }
-        
+
     }
 
     void buildQueryString()
@@ -71,7 +71,7 @@ private:
         else
             _clean_path = _normalized_path;
     }
-    
+
     void buildExtension()
     {
         if (_clean_path.empty() || _ext_pos == utils::str::npos)
@@ -100,7 +100,7 @@ private:
         else
             _basename = _filename;
     }
-    
+
     void builLastDir()
     {
         if (_clean_path.empty())
@@ -108,9 +108,8 @@ private:
         if (_last_slash_pos != utils::str::npos)
             _last_dir = _clean_path.substr(0, _last_slash_pos + 1);
     }
-    
-public:
-    Path(const utils::str& path_) : _path(path_)
+
+    void init()
     {
         normalizePath();
         if (_normalized_path.empty())
@@ -124,28 +123,34 @@ public:
         buildFilename();
         buildBasename();
         builLastDir();
-    };
-    
+    }
+
+public:
+    Path(): _ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos), _q_pos(utils::str::npos){};
+    Path(const utils::str& path_) : _path(path_) ,_ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos),
+      _q_pos(utils::str::npos) { init(); }
+    Path(const std::string& path_) : _path(utils::str(path_)) ,_ext_pos(utils::str::npos), _last_slash_pos(utils::str::npos),
+      _q_pos(utils::str::npos) { init(); }
     ~Path() {};
-    utils::str getFilename() const { return _filename; }
-    utils::str getBasename() const { return _basename; }
-    utils::str getExtension() const { return _extension; }
-    utils::str getPath() const { return _path; }
-    utils::str getNormalizedPath() const { return _normalized_path; }
-    utils::str getQueryString() const { return _query_string; }
-    utils::str getCleanPath() const { return _clean_path; }
-    utils::str getLastDir() const { return _last_dir; }
+    const utils::str &getFilename() const { return _filename; }
+    const utils::str &getBasename() const { return _basename; }
+    const utils::str &getExtension() const { return _extension; }
+    const utils::str &getPath() const { return _path; }
+    const utils::str &getNormalizedPath() const { return _normalized_path; }
+    const utils::str &getQueryString() const { return _query_string; }
+    const utils::str &getCleanPath() const { return _clean_path; }
+    const utils::str &getLastDir() const { return _last_dir; }
     bool isNormalizable() const
     {
         return (!_normalized_path.empty());
     }
-    
+
     Path operator+(const Path& other) const
     {
         utils::str result_path_str;
         if (_clean_path.empty() || other._clean_path.empty())
-            return Path("");
-        
+            return Path(utils::str(""));
+
         if (_clean_path[_clean_path.size() - 1] == '/')
         {
             if (other._clean_path[0] == '/')
@@ -162,7 +167,7 @@ public:
         }
         return Path(result_path_str);
     }
-    
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Path& p)

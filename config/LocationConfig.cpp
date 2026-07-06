@@ -3,17 +3,16 @@
 
 bool LocationConfig::matches(const std::string& uri) const
 {
-    if (_modifier == MOD_NONE || _modifier == MOD_PREFIX)
-        return ( uri.substr(0, _path.size()) == _path);
-    else if (_modifier == MOD_EXACT)
-        return (uri == _path);
-    else
+    const std::string p = _path.getCleanPath().string();
+    if (uri.compare(0, p.size(), p) != 0)
         return (false);
+    if (uri.size() == p.size())
+        return (true);
+    return (uri[p.size()] == '/' || (!p.empty() && p[p.size() - 1] == '/'));
 }
 
-
-const std::string &LocationConfig::resolveRoot() const{
-	if (!_root.empty() || !_parent)
-		return _root;
-	return _parent->getRoot();
+const Path &LocationConfig::resolveRoot() const {
+    if (_root.isNormalizable() || !_parent)
+        return (_root);
+    return (_parent->getRoot());
 }

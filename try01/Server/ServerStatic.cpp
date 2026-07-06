@@ -11,9 +11,11 @@
 static std::string _mimeType(const FileSystem fs)
 {
 	LOG_INFO("mime_type...");
-    size_t dot = fs.path().getPath().rfind('.');
-    if (dot == std::string::npos) return "application/octet-stream";
-    utils::str ext = fs.path().getPath().substr(dot);
+    //size_t dot = fs.path().getPath().rfind('.');
+    //if (dot == std::string::npos) return "application/octet-stream";
+     if (fs.path().getExtension().empty()) return "application/octet-stream";
+    //utils::str ext = fs.path().getPath().substr(dot);
+    utils::str ext = fs.path().getExtension();
     if (ext == ".html") return "text/html";
     if (ext == ".css")  return "text/css";
     if (ext == ".js")   return "application/javascript";
@@ -27,7 +29,6 @@ static std::string _mimeType(const FileSystem fs)
 
 void Server::_serveAutoIndex(const Router &router, const FileSystem &fs)
 {
-    // DIR *dir = opendir(dir_path.c_str());
     if (!fs.exists())
     {
         LOG_WARN("autoindex: Path not found '" << fs.path().getPath() << "'");
@@ -55,53 +56,15 @@ void Server::_serveAutoIndex(const Router &router, const FileSystem &fs)
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
-		utils::str size_str = "-";
-		if (children[i].isFile())
-			size_str = children[i].sizeStr();
+		utils::str size_str;
+		size_str = children[i].sizeStr();
 
-		utils::str	name = children[i].path().getFilename();
-		utils::str display = children[i].isDir() ? name + "/" : name;
-        utils::str href = router.req.path.getCleanPath().string() + display;
+        Path name(children[i].isDir() ? children[i].path().getFilename() + "/" : children[i].path().getFilename());
+        utils::str href = (router.req.path + name).getCleanPath();
 
-		body += "<tr><td><a href=\"" + href + "\">" + display + "</a></td>";
+		body += "<tr><td><a href=\"" + href + "\">" + name.getCleanPath() + "</a></td>";
         body += "<td class=\"size\">" + size_str + "</td></tr>";
 	}
-
-
-    // struct dirent *entry;
-    // while ((entry = readdir(dir)) != NULL)
-    // {
-    //     std::string name = entry->d_name;
-    //     if (name == ".") continue;
-
-    //     std::string full = dir_path + name;
-    //     struct stat st;
-    //     bool is_dir = false;
-    //     std::string size_str = "-";
-
-    //     if (stat(full.c_str(), &st) == 0)
-    //     {
-    //         is_dir = S_ISDIR(st.st_mode);
-    //         if (!is_dir)
-    //         {
-    //             std::ostringstream oss;
-    //             if (st.st_size < 1024)
-    //                 oss << st.st_size << " B";
-    //             else if (st.st_size < 1024 * 1024)
-    //                 oss << st.st_size / 1024 << " KB";
-    //             else
-    //                 oss << st.st_size / (1024 * 1024) << " MB";
-    //             size_str = oss.str();
-    //         }
-    //     }
-
-    //     std::string display = is_dir ? name + "/" : name;
-    //     std::string href = router.req.path.getCleanPath().string() + display;
-
-    //     body += "<tr><td><a href=\"" + href + "\">" + display + "</a></td>";
-    //     body += "<td class=\"size\">" + size_str + "</td></tr>";
-    // }
-    // closedir(dir);
 
     body += "</table></body></html>";
 
@@ -115,15 +78,13 @@ void Server::_serveAutoIndex(const Router &router, const FileSystem &fs)
 void Server::_serveStatic(const Router &router)
 {
 	LOG_INFO("static server.");
-    std::string root = router.config_location->resolveRoot();
 
-    std::string file_path = root + router.req.path.getCleanPath();
+    Path path = router.config_location->resolveRoot() + router.req.path;
+    std::string file_path =  path.getCleanPath().string(); //root + router.req.path.getCleanPath();
     if (!router.req.path.isNormalizable())
     {
-        std::cout << "!req.path.isNormalizable() \n";
         return router.error.forbiden();
     }
-
 	LOG_INFO("path '" << router.req.path << "' is normalized");
 
 	FileSystem	fs(file_path);
@@ -138,6 +99,7 @@ void Server::_serveStatic(const Router &router)
         for (std::list<std::string>::const_iterator it = indexes.begin(); it != indexes.end(); ++it)
         {
             std::string candidate = file_path + *it;
+            LOG_DEBUG("candidate: " << candidate);
             std::ifstream f(candidate.c_str());
             if (f.good()) { found = true; fs.cd(Path(*it)); break; }
         }
@@ -145,6 +107,7 @@ void Server::_serveStatic(const Router &router)
         {
             if (router.config_location->getAutoIndex())
                 return _serveAutoIndex(router, fs);
+            LOG_DEBUG("sending forbiden...");
             return router.error.forbiden();
         }
     }
