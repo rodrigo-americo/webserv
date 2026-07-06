@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerPoll.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/02 10:47:07 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/05 16:53:29 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class MultiplexerPoll: public IMultiplexer
 		sockets	_sockets;
 		pollfds	_pollfds;
 		int		_timeout_ms;
-		sockets _pending_deletion; 
+		sockets _pending_deletion;
 
 	public:
 		MultiplexerPoll(): _sockets(), _pollfds(), _timeout_ms(-1) {};
@@ -57,7 +57,7 @@ class MultiplexerPoll: public IMultiplexer
 		void remove(Socket *socket)
 		{
 			if (!socket) return;
-
+			LOG_TRACE("MULTIPLEXER remove fd: " << socket->fd());
 			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), socket);
 			if (it == _sockets.end() || *it != socket)
 				return;

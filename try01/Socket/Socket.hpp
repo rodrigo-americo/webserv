@@ -50,11 +50,11 @@ class Socket: public segregation::has_type<SocketType::type>
 			return bytes_read;
 		}
 
-		int	close() 
-		{ 
+		int	close()
+		{
 			if (_fd > 2)
 			{
-				LOG_TRACE("is closing fd: " << _fd << "\n");
+				LOG_TRACE("is closing fd: " << _fd);
 				int status = ::close(_fd);
 				_fd = -1;
 				return status;

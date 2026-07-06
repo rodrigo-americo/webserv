@@ -16,8 +16,9 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "HttpResponseError.hpp"
-# include "FileSystem.hpp"
-# include "Router.hpp"
+#include "FileSystem.hpp"
+#include "Router.hpp"
+#include "Cgi.hpp"
 
 void Server::_serveCgi(const Router &router)
 {
@@ -68,6 +69,7 @@ void Server::_serveCgi(const Router &router)
         close(fds_stdin[0]);
         close(fds_stdout[1]);
 
+		LOG_TRACE("CHILD_PROCESS: execute CGI CD to " << script_path.getLastDir().c_str());
         if (chdir(script_path.getLastDir().c_str()) == -1)
             _exit(1);
         utils::str filename = router.req.path.getFilename();
@@ -79,7 +81,9 @@ void Server::_serveCgi(const Router &router)
         for (size_t i = 0; i < env.size(); ++i)
             envp.push_back(const_cast<char *>(env[i].c_str()));
         envp.push_back(NULL);
+		// LOG_TRACE("execve CGI child process.");
         execve(interpreter.c_str(), &argv[0], &envp[0]);
+		// LOG_ERROR("execve CGI Error.");
         _exit(1);
     }
     else
@@ -100,6 +104,11 @@ void Server::_serveCgi(const Router &router)
         CgiProcess *cgi = new CgiProcess(router.res.getConn(), router.req, stdin_pipe, stdout_pipe, pid_child);
         ConnectionPool::getInstance().addCgi(cgi);
     }
+}
+
+void Server::_serveCgi2(Router &router)
+{
+	router.cgi.createProcess();
 }
 
 static std::string _envEntry(const std::string &key, const std::string &value)

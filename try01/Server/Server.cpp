@@ -17,13 +17,13 @@ bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMeth
     return false;
 }
 
-void Server::_dispatch(const Router &router)
+void Server::_dispatch(Router &router)
 {
     const std::map<std::string, std::string>& cgi_ext = router.config_location->getCgiExtensions();
     if (!cgi_ext.empty())
     {
         if (cgi_ext.count(router.req.path.getExtension().string()))
-            return _serveCgi(router);
+            return _serveCgi2(router);
     }
     if (router.req.method == RequestMethod::POST && !router.config_location->getUploadDir().empty())
         return _serveUpload(router);

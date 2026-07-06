@@ -9,7 +9,7 @@
 class Pipe
 {
 private:
-	
+
 	int	_close(PipeChannel *channel)
 	{
 		if (!channel) return 0;
@@ -32,7 +32,23 @@ public:
 			return;
 		}
 		read = new PipeChannel(SocketType::PIPE_READ, fds[0]);
+		if (!read)
+		{
+			error = true;
+			return;
+		}
 		write = new PipeChannel(SocketType::PIPE_WRITE, fds[1]);
+		if (!write)
+		{
+			delete read;
+			error = true;
+		}
+		if (read->hasErrors() || write->hasErrors())
+		{
+			delete read;
+			delete write;
+			error = true;
+		}
 	};
 	~Pipe() {};
 
@@ -54,5 +70,11 @@ public:
 		return status;
 	}
 };
+
+inline std::ostream	&operator<<(std::ostream &os, const Pipe &pipe)
+{
+	os << "Pipe(" << pipe.read->fd() << ", " << pipe.write->fd() << ")";
+	return os;
+}
 
 #endif

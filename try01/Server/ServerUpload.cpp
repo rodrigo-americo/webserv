@@ -5,6 +5,7 @@
 
 # include "Router.hpp"
 # include "Path.hpp"
+# include "UploadFactoyry.hpp"
 
 static std::string _uniquePath(const std::string &dir, const std::string &filename)
 {
@@ -167,4 +168,12 @@ void Server::_serveUpload(const Router &router)
     }
     else
         _handleOctetStream(router, upload_dir);
+}
+
+void Server::_serveUpload2(const Router &router)
+{
+	UploadHandler	*handler = UploadFactoyry::create(&router);
+	if (!handler)
+		return;
+	handler->saveFile();
 }
