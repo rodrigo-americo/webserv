@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 19:59:52 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:00:19 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 19:09:20 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,8 @@ public:
 		.add(ParserTokenType::PT_PROXY_CACHE_BYPASS, schema::unsigned_integer().between(1, unlimited).name("proxy_cache_bypass args amount"))
 		.add(ParserTokenType::PT_FASTCGI_INDEX, schema::unsigned_integer().between(1, 1).name("fastcgi_index args amount"))
 		.add(ParserTokenType::PT_UPLOAD_DIR, schema::unsigned_integer().between(1, 1).name("upload_dir args amount"))
-		.add(ParserTokenType::PT_ALLOW_METHODS, schema::unsigned_integer().between(1, 3).name("allow_methods args amount"));
+		.add(ParserTokenType::PT_ALLOW_METHODS, schema::unsigned_integer().between(1, 3).name("allow_methods args amount"))
+		.add(ParserTokenType::PT_REQUIRE_AUTH, schema::unsigned_integer().between(1, 1).name("required auth args amount"));
 	}
 
 	/**

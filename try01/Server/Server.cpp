@@ -5,6 +5,7 @@
 #include "Logger.hpp"
 #include "HttpResponseError.hpp"
 # include "Router.hpp"
+#include "SessionManager.hpp"
 
 bool Server::_methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed)
 {
@@ -63,6 +64,23 @@ void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
         res.headers["Location"] = redir.second;
         res.send(ResponseHTTPVersion::HTTP_1_1);
         return;
+    }
+    if (req.path.getCleanPath() == "/login")
+    {
+        std::string id = SessionManager::getInstance().create();
+        if (id.size() == 0)
+            return router.error.internalServerError();
+        res.statusCode(200, "OK");
+        res.headers["Set-Cookie"] = "session_id=" + id;
+        res.body("Login realizado.");
+        res.send(ResponseHTTPVersion::HTTP_1_1);
+        return;
+    }
+    if (router.config_location->getRequireAuth())
+    {
+        std::string session_id = req.headers.getCookieValue("session_id");
+        if (session_id.empty() || !SessionManager::getInstance().isValid(session_id))
+            return router.error.forbiden();
     }
     _dispatch(router);
 }

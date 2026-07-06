@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 16:47:55 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 20:13:33 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 19:14:18 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,7 +265,8 @@ class ScopeValidatorBuilder
 				.withDirectiveOnScope(ParserTokenType::PT_PROXY_CACHE_BYPASS, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_HTTP).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_TRY_FILES, ParserTokenType::PT_LOCATION).andOn(ParserTokenType::PT_SERVER)
 				.withDirectiveOnScope(ParserTokenType::PT_UPLOAD_DIR, ParserTokenType::PT_LOCATION)
-				.withDirectiveOnScope(ParserTokenType::PT_ALLOW_METHODS, ParserTokenType::PT_LOCATION);
+				.withDirectiveOnScope(ParserTokenType::PT_ALLOW_METHODS, ParserTokenType::PT_LOCATION)
+				.withDirectiveOnScope(ParserTokenType::PT_REQUIRE_AUTH, ParserTokenType::PT_LOCATION);
 		}
 
 		/**

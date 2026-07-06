@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 17:40:15 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/28 19:58:04 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 18:42:16 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ public:
 		_parser.addDirectiveKeyword("ssl_ciphers", ParserTokenType::PT_SSL_CIPHERS);
 		_parser.addDirectiveKeyword("upload_dir", ParserTokenType::PT_UPLOAD_DIR);
 		_parser.addDirectiveKeyword("allow_methods", ParserTokenType::PT_ALLOW_METHODS);
+		_parser.addDirectiveKeyword("require_auth", ParserTokenType::PT_REQUIRE_AUTH);
 		return *this;
 	}
 

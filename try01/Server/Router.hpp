@@ -26,7 +26,7 @@ public:
 	Router(const HttpRequest &req, HttpResponse &res, const WebServerConfig *config)
 		: _config_global(config), req(req), res(res),
 		config_server(config->match_server(req.port, req.headers.host())),
-		config_location(config_server ? config_server->match_location(req.path.getPath().string()) : NULL),
+		config_location(config_server ? config_server->match_location(req.path.getCleanPath().string()) : NULL),
 		error(*this), cgi(*this)
 		{
 			(void)_config_global;

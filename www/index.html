@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>webserv — 42 Lisboa</title>
+    <title>webserv — 42 São Paulo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -95,6 +95,68 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            margin-top: 1.6rem;
+        }
+
+        .btn {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 0.55rem 1.1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid transparent;
+            transition: filter 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+
+        .btn-login {
+            background: #1f6feb22;
+            color: #58a6ff;
+            border-color: #1f6feb44;
+        }
+        .btn-login:hover { filter: brightness(1.15); }
+
+        .btn-secret {
+            background: #3fb95022;
+            color: #3fb950;
+            border-color: #3fb95044;
+        }
+        .btn-secret:hover { filter: brightness(1.15); }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+        }
+
+        .login-notice {
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .login-notice.ok {
+            background: #3fb95022;
+            color: #3fb950;
+            border: 1px solid #3fb95044;
+        }
+        .login-notice.err {
+            background: #f8514922;
+            color: #f85149;
+            border: 1px solid #f8514944;
         }
 
         .grid {
@@ -203,12 +265,17 @@
 <main>
     <div class="hero">
         <h1>Servidor <em>HTTP</em> do zero</h1>
-        <p>Projeto 42 Lisboa — servidor web não-bloqueante escrito em C++98<br>
+        <p>Projeto 42 São Paulo — servidor web não-bloqueante escrito em C++98<br>
         sem bibliotecas externas, com suporte a virtual hosts e CGI.</p>
         <div class="status-line">
             <div class="dot"></div>
             servidor online na porta 8080
         </div>
+        <div class="hero-actions">
+            <button type="button" id="login-btn" class="btn btn-login">🔐 Login</button>
+            <a href="/secrets/secret_page.html" class="btn btn-secret">🕵️ Acessar página secreta</a>
+        </div>
+        <div id="login-notice" class="login-notice" hidden></div>
     </div>
 
     <div class="grid">
@@ -263,6 +330,43 @@
     <span>branch: <a href="#">feature/response</a></span>
     <span>rodrigo-americo · bruno-valero · ighannam</span>
 </footer>
+
+<script>
+    const loginBtn = document.getElementById('login-btn');
+    const loginNotice = document.getElementById('login-notice');
+
+    loginBtn.addEventListener('click', async () => {
+        loginBtn.disabled = true;
+        const originalLabel = loginBtn.textContent;
+        loginBtn.textContent = '🔐 Entrando...';
+        loginNotice.hidden = true;
+
+        try {
+            // Assume: /login é GET, sem corpo, e cria a sessão no servidor
+            // ao ser chamada (setando o cookie session_id via Set-Cookie).
+            // Se a rota exigir POST no seu servidor, troque o method abaixo.
+            const res = await fetch('/login', {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
+
+            if (res.ok) {
+                loginNotice.textContent = '✅ Login realizado com sucesso — sessão criada.';
+                loginNotice.className = 'login-notice ok';
+            } else {
+                loginNotice.textContent = '⚠️ Falha no login (status ' + res.status + ').';
+                loginNotice.className = 'login-notice err';
+            }
+        } catch (err) {
+            loginNotice.textContent = '⚠️ Erro de rede ao chamar /login.';
+            loginNotice.className = 'login-notice err';
+        } finally {
+            loginNotice.hidden = false;
+            loginBtn.disabled = false;
+            loginBtn.textContent = originalLabel;
+        }
+    });
+</script>
 
 </body>
 </html>
