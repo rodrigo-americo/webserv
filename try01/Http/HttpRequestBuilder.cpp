@@ -3,6 +3,11 @@
 void RequestBuilder::_processHeader(size_t header_end){
 	if (!_is_request_line_processed){
 		_cursor = _buffer.find_first_of(' ');
+		if (_cursor == std::string::npos)
+		{ 
+			_has_error = true;
+			return;
+		}
 		std::string line_method = _buffer.substr(0, _cursor);
 		if (line_method == "GET")
 			_req.method = RequestMethod::GET;

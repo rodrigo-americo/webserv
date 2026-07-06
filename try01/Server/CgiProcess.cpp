@@ -59,41 +59,41 @@ bool CgiProcess::isExpired(time_t now, time_t timeout_secs) const
     return (now - _start_time) > timeout_secs;
 }
 
-// static SetCookie parseSetCookieValue(const std::string& value)
-// {
-//     SetCookie cookie;
-//     size_t start = 0;
-//     while (start <= value.size())
-//     {
-//         size_t semi = value.find(';', start);
-//         utils::str segment = (semi == utils::str::npos) ? value.substr(start) : value.substr(start, semi - start);
-//         segment.trim();
-//         if (!segment.empty())
-//         {
-//             size_t eq = segment.find('=');
-//             if (eq == utils::str::npos)
-//                 cookie.addKeyValue(segment.string(), "");
-//             else
-//                 cookie.addKeyValue(segment.substr(0, eq).string(), segment.substr(eq + 1).string());
-//         }
-//         if (semi == utils::str::npos) break;
-//         start = semi + 1;
-//     }
-//     return cookie;
-// }
+static SetCookie parseSetCookieValue(const std::string& value)
+{
+    SetCookie cookie;
+    size_t start = 0;
+    while (start <= value.size())
+    {
+        size_t semi = value.find(';', start);
+        utils::str segment = (semi == utils::str::npos) ? value.substr(start) : value.substr(start, semi - start);
+        segment.trim();
+        if (!segment.empty())
+        {
+            size_t eq = segment.find('=');
+            if (eq == utils::str::npos)
+                cookie.addKeyValue(segment.string(), "");
+            else
+                cookie.addKeyValue(segment.substr(0, eq).string(), segment.substr(eq + 1).string());
+        }
+        if (semi == utils::str::npos) break;
+        start = semi + 1;
+    }
+    return cookie;
+}
 
-// static void applyCgiHeaders(HttpResponse& res, const CgiResponseParse& parsed)
-// {
-//     for (size_t i = 0; i < parsed.getHeaders().size(); ++i)
-//     {
-//         const utils::str& key = (parsed.getHeaders())[i].first;
-//         const utils::str& value = (parsed.getHeaders())[i].second;
-//         if (key.tolower_const() == "set-cookie")
-//             res.headers.addSetCookie(parseSetCookieValue(value.string()));
-//         else
-//             (res.headers)[key.string()] = value.string();
-//     }
-// }
+static void applyCgiHeaders(HttpResponse& res, const CgiResponseParse& parsed)
+{
+    for (size_t i = 0; i < parsed.getHeaders().size(); ++i)
+    {
+        const utils::str& key = (parsed.getHeaders())[i].first;
+        const utils::str& value = (parsed.getHeaders())[i].second;
+        if (key.tolower_const() == "set-cookie")
+            res.headers.addSetCookie(parseSetCookieValue(value.string()));
+        else
+            (res.headers)[key.string()] = value.string();
+    }
+}
 
 void CgiProcess::buildAndSendResponse()
 {
@@ -108,7 +108,7 @@ void CgiProcess::buildAndSendResponse()
         return;
     }
     res.statusCode(parsed.getStatusCode(), parsed.getStatusMsg());
-    //applyCgiHeaders(res, parsed);
+    applyCgiHeaders(res, parsed);
     res.body(parsed.getBody());
     res.send(ResponseHTTPVersion::HTTP_1_1);
 

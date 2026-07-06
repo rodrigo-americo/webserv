@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeaders.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 21:56:02 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 17:34:24 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/05 13:54:41 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <map>
 # include <vector>
 # include <string>
+
+#include "str.hpp"
 
 class SetCookie
 {
@@ -34,10 +36,18 @@ public:
 	const std::vector<std::pair<std::string, std::string> >	&getItems() const { return _set_cookie; }
 };
 
+struct CaseInsensitiveCompare
+{
+	bool operator()(const std::string &a, const std::string &b) const
+	{
+		return utils::str(a).tolower().string() < utils::str(b).tolower().string();
+	}
+};
+
 class HttpHeaders
 {
 	public:
-		typedef std::map<std::string, std::string>	Headers;
+		typedef std::map<std::string, std::string, CaseInsensitiveCompare>	Headers;
 		typedef Headers::iterator								iterator;
 		typedef Headers::const_iterator								const_iterator;
 	private:
