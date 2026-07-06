@@ -53,7 +53,6 @@ bool	Cgi::_settupError()
 void	Cgi::_execute() const
 {
 	// Logger::levelTrace();
-	LOG_TRACE("CHILD_PROCESS: executting CGI child process.");
 	LOG_TRACE("CHILD_PROCESS: execute CGI closing " << *_pipe_in.write << ", " << *_pipe_out.read);
 	if (_pipe_in.write->close() == -1 || _pipe_out.read->close()  == -1)
 	{
@@ -113,17 +112,9 @@ void	Cgi::createProcess()
 		_execute();
 	if (pid_child != 0)
 	{
-		LOG_ERROR("CGI applyFcntl.");
-		_pipe_in.applyFcntl();
-		_pipe_out.applyFcntl();
-		if (_pipe_in.error || _pipe_out.error)
-		{
-			_pipe_in.close();
-			_pipe_out.close();
-			::kill(pid_child, SIGKILL);
-			waitpid(pid_child, NULL, 0);
-			return _router.error.internalServerError();
-		}
+		_pipe_in.closeRead();
+		_pipe_out.closeWrite();
+
 		LOG_TRACE("adding CGI process to Connection Pool.");
 		CgiProcess		*process = new CgiProcess(_router.res.getConn(), _router.req, _pipe_in.write, _pipe_out.read, pid_child);
 		ConnectionPool::getInstance().addCgi(process);

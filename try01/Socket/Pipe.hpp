@@ -69,12 +69,6 @@ public:
 		status.second = closeWrite();
 		return status;
 	}
-
-	void applyFcntl()
-	{
-		read->applyFcntl();
-		write->applyFcntl();
-	}
 };
 
 inline std::ostream	&operator<<(std::ostream &os, const Pipe &pipe)
