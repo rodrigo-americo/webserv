@@ -26,7 +26,7 @@ void Server::_dispatch(Router &router)
             return _serveCgi2(router);
     }
     if (router.req.method == RequestMethod::POST && !router.config_location->getUploadDir().empty())
-        return _serveUpload(router);
+        return _serveUpload2(router);
     if (router.req.method == RequestMethod::DELETE && !router.config_location->getUploadDir().empty())
         return _serveDelete(router);
     _serveStatic(router);
