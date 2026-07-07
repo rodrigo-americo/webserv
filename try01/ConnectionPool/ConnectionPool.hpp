@@ -10,6 +10,7 @@
 # include <sys/wait.h>
 # include <ctime>
 
+# include "signal.hpp"
 # include "singleton.hpp"
 # include "IMultiplexer.hpp"
 # include "Server.hpp"
@@ -229,8 +230,9 @@ public:
 	void	waitConnections()
 	{
 		std::cout << "Waitting for connections!\n";
-		while (true)
+		while (!g_stop)
 		{
+			
 			time_t now = time(NULL);
 			std::list<CgiProcess*>::iterator cit = _running_cgis.begin();
 			while (cit != _running_cgis.end())
