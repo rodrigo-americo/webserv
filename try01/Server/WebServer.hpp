@@ -20,7 +20,7 @@ public:
 	WebServer();
 	~WebServer();
 	void start(WebServerConfig* config);
-	void clean_up();
+	void clean_up(){std::cout << "limpando!! \n";};
 };
 
 #endif
