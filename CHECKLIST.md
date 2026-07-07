@@ -42,8 +42,8 @@
 - [x] Escuta múltiplas portas simultaneamente
 - [x] Lida corretamente com múltiplos clientes conectados ao mesmo tempo
 - [ ] Lida com desconexão inesperada de clientes sem travar/crashar
-- [ ] Compatível com navegador web real (testado com Chrome/Firefox/etc.)
-- [ ] Comportamento comparado/validado contra NGINX quando há dúvidas
+- [x] Compatível com navegador web real (testado com Chrome/Firefox/etc.)
+- [x] Comportamento comparado/validado contra NGINX quando há dúvidas
 
 ---
 
@@ -53,12 +53,12 @@
 - [x] Suporta método **POST**
 - [x] Suporta método **DELETE**
 - [x] Códigos de status HTTP retornados são precisos/corretos
-- [ ] Páginas de erro **padrão** existem quando nenhuma é configurada
+- [x] Páginas de erro **padrão** existem quando nenhuma é configurada
 - [x] Serve um site **totalmente estático** (HTML, CSS, imagens etc.)
 - [x] Suporta **upload de arquivos** vindos do cliente
 - [x] Parsing correto de request line, headers e body
 - [x] Lida com corpos com `Content-Length`
-- [ ] Lida com `chunked transfer encoding` (desagrupar chunks)
+- [x] Lida com `chunked transfer encoding` (desagrupar chunks)
 - [x] Host virtual **não é obrigatório** (fora do escopo, mas pode implementar)
 
 ---
