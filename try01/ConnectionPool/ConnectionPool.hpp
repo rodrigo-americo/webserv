@@ -78,7 +78,7 @@ private:
 		return NULL;
 	}
 
-	std::list<CgiProcess*>::iterator _findCgiByPipe(Socket *pipe_socket)
+	std::list<CgiProcess*>::iterator _findCgiByPipe(FileDescriptor *pipe_socket)
 	{
 		for (std::list<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 		{
@@ -201,16 +201,17 @@ private:
             _multiplexer->remove(conn);
 	}
 
-public:
-	ConnectionPool(): _multiplexer(NULL) { }
-	~ConnectionPool() {}
-
-	void setMultiplexer(IMultiplexer *multiplexer)
+	void _setMultiplexer(IMultiplexer *multiplexer)
 	{
 		_multiplexer = multiplexer;
 	}
 
-	bool	addListenner(Socket *socket, Server *server)
+	IMultiplexer	*_getMultiplexer()
+	{
+		return _multiplexer;
+	}
+
+	bool	_addListenner(Socket *socket, Server *server)
 	{
 		if (!socket || !socket->isValid()) return false;
 		_multiplexer->add(socket);
@@ -218,13 +219,69 @@ public:
 		return true;
 	}
 
-	bool addPipe(Socket *pipe_socket)
+	bool _addFileDescriptor(FileDescriptor *file_descriptor)
 	{
-		if (!pipe_socket || !pipe_socket->isValid())
+		if (!file_descriptor || !file_descriptor->isValid())
 			return false;
-		_multiplexer->add(pipe_socket);
+		_multiplexer->add(file_descriptor);
 		return true;
 	}
+
+	void _addCgi(CgiProcess *cgi)
+	{
+		if (!cgi) return;
+		_multiplexer->add(cgi->stdinPipe());
+		_multiplexer->add(cgi->stdoutPipe());
+		_running_cgis.push_back(cgi);
+	}
+
+public:
+	ConnectionPool(): _multiplexer(NULL) { }
+	~ConnectionPool() {}
+
+	static void	multiplexer(IMultiplexer *multiplexer)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._setMultiplexer(multiplexer);
+	}
+
+	static void	addListenner(Socket *socket, Server *server)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._addListenner(socket, server);
+	}
+
+	static void addFileDescriptor(FileDescriptor *file_descriptor)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._addFileDescriptor(file_descriptor);
+	}
+
+	static void removeFileDescriptor(FileDescriptor *file_descriptor)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._getMultiplexer()->remove(file_descriptor);
+		delete file_descriptor;
+	}
+
+	static void untrackFileDescriptor(FileDescriptor *file_descriptor)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._getMultiplexer()->remove(file_descriptor);
+	}
+
+	static void addCgi(CgiProcess *cgi)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._addCgi(cgi);
+	}
+
+	// static void removeCgi(CgiProcess *cgi)
+	// {
+	// 	ConnectionPool	&instance = ConnectionPool::getInstance();
+	// 	instance._getMultiplexer()->remove(file_descriptor);
+	// 	delete file_descriptor;
+	// }
 
 	void	waitConnections()
 	{
@@ -246,31 +303,31 @@ public:
 					++cit;
 			}
 			// _processPendingRequests();
-			SocketEventList	events;
+			ConnectionEventList	events;
 			std::string error = _multiplexer->wait(events);
 			if (!error.empty())
 				std::cerr << error << std::endl;
 			if (events.empty()) continue;
 			for (size_t i = 0; i < events.size(); i++)
 			{
-				SocketEvent	event = events[i];
+				ConnectionEvent	event = events[i];
 
-				if (event.socket->getType() == SocketType::LISTENNER)
+				if (event.file_descriptor->getType() == FileDescriptorType::SOCKET_LISTENNER)
 				{
 					if (!event.error.empty())
 					{
 						std::cerr << event.error << std::endl;
-						_multiplexer->remove(event.socket);
+						_multiplexer->remove(event.file_descriptor);
 						continue;
 					}
-					SocketConnection	*connection = new SocketConnection(event.socket);
+					SocketConnection	*connection = new SocketConnection(static_cast<Socket*>(event.file_descriptor));
 					if (!connection->isValid()) { delete connection; continue; }
-					_multiplexer->add(connection);
+					ConnectionPool::addFileDescriptor(connection);
 					continue;
 				}
-				else if (event.socket->getType() == SocketType::CONNECTION)
+				else if (event.file_descriptor->getType() == FileDescriptorType::SOCKET_CONNECTION)
 				{
-					SocketConnection	*conn = static_cast<SocketConnection*>(event.socket);
+					SocketConnection	*conn = static_cast<SocketConnection*>(event.file_descriptor);
 					if (!event.error.empty() || event.eof)
 					{
 						std::list<CgiProcess*>::iterator cit = _findCgiByClient(conn);
@@ -317,13 +374,13 @@ public:
 						}
 					}
 				}
-				else if (event.socket->getType() == SocketType::PIPE_READ)
+				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_READ)
 				{
-					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.socket);
+					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
 					if (cit == _running_cgis.end())
 					{
-						LOG_TRACE("CGI pipe read not found: " << event.socket->fd());
-						_multiplexer->remove(event.socket);
+						LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
+						_multiplexer->remove(event.file_descriptor);
 						continue;
 					}
 					LOG_TRACE("PIPE_READ: " << event);
@@ -333,13 +390,13 @@ public:
 					if ((*cit)->isDone())
 						_cleanupCgi(cit, CGI_NORMAL);
 				}
-				else if (event.socket->getType() == SocketType::PIPE_WRITE)
+				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_WRITE)
 				{
-					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.socket);
+					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
 					if (cit == _running_cgis.end())
 					{
-						LOG_TRACE("CGI pipe write not found: " << event.socket->fd());
-						_multiplexer->remove(event.socket);
+						LOG_TRACE("CGI pipe write not found: " << event.file_descriptor->fd());
+						_multiplexer->remove(event.file_descriptor);
 						continue;
 					}
 					LOG_TRACE("PIPE_WRITE: " << event);
@@ -354,19 +411,11 @@ public:
 				}
 				else
 				{
-					std::cerr << "unknown socket type " << event.socket->getType() << "\n";
+					std::cerr << "unknown socket type " << event.file_descriptor->getType() << "\n";
 				}
 			}
 			_multiplexer->flushRemovals();
 		}
-	}
-
-	void addCgi(CgiProcess *cgi)
-	{
-		if (!cgi) return;
-		_multiplexer->add(cgi->stdinPipe());
-		_multiplexer->add(cgi->stdoutPipe());
-		_running_cgis.push_back(cgi);
 	}
 };
 

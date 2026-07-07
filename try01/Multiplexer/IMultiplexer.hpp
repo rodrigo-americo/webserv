@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IMultiplexer.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:58:06 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/01 11:23:17 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/07 13:55:19 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,16 @@
 
 # include <string>
 
-# include "SocketEvent.hpp"
+# include "ConnectionEvent.hpp"
 
-class Socket;
+class FileDescriptor;
 
 struct IMultiplexer
 {
 	virtual ~IMultiplexer() {};
-	virtual void		add(Socket *socket) = 0;
-	virtual void		remove(Socket *socket) = 0;
-	virtual std::string	wait(SocketEventList &events) = 0;
+	virtual void		add(FileDescriptor *file_descriptor) = 0;
+	virtual void		remove(FileDescriptor *file_descriptor) = 0;
+	virtual std::string	wait(ConnectionEventList &events) = 0;
 	virtual void		setTimeout(int timeout_ms) = 0;
 	virtual void flushRemovals() = 0;
 };

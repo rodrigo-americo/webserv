@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/05 16:53:29 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/07 13:53:20 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 class MultiplexerPoll: public IMultiplexer
 {
 	private:
-		typedef std::vector<Socket *>	sockets;
+		typedef std::vector<FileDescriptor *>	sockets;
 		typedef std::vector<pollfd>		pollfds;
 		sockets	_sockets;
 		pollfds	_pollfds;
@@ -36,30 +36,30 @@ class MultiplexerPoll: public IMultiplexer
 		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerPoll() {};
 
-		void add(Socket *socket)
+		void add(FileDescriptor *file_descriptor)
 		{
-			if (!socket) return;
-			if (std::binary_search(_sockets.begin(), _sockets.end(), socket))
+			if (!file_descriptor) return;
+			if (std::binary_search(_sockets.begin(), _sockets.end(), file_descriptor))
 				return;
 
 			pollfd	poll_fd;
 
-			poll_fd.fd		= socket->fd();
+			poll_fd.fd		= file_descriptor->fd();
 			poll_fd.events	= POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL;
 			poll_fd.revents	= 0;
 
-			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), socket);
+			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), file_descriptor);
 			size_t	idx = it - _sockets.begin();
-			_sockets.insert(it, socket);
+			_sockets.insert(it, file_descriptor);
 			_pollfds.insert(_pollfds.begin() + idx, poll_fd);
 		}
 
-		void remove(Socket *socket)
+		void remove(FileDescriptor *file_descriptor)
 		{
-			if (!socket) return;
-			LOG_TRACE("MULTIPLEXER remove fd: " << socket->fd());
-			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), socket);
-			if (it == _sockets.end() || *it != socket)
+			if (!file_descriptor) return;
+			LOG_TRACE("MULTIPLEXER remove fd: " << file_descriptor->fd());
+			sockets::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), file_descriptor);
+			if (it == _sockets.end() || *it != file_descriptor)
 				return;
 			size_t	idx = it - _sockets.begin();
 			_pending_deletion.push_back(*it);
@@ -74,7 +74,7 @@ class MultiplexerPoll: public IMultiplexer
             _pending_deletion.clear();
         }
 
-		std::string wait(SocketEventList &events)
+		std::string wait(ConnectionEventList &events)
 		{
 			events.clear();
 			if (_pollfds.empty()) return "";
@@ -84,8 +84,8 @@ class MultiplexerPoll: public IMultiplexer
 			{
 				if (_pollfds[i].revents == 0)
 					continue;
-				SocketEvent		event;
-				event.socket	= _sockets[i];
+				ConnectionEvent		event;
+				event.file_descriptor	= _sockets[i];
 				event.readable	= _pollfds[i].revents & POLLIN;
 				event.writable	= _pollfds[i].revents & POLLOUT;
 				if (_pollfds[i].revents & POLLERR)

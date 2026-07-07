@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/01 15:24:01 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/07 17:52:18 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,14 +60,14 @@ void WebServer::start(WebServerConfig* config)
 	_multiplexer = _createMultiplexer(config);
 
 	ConnectionPool& pool = ConnectionPool::getInstance();
-	pool.setMultiplexer(_multiplexer);
+	ConnectionPool::multiplexer(_multiplexer);
 
 	Server* srv = new Server(config);
 	_servers.push_back(srv);
 
 	const std::list<ServerConfig*>& servers = config->getServers();
 	for (std::list<ServerConfig*>::const_iterator it = servers.begin(); it != servers.end(); it++)
-	{	
+	{
 		const std::list<ConfigServerListen>& listens = (*it)->getListen();
 		for (std::list<ConfigServerListen>::const_iterator lit = listens.begin(); lit != listens.end(); lit++)
 		{

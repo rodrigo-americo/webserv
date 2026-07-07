@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerSelect.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:44:46 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/01 17:15:03 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/07 13:56:28 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,37 +23,37 @@
 class MultiplexerSelect: public IMultiplexer
 {
 	private:
-		typedef std::map<int, Socket*>	sockets;
-		sockets	_sockets;
-		fd_set	_main_read_set;
-		fd_set	_main_write_set;
-		fd_set	_main_error_set;
-		int		_max_fd;
-		int		_timeout_ms;
-		sockets _pending_deletion;
+		typedef std::map<int, FileDescriptor*>	file_descriptors;
+		file_descriptors	_sockets;
+		fd_set				_main_read_set;
+		fd_set				_main_write_set;
+		fd_set				_main_error_set;
+		int					_max_fd;
+		int					_timeout_ms;
+		file_descriptors	_pending_deletion;
 
 	public:
 		MultiplexerSelect(): _sockets(), _main_read_set(), _main_write_set(), _main_error_set(), _max_fd(0), _timeout_ms(-1) {};
 		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
 		~MultiplexerSelect() {};
 
-		void add(Socket *socket)
+		void add(FileDescriptor *file_descriptor)
 		{
-			if (!socket) return;
+			if (!file_descriptor) return;
 
-			FD_SET(socket->fd(), &_main_read_set);
-			FD_SET(socket->fd(), &_main_write_set);
-			FD_SET(socket->fd(), &_main_error_set);
-			_sockets[socket->fd()] = socket;
-			if (socket->fd() > _max_fd)
-				_max_fd = socket->fd();
+			FD_SET(file_descriptor->fd(), &_main_read_set);
+			FD_SET(file_descriptor->fd(), &_main_write_set);
+			FD_SET(file_descriptor->fd(), &_main_error_set);
+			_sockets[file_descriptor->fd()] = file_descriptor;
+			if (file_descriptor->fd() > _max_fd)
+				_max_fd = file_descriptor->fd();
 		}
 
-		void remove(Socket *socket)
+		void remove(FileDescriptor *file_descriptor)
 		{
-			if (!socket) return;
+			if (!file_descriptor) return;
 
-			sockets::iterator	it = _sockets.find(socket->fd());
+			file_descriptors::iterator	it = _sockets.find(file_descriptor->fd());
 			if (it == _sockets.end()) return;
 			FD_CLR(it->first, &_main_read_set);
 			FD_CLR(it->first, &_main_write_set);
@@ -64,12 +64,12 @@ class MultiplexerSelect: public IMultiplexer
 
 		void flushRemovals()
         {
-            for (sockets::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
+            for (file_descriptors::iterator it = _pending_deletion.begin(); it != _pending_deletion.end(); ++it)
                 delete it->second;
             _pending_deletion.clear();
         }
 
-		std::string wait(SocketEventList &events)
+		std::string wait(ConnectionEventList &events)
 		{
 			events.clear();
 
@@ -94,18 +94,18 @@ class MultiplexerSelect: public IMultiplexer
 			int ret = select(_max_fd + 1, &read_set, &write_set, &error_set, tvp);
 			if (ret < 0)
 				return strerror(errno);
-			for (sockets::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
+			for (file_descriptors::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
 			{
-				SocketEvent		event;
+				ConnectionEvent		event;
 				int				fd = it->first;
-				event.socket	= it->second;
+				event.file_descriptor	= it->second;
 				event.readable	= FD_ISSET(fd, &read_set);
 				event.writable	= FD_ISSET(fd, &write_set);
 				if (FD_ISSET(fd, &error_set))
 				{
 					int			err;
 					socklen_t	len = sizeof(err);
-					if (Socket::usesGetSockOpt(event.socket->getType()))
+					if (Socket::usesGetSockOpt(event.file_descriptor->getType()))
 					{
 						if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len) < 0)
 						{

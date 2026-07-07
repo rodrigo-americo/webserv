@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketListenner.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:37:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/29 17:46:26 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/07 13:36:41 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ class SocketListenner: public Socket
 		}
 
 	public:
-		SocketListenner(const ConfigServerListen &listenner, size_t worker_connections): Socket(SocketType::LISTENNER)
+		SocketListenner(const ConfigServerListen &listenner, size_t worker_connections): Socket(FileDescriptorType::SOCKET_LISTENNER)
 		{
 			int domain = listenner.is_unix ? AF_UNIX : (listenner.is_ipv6 ? AF_INET6 : AF_INET);
 			fd(socket(domain, SOCK_STREAM, 0));

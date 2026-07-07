@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketConnection.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/04 15:05:28 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/07 19:16:58 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,15 +25,15 @@ class SocketConnection: public Socket
 {
 	private:
 		const Socket *_listenner;
-		std::string	_out_headers;
-		size_t		_out_headers_off;
+		std::string	_total_bytes;
+		size_t		_bytes_processed;
 		int			_out_file_fd;
 		off_t		_out_file_off;
 		size_t		_out_file_left;
 
 	public:
-		SocketConnection(const Socket *listenner): Socket(SocketType::CONNECTION), _listenner(listenner),
-			_out_headers(), _out_headers_off(0), _out_file_fd(-1), _out_file_off(0), _out_file_left(0)
+		SocketConnection(const Socket *listenner): Socket(FileDescriptorType::SOCKET_CONNECTION), _listenner(listenner),
+			_total_bytes(), _bytes_processed(0), _out_file_fd(-1), _out_file_off(0), _out_file_left(0)
 		{
 			socklen_t	len = _addr.size();
 			fd(accept(_listenner->fd(), _addr.ptr(), &len));
@@ -54,7 +54,7 @@ class SocketConnection: public Socket
 			std::cout << "client connected! fd: " << fd() << std::endl;
 		}
 		SocketConnection(const SocketConnection& other): Socket(other), _listenner(other._listenner),
-			_out_headers(other._out_headers), _out_headers_off(other._out_headers_off),
+			_total_bytes(other._total_bytes), _bytes_processed(other._bytes_processed),
 			_out_file_fd(-1), _out_file_off(0), _out_file_left(0)
 		{ LOG_TRACE("copy contructor SocketConnection called " << other.fd() << "\n"); };
 
@@ -68,13 +68,13 @@ class SocketConnection: public Socket
 
 		bool	hasPendingWrite() const
 		{
-			return _out_headers_off < _out_headers.size() || _out_file_fd >= 0;
+			return _bytes_processed < _total_bytes.size() || _out_file_fd >= 0;
 		}
 
 		void	queueWrite(const utils::str &data)
 		{
-			_out_headers = data.string();
-			_out_headers_off = 0;
+			_total_bytes = data.string();
+			_bytes_processed = 0;
 		}
 
 		bool	queueFile(const utils::str &path, size_t size)
@@ -89,11 +89,11 @@ class SocketConnection: public Socket
 
 		void	flushWrite()
 		{
-			if (_out_headers_off < _out_headers.size())
+			if (_bytes_processed < _total_bytes.size())
 			{
-				ssize_t n = ::write(fd(), _out_headers.data() + _out_headers_off, _out_headers.size() - _out_headers_off);
+				ssize_t n = ::write(fd(), _total_bytes.data() + _bytes_processed, _total_bytes.size() - _bytes_processed);
 				if (n > 0)
-					_out_headers_off += static_cast<size_t>(n);
+					_bytes_processed += static_cast<size_t>(n);
 				return;
 			}
 			if (_out_file_fd < 0)

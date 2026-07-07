@@ -31,13 +31,13 @@ public:
 			error = true;
 			return;
 		}
-		read = new PipeChannel(SocketType::PIPE_READ, fds[0]);
+		read = new PipeChannel(FileDescriptorType::PIPE_READ, fds[0]);
 		if (!read)
 		{
 			error = true;
 			return;
 		}
-		write = new PipeChannel(SocketType::PIPE_WRITE, fds[1]);
+		write = new PipeChannel(FileDescriptorType::PIPE_WRITE, fds[1]);
 		if (!write)
 		{
 			delete read;

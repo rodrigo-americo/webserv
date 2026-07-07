@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 15:23:36 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/11 15:45:54 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/07 17:52:47 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,9 @@ SocketListenner	*makeListenner(int port = 8080)
 
 int main()
 {
-	ConnectionPool	&pool = ConnectionPool::getInstance();
-	pool.setMultiplexer(new MultiplexerEpoll());
-	Server	*server = new Server();
-	pool.addListenner(makeListenner(), server);
-	pool.waitConnections();
+	// ConnectionPool	&pool = ConnectionPool::getInstance();
+	// pool.setMultiplexer(new MultiplexerEpoll());
+	// Server	*server = new Server();
+	// pool.addListenner(makeListenner(), server);
+	// pool.waitConnections();
 }
