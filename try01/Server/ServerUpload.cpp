@@ -172,8 +172,11 @@ void Server::_serveUpload(const Router &router)
 
 void Server::_serveUpload2(const Router &router)
 {
+	LOG_TRACE("_serveUpload2()");
 	UploadHandler	*handler = UploadFactoyry::create(&router);
 	if (!handler)
-		return;
+		return router.error.unsupportedMediaType();
+	LOG_TRACE("upload.media_type: " << handler->mediaType());
 	handler->saveFile();
+	delete handler;
 }

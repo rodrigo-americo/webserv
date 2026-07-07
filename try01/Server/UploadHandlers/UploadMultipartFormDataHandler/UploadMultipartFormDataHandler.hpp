@@ -1,7 +1,12 @@
 #ifndef UPLOAD_MULTIPART_HANDLER_HPP
 # define UPLOAD_MULTIPART_HANDLER_HPP
 
+# include <utility>
+
 # include "UploadFactoyry.hpp"
+# include "UploadMultipartFormDataIterator.hpp"
+
+class Router;
 
 class UploadMultipartFormDataHandler: public UploadHandler, public UploadFactoyryRegister<UploadMultipartFormDataHandler>
 {
@@ -16,6 +21,7 @@ class UploadMultipartFormDataHandler: public UploadHandler, public UploadFactoyr
 
 		UploadHandler	*copy(const Router *router);
 		void			saveFile();
+		void			saveFile2();
 };
 
 #endif
