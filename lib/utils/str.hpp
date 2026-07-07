@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   str.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 19:09:08 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/05 13:56:59 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/06 22:11:53 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef STR_HPP
 # define STR_HPP
 
+# include <iostream>
 # include <sstream>
 # include <string>
 # include <cstring>
@@ -328,6 +329,19 @@ namespace utils
 		size_t			find(const T &__str, size_t pos = 0) const
 		{
 			return	_str.find(__str, pos);
+		}
+
+		template<typename T>
+		size_t			count(const T &__str, size_t pos = 0) const
+		{
+			size_t	counter = 0;
+			size_t	idx = _str.find(__str, pos);
+			while (idx != npos)
+			{
+				idx = find(__str, idx + 1);
+				++counter;
+			}
+			return counter;
 		}
 
 		/**

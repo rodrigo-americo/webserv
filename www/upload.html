@@ -89,13 +89,18 @@
             line-height: 1.6;
         }
 
-        .drop-text strong { color: #58a6ff; cursor: pointer; }
+        .drop-text strong { color: #58a6ff; }
 
-        #file-name {
-            margin-top: 0.75rem;
+        #file-list {
+            margin-top: 0.9rem;
             font-size: 0.85rem;
             color: #3fb950;
-            min-height: 1.2rem;
+            text-align: left;
+            display: inline-block;
+        }
+
+        #file-list div {
+            padding: 0.1rem 0;
         }
 
         .btn {
@@ -154,21 +159,20 @@
 </header>
 
 <main>
-    <h1>Upload de <em>arquivo</em></h1>
-    <p class="subtitle">Selecione ou arraste um arquivo para enviar ao servidor.</p>
+    <h1>Upload de <em>arquivos</em></h1>
+    <p class="subtitle">Selecione ou arraste um ou mais arquivos para enviar ao servidor.</p>
 
     <form id="upload-form">
         <div class="drop-zone" id="drop-zone">
-            <input type="file" id="file-input" name="file">
+            <input type="file" id="file-input" name="file" multiple>
             <div class="drop-icon">📂</div>
             <div class="drop-text">
-                Arraste um arquivo aqui ou<br>
-                <strong onclick="document.getElementById('file-input').click()">clique para selecionar</strong>
+                Arraste arquivos aqui ou <strong>clique para selecionar</strong>
             </div>
-            <div id="file-name"></div>
+            <div id="file-list"></div>
         </div>
 
-        <button type="submit" class="btn" id="submit-btn" disabled>Enviar arquivo</button>
+        <button type="submit" class="btn" id="submit-btn" disabled>Enviar arquivo(s)</button>
     </form>
 
     <div id="status"></div>
@@ -181,18 +185,30 @@
 <script>
     const dropZone   = document.getElementById('drop-zone');
     const fileInput  = document.getElementById('file-input');
-    const fileNameEl = document.getElementById('file-name');
+    const fileListEl = document.getElementById('file-list');
     const submitBtn  = document.getElementById('submit-btn');
     const statusEl   = document.getElementById('status');
     const form       = document.getElementById('upload-form');
 
-    function setFile(file) {
-        fileNameEl.textContent = file ? file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)' : '';
-        submitBtn.disabled = !file;
+    function setFiles(fileArray) {
+        fileListEl.innerHTML = '';
+        if (fileArray && fileArray.length) {
+            fileArray.forEach(function(file) {
+                var row = document.createElement('div');
+                row.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                fileListEl.appendChild(row);
+            });
+        }
+        submitBtn.disabled = !(fileArray && fileArray.length);
     }
 
+    // Toda a caixa é clicável para abrir o seletor de arquivos
+    dropZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+
     fileInput.addEventListener('change', function() {
-        setFile(fileInput.files[0] || null);
+        setFiles(Array.from(fileInput.files));
     });
 
     dropZone.addEventListener('dragover', function(e) {
@@ -207,49 +223,62 @@
     dropZone.addEventListener('drop', function(e) {
         e.preventDefault();
         dropZone.classList.remove('drag-over');
-        var file = e.dataTransfer.files[0];
-        if (file) {
+        var files = e.dataTransfer.files;
+        if (files && files.length) {
             var dt = new DataTransfer();
-            dt.items.add(file);
+            for (var i = 0; i < files.length; i++) {
+                dt.items.add(files[i]);
+            }
             fileInput.files = dt.files;
-            setFile(file);
+            setFiles(Array.from(fileInput.files));
         }
     });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        var file = fileInput.files[0];
-        if (!file) return;
+        var files = Array.from(fileInput.files);
+        if (!files.length) return;
 
         statusEl.className = '';
         statusEl.style.display = 'none';
         submitBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
 
-        var formData = new FormData();
-        formData.append('file', file);
+        var sendNext = function(index) {
+            if (index >= files.length) {
+                submitBtn.textContent = 'Enviar arquivo(s)';
+                statusEl.className = 'ok';
+                statusEl.textContent = files.length + ' arquivo(s) enviado(s) com sucesso!';
+                fileInput.value = '';
+                setFiles([]);
+                return;
+            }
 
-        fetch('/upload/', { method: 'POST', body: formData })
-            .then(function(res) {
-                submitBtn.textContent = 'Enviar arquivo';
-                if (res.ok) {
-                    statusEl.className = 'ok';
-                    statusEl.textContent = 'Arquivo "' + file.name + '" enviado com sucesso!';
-                    fileInput.value = '';
-                    setFile(null);
-                } else {
-                    return res.text().then(function(t) {
-                        statusEl.className = 'err';
-                        statusEl.textContent = 'Erro ' + res.status + ': ' + t;
-                    });
-                }
-            })
-            .catch(function(err) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Enviar arquivo';
-                statusEl.className = 'err';
-                statusEl.textContent = 'Falha na conexão: ' + err.message;
-            });
+            var formData = new FormData();
+            formData.append('file', files[index]);
+
+            fetch('/upload/', { method: 'POST', body: formData })
+                .then(function(res) {
+                    if (res.ok) {
+                        sendNext(index + 1);
+                    } else {
+                        return res.text().then(function(t) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Enviar arquivo(s)';
+                            statusEl.className = 'err';
+                            statusEl.textContent = 'Erro ' + res.status + ' ao enviar "' + files[index].name + '": ' + t;
+                        });
+                    }
+                })
+                .catch(function(err) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enviar arquivo(s)';
+                    statusEl.className = 'err';
+                    statusEl.textContent = 'Falha na conexão ao enviar "' + files[index].name + '": ' + err.message;
+                });
+        };
+
+        sendNext(0);
     });
 </script>
 

@@ -8,6 +8,7 @@ UploadHandler	*UploadOctetStreamHandler::copy(const Router *router)
 
 void			UploadOctetStreamHandler::saveFile()
 {
+	LOG_TRACE("saving file: " << _router->req.path.getFilename());
 	utils::str upload_path = _uploadPath(_router->req.path.getFilename());
 	if (upload_path.empty())
 		return;
