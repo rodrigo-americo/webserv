@@ -16,7 +16,7 @@
 # include <errno.h>
 # include <fcntl.h>
 # include <unistd.h>
-# include <sys/sendfile.h>
+# include "FileChunkSource.hpp"
 
 # include "str.hpp"
 # include "Socket.hpp"
@@ -25,15 +25,13 @@ class SocketConnection: public Socket
 {
 	private:
 		const Socket *_listenner;
-		std::string	_out_headers;
-		size_t		_out_headers_off;
-		int			_out_file_fd;
-		off_t		_out_file_off;
-		size_t		_out_file_left;
+		std::string _out_headers;
+		size_t _out_headers_off;
+		FileChunkSource _out_file;
 
 	public:
 		SocketConnection(const Socket *listenner): Socket(SocketType::CONNECTION), _listenner(listenner),
-			_out_headers(), _out_headers_off(0), _out_file_fd(-1), _out_file_off(0), _out_file_left(0)
+			_out_headers(), _out_headers_off(0)
 		{
 			socklen_t	len = _addr.size();
 			fd(accept(_listenner->fd(), _addr.ptr(), &len));
@@ -54,21 +52,19 @@ class SocketConnection: public Socket
 			std::cout << "client connected! fd: " << fd() << std::endl;
 		}
 		SocketConnection(const SocketConnection& other): Socket(other), _listenner(other._listenner),
-			_out_headers(other._out_headers), _out_headers_off(other._out_headers_off),
-			_out_file_fd(-1), _out_file_off(0), _out_file_left(0)
+    		_out_headers(other._out_headers), _out_headers_off(other._out_headers_off)
 		{ LOG_TRACE("copy contructor SocketConnection called " << other.fd() << "\n"); };
 
-		~SocketConnection()
-		{
-			if (_out_file_fd >= 0)
-				::close(_out_file_fd);
-		}
+		~SocketConnection(){
+			_out_file.close();
+		};
 
 		const Socket	*listenner() const { return _listenner; }
 
+
 		bool	hasPendingWrite() const
 		{
-			return _out_headers_off < _out_headers.size() || _out_file_fd >= 0;
+			return _out_headers_off < _out_headers.size() || _out_file.isOpen();
 		}
 
 		void	queueWrite(const utils::str &data)
@@ -79,12 +75,7 @@ class SocketConnection: public Socket
 
 		bool	queueFile(const utils::str &path, size_t size)
 		{
-			_out_file_fd = open(path.c_str(), O_RDONLY);
-			if (_out_file_fd < 0)
-				return false;
-			_out_file_off = 0;
-			_out_file_left = size;
-			return true;
+			return _out_file.open(path.string(), size);
 		}
 
 		void	flushWrite()
@@ -96,21 +87,23 @@ class SocketConnection: public Socket
 					_out_headers_off += static_cast<size_t>(n);
 				return;
 			}
-			if (_out_file_fd < 0)
+			if (!_out_file.isOpen())
 				return;
-			ssize_t n = sendfile(fd(), _out_file_fd, &_out_file_off, _out_file_left);
-			if (n <= 0)
+			if (_out_file.needsRefill())
 			{
-				::close(_out_file_fd);
-				_out_file_fd = -1;
+				if (!_out_file.refill()){
+					_out_file.close();
+					return;
+				}
+			}
+			ssize_t n = ::write(fd(), _out_file.data(), _out_file.pending());
+			if ( n <= 0){
+				_out_file.close();
 				return;
 			}
-			_out_file_left -= static_cast<size_t>(n);
-			if (_out_file_left == 0)
-			{
-				::close(_out_file_fd);
-				_out_file_fd = -1;
-			}
+			_out_file.advance(static_cast<size_t>(n));
+			if (_out_file.done())
+				_out_file.close();
 		}
 };
 
