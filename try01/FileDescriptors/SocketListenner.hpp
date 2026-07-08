@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketListenner.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:37:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/07 13:36:41 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/08 16:06:54 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <errno.h>
 # include <netinet/in.h>
 # include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 # include <iostream>
 
@@ -63,13 +64,18 @@ class SocketListenner: public Socket
 			if (listenner.is_unix)
 				_addr.toUnix(listenner.address);
 			else if (listenner.is_ipv4)
-				_addr.toIpv4(listenner.port);
+				_addr.toIpv4(listenner.port, listenner.address);
 			else if (listenner.is_ipv6)
-				_addr.toIpv6(listenner.port);
+				_addr.toIpv6(listenner.port, listenner.address);
 		}
 
 		void	_bind_and_listen(size_t worker_connections)
 		{
+			char ip_str[INET_ADDRSTRLEN];
+			struct in_addr ip = ((struct sockaddr_in *)_addr.ptr())->sin_addr;
+			inet_ntop(AF_INET, &ip, ip_str, INET_ADDRSTRLEN);
+
+			LOG_TRACE("_addr.ptr()->sa_data: " << ip_str);
 			if (bind(fd(), _addr.ptr(), _addr.size()) < 0)
 			{
 				_errors.push_back(std::string("Error on bind: ") + strerror(errno));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerListenParser.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 10:58:09 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/13 00:32:11 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/08 15:18:18 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include "utils.hpp"
 # include "schema.hpp"
 
+# include "Logger.hpp"
 # include "ParserComposite.hpp"
 # include "ConfigServerListen.hpp"
 # include "ConfigServer.hpp"
@@ -68,6 +69,7 @@ class ServerListenParser
 					return;
 				}
 				_parseSchemedValue(token, utils::str(&arg[closing + 2]).string(), port_schema, config.port);
+				config.address = arg.substr(0, arg.find(":")).string();
 				return;
 			}
 			if (arg.find("unix:") == 0)

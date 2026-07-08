@@ -135,6 +135,12 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
             ConfigServer tmp;
             ServerListenParser p(d);
             p.toConfig(tmp);
+            if (p.hasErrors())
+            {
+                for (size_t i = 0; i < p.errors().size(); i++)
+                    _addError(p.errors()[i]);
+                break;
+            }
             for (size_t i = 0; i < tmp.listeners.size(); i++)
                 sc->addListen(tmp.listeners[i]);
             break;

@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   SocketAddress.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 15:21:20 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/06/10 01:24:47 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/08 16:58:24 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SOCKER_ADDRESS_HPP
 # define SOCKER_ADDRESS_HPP
 
+# include <sys/socket.h>
+# include <netdb.h>
 # include <netinet/in.h>
 # include <sys/un.h>
 # include <string>
@@ -34,21 +36,43 @@ class SocketAddress
 				{}
 		~SocketAddress() {};
 
-		void	toIpv4(unsigned short port, in_addr_t s_addr = INADDR_ANY)
+		struct addrinfo *resolveAddrInfo(const std::string &ip, int family)
+		{
+		
+			std::string _ip = ip.empty() ? "127.0.0.1" : ip;
+			struct addrinfo hints;
+			struct addrinfo *result;
+
+			std::memset(&hints, 0, sizeof(hints));
+			hints.ai_family = family;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_flags = AI_NUMERICHOST;
+
+			int status = getaddrinfo(_ip.c_str(), NULL, &hints, &result);
+			if (status != 0)
+				throw std::runtime_error(std::string("IP inválido: ") + gai_strerror(status));
+
+			return result; // quem chamou é responsável por dar freeaddrinfo()
+		}
+
+		void	toIpv4(unsigned short port, const std::string &ip)
 		{
 			_storage.ss_family = AF_INET;
 			sockaddr_in	*ipv4 = reinterpret_cast<sockaddr_in *>(&_storage);
 			ipv4->sin_port = htons(port);
-			ipv4->sin_addr.s_addr = s_addr;
+			
+			struct sockaddr_in *addr_in = reinterpret_cast<sockaddr_in *>(resolveAddrInfo(ip, _storage.ss_family)->ai_addr);
+			ipv4->sin_addr.s_addr = addr_in->sin_addr.s_addr;
 			recalculate();
 		}
 
-		void	toIpv6(unsigned short port, in6_addr addr = ::in6addr_any)
+		void	toIpv6(unsigned short port, const std::string &ip)
 		{
 			_storage.ss_family = AF_INET6;
 			sockaddr_in6	*ipv6 = reinterpret_cast<sockaddr_in6 *>(&_storage);
 			ipv6->sin6_port = htons(port);
-			ipv6->sin6_addr = addr;
+			struct sockaddr_in6 *addr_in = reinterpret_cast<sockaddr_in6 *>(resolveAddrInfo(ip, _storage.ss_family)->ai_addr);
+			ipv6->sin6_addr = addr_in->sin6_addr;
 			recalculate();
 		}
 
