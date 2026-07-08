@@ -5,12 +5,13 @@
 
 Cgi::Cgi(const Router &router)
 	: _router(router), _pipe_in(), _pipe_out(),
-	_script_path((router.config_location->resolveRoot() + router.req.path).getPath()),
+	_script_path(((router.config_location ? router.config_location->resolveRoot() : Path(utils::str(""))) + router.req.path).getPath()),
 	_env(router, _script_path.path().getCleanPath()), _interpreter() { _init(); };
 Cgi::~Cgi() {};
 
 void	Cgi::_init()
 {
+	if (!_router.config_location) return;
 	const std::map<std::string, std::string>& cgi_map = _router.config_location->getCgiExtensions();
 	std::map<std::string, std::string>::const_iterator it = cgi_map.find(_router.req.path.getExtension().string());
 	if (it != cgi_map.end())
