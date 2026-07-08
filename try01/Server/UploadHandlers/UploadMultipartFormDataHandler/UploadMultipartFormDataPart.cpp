@@ -143,9 +143,9 @@ UploadMultipartFormDataPart::UploadMultipartFormDataPart(const Router *router, s
 		return;
 	}
 
-	_header = router->req.body.substr(part_begin, header_end - part_begin + 2);
+	_header = _router->req.body.substr(part_begin, header_end - part_begin + 2);
 	size_t	body_start = header_end + 4;
-	_body = router->req.body.substr(body_start, part_size - (body_start - part_begin));
+	_body = _router->req.body.substr(body_start, part_size - (body_start - part_begin));
 	LOG_INFO("Header and Body builder OK!");
 	_extractHeaderInfo();
 }

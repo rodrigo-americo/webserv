@@ -1,6 +1,7 @@
 #include <iostream>
 #include "parser/parser/ParserBuilder.hpp"
 #include "config/ConfigBuilderVisitor.hpp"
+#include "signal.hpp"
 #include "WebServer.hpp"
 #include "Logger.hpp"
 # include "LoggerDestineFile.hpp"
@@ -17,7 +18,7 @@ int main(int argc, char* argv[])
         std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;
         return 1;
     }
-
+    setup_signal_handlers();
     ParserAst ast = ParserBuilder::defaultBuilder()
         .withFile(argv[1])
         .build();
@@ -48,5 +49,6 @@ int main(int argc, char* argv[])
 	WebServer webServer;
 	webServer.start(config);
     delete config;
+    webServer.clean_up();
     return 0;
 }
