@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SocketEvent.hpp                                    :+:      :+:    :+:   */
+/*   ConnectionEvent.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -17,22 +17,22 @@
 # include <string>
 # include <iostream>
 
-class Socket;
+class FileDescriptor;
 
-struct SocketEvent
+struct ConnectionEvent
 {
-	Socket		*socket;
-	bool		readable;
-	bool		writable;
-	bool        eof;
-	std::string	error;
+	FileDescriptor	*file_descriptor;
+	bool			readable;
+	bool			writable;
+	bool			eof;
+	std::string		error;
 
-	SocketEvent(): socket(NULL), readable(false), writable(false), eof(false), error() {}
+	ConnectionEvent(): file_descriptor(NULL), readable(false), writable(false), eof(false), error() {}
 };
 
-typedef std::vector<SocketEvent>	SocketEventList;
+typedef std::vector<ConnectionEvent>	ConnectionEventList;
 
-std::ostream	&operator<<(std::ostream &os, const SocketEvent &ev);
+std::ostream	&operator<<(std::ostream &os, const ConnectionEvent &ev);
 
 
 #endif

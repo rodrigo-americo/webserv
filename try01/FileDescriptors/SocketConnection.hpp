@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/04 15:05:28 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/08 11:15:23 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class SocketConnection: public Socket
 		FileChunkSource _out_file;
 
 	public:
-		SocketConnection(const Socket *listenner): Socket(SocketType::CONNECTION), _listenner(listenner),
+		SocketConnection(const Socket *listenner): Socket(FileDescriptorType::SOCKET_CONNECTION), _listenner(listenner),
 			_out_headers(), _out_headers_off(0)
 		{
 			socklen_t	len = _addr.size();

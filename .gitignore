@@ -18,3 +18,6 @@ core
 
 # LOG
 *.log
+
+#OUTFILE
+out

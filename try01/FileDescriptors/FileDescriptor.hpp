@@ -1,45 +1,39 @@
-#ifndef SOCKET_HPP
-# define SOCKET_HPP
+#ifndef FILE_DECRIPTOR_HPP
+# define FILE_DECRIPTOR_HPP
 
 # include <unistd.h>
-
-# include <iostream>
 # include <vector>
 
 # include "segregation.hpp"
-# include "ConfigServerListen.hpp"
-# include "SocketAddress.hpp"
 # include "Logger.hpp"
 
-
-
-struct SocketType
+struct FileDescriptorType
 {
 	enum type
 	{
-		LISTENNER,
-		CONNECTION,
+		SOCKET_LISTENNER,
+		SOCKET_CONNECTION,
 		PIPE_READ,
 		PIPE_WRITE
 	};
 };
 
-class Socket: public segregation::has_type<SocketType::type>
+class FileDescriptor: public segregation::has_type<FileDescriptorType::type>
 {
-	typedef segregation::has_type<SocketType::type>	base;
+	typedef segregation::has_type<FileDescriptorType::type>	has_type;
 	public:
-		typedef SocketType::type	type;
+		typedef FileDescriptorType::type	type;
 	private:
-		int							_fd;
+		int	_fd;
+
 	protected:
-		SocketAddress				_addr;
 		std::vector<std::string>	_errors;
 
 	public:
-		Socket(type _type): base(_type), _fd(-1), _addr(), _errors() {};
-		Socket(type _type, int fd): base(_type), _fd(fd), _addr(), _errors() {};
-		Socket(const Socket& other): base(other._type), _fd(other._fd), _addr(other._addr), _errors(other._errors) {LOG_TRACE("copy contructor Socket called " << other._fd << "\n");};
-		~Socket() { close(); };
+		FileDescriptor(type _type): has_type(_type), _fd(-1) {}
+		FileDescriptor(type _type, int fd): has_type(_type), _fd(fd) {}
+		FileDescriptor(const FileDescriptor& other): has_type(other._type), _fd(other._fd) {LOG_TRACE("copy contructor Socket called " << other._fd << "\n");};
+		~FileDescriptor() { close(); }
 
 		ssize_t	read(size_t bytes, std::string &buff) const
 		{
@@ -52,7 +46,7 @@ class Socket: public segregation::has_type<SocketType::type>
 
 		int	close()
 		{
-			if (_fd > 2)
+			if (isValid())
 			{
 				LOG_TRACE("is closing fd: " << _fd);
 				int status = ::close(_fd);
@@ -67,6 +61,14 @@ class Socket: public segregation::has_type<SocketType::type>
 			::write(_fd, data.c_str(), data.size());
 		}
 
+		int dup2(int _fd)
+		{
+			int status = ::dup2(fd(), _fd);
+			if (status != -1)
+				close();
+			return status;
+		}
+
 		int		fd() const { return _fd; }
 
 		void fd(int fd_)
@@ -76,9 +78,7 @@ class Socket: public segregation::has_type<SocketType::type>
 			LOG_TRACE("fd conn set fd " << temp << " to " << fd_ << "\n");
 		}
 
-		const SocketAddress	&addr() const { return _addr; }
-		SocketAddress	&addr() { return _addr; }
-
+		bool							isClosed() const { return _fd == -1; }
 		bool							isValid() const { return _fd > 2; }
 		bool							hasErrors() const { return !_errors.empty(); }
 		const std::vector<std::string>	&errors() const { return _errors; }
@@ -86,10 +86,6 @@ class Socket: public segregation::has_type<SocketType::type>
 		{
 			for (size_t i = 0; i < _errors.size(); i++)
 				std::cerr << _errors[i] << "\n";
-		}
-		static bool usesGetSockOpt(SocketType::type t)
-		{
-			return t == SocketType::LISTENNER || t == SocketType::CONNECTION;
 		}
 };
 
