@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/07 17:52:18 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/09 16:51:41 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void WebServer::start(WebServerConfig* config)
 
 			SocketListenner* sock = new SocketListenner(*lit, worker_connections);
 			if (sock->hasErrors()) { delete sock; continue; }
-			_listeners.push_back(sock);
+			// _listeners.push_back(sock);
 			pool.addListenner(sock, srv);
 		}
 	}

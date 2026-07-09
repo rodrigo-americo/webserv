@@ -217,6 +217,7 @@ private:
 		if (!socket || !socket->isValid()) return false;
 		_multiplexer->add(socket);
 		_http_request_observers.addSocketToObserver(socket, server);
+		LOG_TRACE("_addListenner: " << socket->addr().ip());
 		return true;
 	}
 
@@ -289,7 +290,7 @@ public:
 		std::cout << "Waitting for connections!\n";
 		while (!g_stop)
 		{
-			
+
 			time_t now = time(NULL);
 			std::list<CgiProcess*>::iterator cit = _running_cgis.begin();
 			while (cit != _running_cgis.end())

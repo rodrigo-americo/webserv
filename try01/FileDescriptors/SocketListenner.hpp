@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketListenner.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:37:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/08 16:06:54 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/09 16:48:56 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 
 # include <iostream>
 
+# include "Logger.hpp"
 # include "Socket.hpp"
 # include "ConfigServerListen.hpp"
 
@@ -67,6 +68,7 @@ class SocketListenner: public Socket
 				_addr.toIpv4(listenner.port, listenner.address);
 			else if (listenner.is_ipv6)
 				_addr.toIpv6(listenner.port, listenner.address);
+			LOG_TRACE("_setAddr: " << _addr.ip() << ":" << _addr.port());
 		}
 
 		void	_bind_and_listen(size_t worker_connections)
@@ -113,7 +115,7 @@ class SocketListenner: public Socket
 				return;
 			}
 			_bind_and_listen(worker_connections);
-			std::cout << "Server listenning on port " << _addr.port() << "..." << std::endl;
+			std::cout << "Server listenning on " << _addr.ip() << ":" << _addr.port() << "..." << std::endl;
 		};
 		~SocketListenner() {};
 };

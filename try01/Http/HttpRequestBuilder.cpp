@@ -4,7 +4,7 @@ void RequestBuilder::_processHeader(size_t header_end){
 	if (!_is_request_line_processed){
 		_cursor = _buffer.find_first_of(' ');
 		if (_cursor == std::string::npos)
-		{ 
+		{
 			_has_error = true;
 			return;
 		}
@@ -38,7 +38,7 @@ void RequestBuilder::_processHeader(size_t header_end){
 		_cursor = val_end + 2;
 	}
 	if (_config){
-		const ServerConfig *server = _config->match_server(_req.port, _req.headers.host());
+		const ServerConfig *server = _config->match_server(_req);
 		if (server)
 			_max_body_size = server->getClientMaxBodySize();
 	}
@@ -61,9 +61,9 @@ void RequestBuilder::_processHeader(size_t header_end){
 }
 
 void RequestBuilder::_verifyCompletion(){
-	
+
 	if (_body_start == 0 || _has_error) return;
-	
+
 	if (_is_chunked)
 		_decodeChunkedBody();
 	else if (_req.method != RequestMethod::GET){

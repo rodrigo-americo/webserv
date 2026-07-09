@@ -5,6 +5,8 @@
 # include "ConfigNode.hpp"
 # include "GlobalConfig.hpp"
 
+class HttpRequest;
+
 class WebServerConfig : public ConfigContainer {
 	private:
 		WebServerConfig(const WebServerConfig& other);
@@ -27,7 +29,7 @@ class WebServerConfig : public ConfigContainer {
 			size_t wc = _global->getEvents()->getWorkerConnections();
 			return wc ? wc : 1024;
 		}
-		const ServerConfig* match_server(size_t port, const std::string& host_header) const;
+		const ServerConfig* match_server(const HttpRequest& req) const;
 		void addChild(ConfigNode* child);
 };
 
