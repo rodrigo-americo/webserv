@@ -11,7 +11,7 @@
 # include "WebServerConfig.hpp"
 # include "ServerConfig.hpp"
 
-class RequestBuilder
+class HttpRequestBuilder
 {
 private:
 	HttpRequest	_req;
@@ -32,15 +32,15 @@ private:
 	static const size_t	MAX_CHUNK_SIZE = 100 * 1024 * 1024;
 	static const size_t	MAX_TRAILER_SIZE = 8 * 1024;
 
-	bool			_is_chunked;
-	bool			_has_error;
-	int				_error_status;
-	std::string		_error_message;
-	size_t			_chunk_cursor;
-	size_t			_chunk_remaining;
-	ChunkState		_chunk_state;
+	bool					_is_chunked;
+	bool					_has_error;
+	int						_error_status;
+	std::string				_error_message;
+	size_t					_chunk_cursor;
+	size_t					_chunk_remaining;
+	ChunkState				_chunk_state;
 	const WebServerConfig	*_config;
-	size_t			_max_body_size;
+	size_t					_max_body_size;
 
 	void	_processHeader(size_t header_end);
 	void	_verifyCompletion();
@@ -53,13 +53,13 @@ private:
 public:
 	SocketConnection *connection;
 
-	RequestBuilder(SocketConnection *conn, const WebServerConfig *config = NULL)
+	HttpRequestBuilder(SocketConnection *conn, const WebServerConfig *config = NULL)
 		: _req(conn), _buffer(), _body_start(0), _is_request_line_processed(false), _is_complete(false), _cursor(0),
 		  _is_chunked(false), _has_error(false), _error_status(400), _error_message("Bad Request"),
 		  _chunk_cursor(0), _chunk_remaining(0), _chunk_state(CHUNK_SIZE),
 		  _config(config), _max_body_size(0),
 		  connection(conn) {}
-	~RequestBuilder() {}
+	~HttpRequestBuilder() {}
 
 	HttpRequest	build() const { return _req; }
 

@@ -48,6 +48,18 @@ class HttpRequest
 			: _connection(conn), method(), path(utils::str("")), http_version(),
 			 body(), headers(), port(conn->listenner()->addr().port()) {}
 		SocketConnection *connection() const { return _connection; }
+		HttpRequest	&operator=(const HttpRequest &other)
+		{
+			if (&other == this) return *this;
+			_connection = other._connection;
+			method = other.method;
+			path = other.path;
+			http_version = other.http_version;
+			body = other.body;
+			headers = other.headers;
+			port = other.port;
+			return *this;
+		}
 
 };
 

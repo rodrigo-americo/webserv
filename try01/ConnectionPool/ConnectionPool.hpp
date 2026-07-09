@@ -3,8 +3,6 @@
 #ifndef CONNECTION_POOL_HPP
 # define CONNECTION_POOL_HPP
 
-# include <map>
-# include <list>
 # include <set>
 # include <vector>
 # include <signal.h>
@@ -21,40 +19,8 @@
 #include "SocketPipeRead.hpp"
 #include "SocketPipeWrite.hpp"
 #include "Logger.hpp"
+# include "HttpRequestObservers.hpp"
 
-
-class HttpRequestObservers
-{
-	private:
-		std::map<const Socket*, Server*>	_observers;
-
-	public:
-		HttpRequestObservers() {}
-		~HttpRequestObservers() {}
-
-		void	addSocketToObserver(const Socket *socket, Server *server)
-		{
-			_observers[socket] = server;
-		}
-		Server	*findServer(const Socket *listener) const
-		{
-			std::map<const Socket*, Server*>::const_iterator it = _observers.find(listener);
-			return (it == _observers.end()) ? NULL : it->second;
-		}
-		bool	notifyRequest(RequestBuilder &req_builder)
-		{
-			std::map<const Socket*, Server*>::iterator list_it = _observers.find(req_builder.connection->listenner());
-			if (list_it == _observers.end())
-			{
-				std::cerr << "Error on handling request, listenner '" << req_builder.connection->listenner()->fd() << "' not found!" << std::endl;
-				return false;
-			}
-			HttpRequest		req = req_builder.build();
-			HttpResponse	res(req_builder.connection);
-			list_it->second->handleRequest(req, res);
-			return true;
-		}
-};
 
 /**
  * ConnectionPool sera:
@@ -68,16 +34,16 @@ class ConnectionPool: public patterns::singleton<ConnectionPool>
 private:
 	IMultiplexer				*_multiplexer;
 	HttpRequestObservers		_http_request_observers;
-	std::list<RequestBuilder>	_pending_request;
+	std::list<HttpRequestBuilder>	_pending_request;
 	std::set<CgiProcess*>		_running_cgis;
 	WebServerConfig				*_global_config;
 
 	ConnectionPool()
 		: _multiplexer(NULL), _http_request_observers(), _pending_request(), _running_cgis(), _global_config(NULL) { }
 
-	RequestBuilder *_findPending(SocketConnection *conn)
+	HttpRequestBuilder *_findPending(SocketConnection *conn)
 	{
-		for (std::list<RequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
+		for (std::list<HttpRequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
 		{
 			if (it->connection == conn)
 				return &(*it);
@@ -118,7 +84,7 @@ private:
 
 	void	_removePending(SocketConnection *conn)
 	{
-		for (std::list<RequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
+		for (std::list<HttpRequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
 		{
 			if (it->connection == conn)
 			{
@@ -128,7 +94,7 @@ private:
 		}
 	}
 
-	bool	_handleRequest(RequestBuilder &req_builder)
+	bool	_handleRequest(HttpRequestBuilder &req_builder)
 	{
 		static const size_t buffer_size = 1024;
 		std::string	chunk;
@@ -315,7 +281,7 @@ public:
 						continue;
 					}
 
-					RequestBuilder *existing = _findPending(conn);
+					HttpRequestBuilder *existing = _findPending(conn);
 					if (existing)
 					{
 						if (_handleRequest(*existing))
@@ -329,7 +295,7 @@ public:
 					{
 						Server *server = _http_request_observers.findServer(conn->listenner());
 						const WebServerConfig *config = server ? server->getConfig() : NULL;
-						_pending_request.push_back(RequestBuilder(conn, config));
+						_pending_request.push_back(HttpRequestBuilder(conn, config));
 						if (_handleRequest(_pending_request.back()))
 						{
 							_pending_request.pop_back();
