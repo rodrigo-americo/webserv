@@ -19,7 +19,7 @@
 #include "SocketPipeRead.hpp"
 #include "SocketPipeWrite.hpp"
 #include "Logger.hpp"
-# include "HttpRequestObservers.hpp"
+# include "HttpRequestsManager.hpp"
 
 
 /**
@@ -33,95 +33,14 @@ class ConnectionPool: public patterns::singleton<ConnectionPool>
 	friend class patterns::singleton<ConnectionPool>;
 private:
 	IMultiplexer				*_multiplexer;
-	HttpRequestObservers		_http_request_observers;
-	std::list<HttpRequestBuilder>	_pending_request;
-	std::set<CgiProcess*>		_running_cgis;
-	WebServerConfig				*_global_config;
+	HttpRequestsManager			_requests;
 
 	ConnectionPool()
-		: _multiplexer(NULL), _http_request_observers(), _pending_request(), _running_cgis(), _global_config(NULL) { }
-
-	HttpRequestBuilder *_findPending(SocketConnection *conn)
-	{
-		for (std::list<HttpRequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
-		{
-			if (it->connection == conn)
-				return &(*it);
-		}
-		return NULL;
-	}
-
-	std::set<CgiProcess*>::iterator _findCgiByPipe(FileDescriptor *pipe_socket)
-	{
-		for (std::set<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
-		{
-			if ((*it)->stdinPipe()  == pipe_socket
-			|| (*it)->stdoutPipe() == pipe_socket)
-				return it;
-		}
-		return _running_cgis.end();
-	}
-
-	std::set<CgiProcess*>::iterator _findCgiByClient(SocketConnection *conn)
-	{
-		for (std::set<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
-		{
-			if ((*it)->clientConn() == conn)
-				return it;
-		}
-		return _running_cgis.end();
-	}
-
-	bool _isConnectionOwnedByCgi(SocketConnection *conn) const
-	{
-		for (std::set<CgiProcess*>::const_iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
-		{
-			if ((*it)->clientConn() == conn)
-				return true;
-		}
-		return false;
-	}
-
-	void	_removePending(SocketConnection *conn)
-	{
-		for (std::list<HttpRequestBuilder>::iterator it = _pending_request.begin(); it != _pending_request.end(); ++it)
-		{
-			if (it->connection == conn)
-			{
-				_pending_request.erase(it);
-				return;
-			}
-		}
-	}
-
-	bool	_handleRequest(HttpRequestBuilder &req_builder)
-	{
-		static const size_t buffer_size = 1024;
-		std::string	chunk;
-		ssize_t bytes_read = req_builder.connection->read(buffer_size, chunk);
-		while (bytes_read > 0)
-		{
-			req_builder.addToBuffer(chunk);
-			if (req_builder.isComplete() || req_builder.hasError()) break;
-			if (bytes_read < static_cast<ssize_t>(buffer_size)) break;
-			chunk.clear();
-			bytes_read = req_builder.connection->read(buffer_size, chunk);
-		}
-		if (req_builder.hasError())
-		{
-			req_builder.sendBadRequest(_global_config);
-			return true;
-		}
-
-		bool	is_request_complete = req_builder.isComplete();
-		if (is_request_complete)
-			_http_request_observers.notifyRequest(req_builder);
-		return is_request_complete;
-	}
+		: _multiplexer(NULL), _requests() {}
 
 	void	_setGlobalConfig(WebServerConfig *config)
 	{
-		_global_config = config;
+		_requests.setGlobalConfig(config);
 	}
 
 	void _setMultiplexer(IMultiplexer *multiplexer)
@@ -138,7 +57,7 @@ private:
 	{
 		if (!socket || !socket->isValid()) return false;
 		_multiplexer->add(socket);
-		_http_request_observers.addSocketToObserver(socket, server);
+		_requests.observeSocket(socket, server);
 		return true;
 	}
 
@@ -155,16 +74,18 @@ private:
 		if (!cgi) return;
 		_multiplexer->add(cgi->stdinPipe());
 		_multiplexer->add(cgi->stdoutPipe());
-		_running_cgis.insert(cgi);
+		_requests.addCgi(cgi);
 	}
 
 	void _removeCgi(CgiProcess *cgi)
 	{
-		_running_cgis.erase(cgi);
+		_requests.removeCgi(cgi);
 	}
 
 public:
 	~ConnectionPool() {}
+
+	HttpRequestsManager	&requests() { return _requests; }
 
 	static void	multiplexer(IMultiplexer *multiplexer)
 	{
@@ -191,12 +112,6 @@ public:
 		// delete file_descriptor;
 	}
 
-	static void untrackFileDescriptor(FileDescriptor *file_descriptor)
-	{
-		ConnectionPool	&instance = ConnectionPool::getInstance();
-		instance._getMultiplexer()->remove(file_descriptor);
-	}
-
 	static void addCgi(CgiProcess *cgi)
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
@@ -215,22 +130,8 @@ public:
 		while (!g_stop)
 		{
 
-			time_t now = time(NULL);
-			std::set<CgiProcess*>::iterator cit = _running_cgis.begin();
-			while (cit != _running_cgis.end())
-			{
-				if ((*cit)->isExpired(now, 30))
-				{
-					LOG_TRACE("CGI expired");
-					std::set<CgiProcess*>::iterator victim = cit;
-					++cit;
-					(*victim)->timeoutResponse();
-					// _cleanupCgi(victim, CGI_TIMEOUT);
-				}
-				else
-					++cit;
-			}
-			// _processPendingRequests();
+			_requests.checkTimeout();
+
 			ConnectionEventList	events;
 			std::string error = _multiplexer->wait(events);
 			if (!error.empty())
@@ -258,13 +159,9 @@ public:
 					SocketConnection	*conn = static_cast<SocketConnection*>(event.file_descriptor);
 					if (!event.error.empty() || event.eof)
 					{
-						std::set<CgiProcess*>::iterator cit = _findCgiByClient(conn);
-						if (cit != _running_cgis.end())
-							// _cleanupCgi(cit, CGI_CLIENT_GONE);
-							delete *cit;
-
-						if (!_isConnectionOwnedByCgi(conn))
-							ConnectionPool::removeFileDescriptor(conn);
+						CgiProcess *cgi = _requests.findCgiByConnection(conn);
+						delete cgi;
+						ConnectionPool::removeFileDescriptor(conn);
 						continue;
 					}
 
@@ -281,64 +178,40 @@ public:
 						continue;
 					}
 
-					HttpRequestBuilder *existing = _findPending(conn);
+					HttpRequestBuilder *existing = _requests.findPending(conn);
 					if (existing)
-					{
-						if (_handleRequest(*existing))
-						{
-							_removePending(conn);
-							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
-        						ConnectionPool::removeFileDescriptor(conn);
-						}
-					}
+						_requests.buildRequest(*existing);
 					else
-					{
-						Server *server = _http_request_observers.findServer(conn->listenner());
-						const WebServerConfig *config = server ? server->getConfig() : NULL;
-						_pending_request.push_back(HttpRequestBuilder(conn, config));
-						if (_handleRequest(_pending_request.back()))
-						{
-							_pending_request.pop_back();
-							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
-        						ConnectionPool::removeFileDescriptor(conn);
-						}
-					}
+						_requests.buildRequest(conn);
 				}
 				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_READ)
 				{
-					std::set<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
-					if (cit == _running_cgis.end())
+					CgiProcess	*cgi = _requests.findCgiByConnectionEvent(event);
+					if (cgi)
 					{
-						LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
-						ConnectionPool::removeFileDescriptor(event.file_descriptor);
-						continue;
+						if (event.readable || event.eof)
+							cgi->onStdoutReadable();
+						if (cgi->isDone())
+							cgi->buildAndSendResponse();
 					}
-					LOG_TRACE("PIPE_READ: " << event);
-					if (event.readable || event.eof)
-						(*cit)->onStdoutReadable();
-
-					if ((*cit)->isDone())
-						// _cleanupCgi(cit, CGI_NORMAL);
-						(*cit)->buildAndSendResponse();
+					LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
 				}
 				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_WRITE)
 				{
-					std::set<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
-					if (cit == _running_cgis.end())
+					CgiProcess	*cgi = _requests.findCgiByConnectionEvent(event);
+					if (cgi)
 					{
-						LOG_TRACE("CGI pipe write not found: " << event.file_descriptor->fd());
-						ConnectionPool::removeFileDescriptor(event.file_descriptor);
-						continue;
+						LOG_TRACE("PIPE_WRITE: " << event);
+						if (event.writable)
+							cgi->onStdinWritable();
+						if (!cgi->isStdinClosed() && cgi->stdinWriteFinished())
+						{
+							LOG_TRACE("CGI write finished. Closing.");
+							ConnectionPool::removeFileDescriptor(cgi->stdinPipe()); // fecha o fd -> EOF pro filho
+							cgi->markStdinClosed();
+						}
 					}
-					LOG_TRACE("PIPE_WRITE: " << event);
-					if (event.writable)
-						(*cit)->onStdinWritable();
-					if (!(*cit)->isStdinClosed() && (*cit)->stdinWriteFinished())
-					{
-						LOG_TRACE("CGI write finished. Closing.");
-						ConnectionPool::removeFileDescriptor((*cit)->stdinPipe()); // fecha o fd -> EOF pro filho
-						(*cit)->markStdinClosed();
-					}
+					LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
 				}
 				else
 				{

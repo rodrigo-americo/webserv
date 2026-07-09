@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerPoll.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/08 18:13:00 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/07/09 19:32:06 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,11 @@ class MultiplexerPoll: public IMultiplexer
 	public:
 		MultiplexerPoll(): _sockets(), _pollfds(), _timeout_ms(-1) {};
 		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
-		~MultiplexerPoll() {};
+		~MultiplexerPoll()
+		{
+			for (file_descriptors::iterator it = _sockets.begin(); it < _sockets.end(); ++it)
+				delete *it;
+		};
 
 		void add(FileDescriptor *file_descriptor)
 		{

@@ -9,7 +9,6 @@ void	HttpError::badRequest(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::unauthorized(const utils::str &body) const
@@ -18,7 +17,6 @@ void	HttpError::unauthorized(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::forbiden(const utils::str &body) const
@@ -28,7 +26,6 @@ void	HttpError::forbiden(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::notFound(const utils::str &body) const
@@ -37,7 +34,6 @@ void	HttpError::notFound(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::methodNotAllowed(const utils::str &body) const
@@ -46,7 +42,6 @@ void	HttpError::methodNotAllowed(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::timeout(const utils::str &body) const
@@ -55,7 +50,6 @@ void	HttpError::timeout(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::contentLarge(const utils::str &body) const
@@ -64,7 +58,6 @@ void	HttpError::contentLarge(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::unsupportedMediaType(const utils::str &body) const
@@ -73,7 +66,6 @@ void	HttpError::unsupportedMediaType(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 
 void	HttpError::internalServerError(const utils::str &body) const
@@ -82,6 +74,5 @@ void	HttpError::internalServerError(const utils::str &body) const
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
-	ConnectionPool::removeFileDescriptor(_router.res.getConn());
 }
 

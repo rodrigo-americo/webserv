@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/07 17:52:18 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/09 19:32:34 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ WebServer::WebServer() : _multiplexer(NULL) {}
 
 WebServer::~WebServer()
 {
-	for (size_t i = 0; i < _listeners.size(); i++)
-		delete _listeners[i];
+	// for (size_t i = 0; i < _listeners.size(); i++)
+	// 	delete _listeners[i];
 	for (size_t i = 0; i < _servers.size(); i++)
 		delete _servers[i];
 	delete _multiplexer;

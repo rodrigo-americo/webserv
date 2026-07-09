@@ -46,7 +46,7 @@ class FileDescriptor: public segregation::has_type<FileDescriptorType::type>
 
 		int	close()
 		{
-			if (isValid())
+			if (_fd > 2)
 			{
 				LOG_TRACE("is closing fd: " << _fd);
 				int status = ::close(_fd);
