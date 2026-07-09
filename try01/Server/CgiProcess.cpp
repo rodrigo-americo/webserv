@@ -1,6 +1,7 @@
 
 #include <cstdlib>
 #include <sstream>
+#include <sys/wait.h>
 
 #include "CgiProcess.hpp"
 #include "SocketConnection.hpp"
@@ -10,6 +11,7 @@
 #include "Logger.hpp"
 #include "CgiResponseParse.hpp"
 #include "PipeChannel.hpp"
+# include "ConnectionPool.hpp"
 
 CgiProcess::CgiProcess(SocketConnection *client, const HttpRequest &req, PipeChannel *stdin_pipe, PipeChannel *stdout_pipe, pid_t pid)
     : _client_conn(client), _stdin_pipe(stdin_pipe), _stdout_pipe(stdout_pipe), _child_pid(pid), _body_to_write(req.body), _body_write_offset(0),_stdout_buffer(), _start_time(time(NULL)), _stdout_closed(false), _stdin_closed(false), _request(req)
@@ -17,7 +19,23 @@ CgiProcess::CgiProcess(SocketConnection *client, const HttpRequest &req, PipeCha
 	LOG_TRACE("CgiProcessConstructor(conn(" << client->fd() << "), " << *stdin_pipe << ", " << *stdout_pipe << ", PID " << pid << ")");
 }
 
-CgiProcess::~CgiProcess() {}
+CgiProcess::~CgiProcess()
+{
+	::kill(_child_pid, SIGKILL);
+	waitpid(_child_pid, NULL, 0);
+	ConnectionPool::removeFileDescriptor(_stdin_pipe);
+	ConnectionPool::removeFileDescriptor(_stdout_pipe);
+	ConnectionPool::removeCgi(this);
+}
+
+void	CgiProcess::timeoutResponse()
+{
+	HttpResponse res(_client_conn);
+	res.statusCode(504, "Gateway Timeout");
+	res.body("Gateway Timeout\n");
+	res.send(ResponseHTTPVersion::HTTP_1_1);
+	delete this;
+}
 
 void CgiProcess::onStdinWritable()
 {
@@ -111,5 +129,5 @@ void CgiProcess::buildAndSendResponse()
     applyCgiHeaders(res, parsed);
     res.body(parsed.getBody());
     res.send(ResponseHTTPVersion::HTTP_1_1);
-
+	delete this;
 }

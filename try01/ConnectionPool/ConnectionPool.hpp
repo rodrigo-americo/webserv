@@ -5,6 +5,7 @@
 
 # include <map>
 # include <list>
+# include <set>
 # include <vector>
 # include <signal.h>
 # include <sys/wait.h>
@@ -14,6 +15,7 @@
 # include "singleton.hpp"
 # include "IMultiplexer.hpp"
 # include "Server.hpp"
+# include "Router.hpp"
 # include "HttpRequestBuilder.hpp"
 #include "CgiProcess.hpp"
 #include "SocketPipeRead.hpp"
@@ -67,7 +69,11 @@ private:
 	IMultiplexer				*_multiplexer;
 	HttpRequestObservers		_http_request_observers;
 	std::list<RequestBuilder>	_pending_request;
-	std::list<CgiProcess*>		_running_cgis;
+	std::set<CgiProcess*>		_running_cgis;
+	WebServerConfig				*_global_config;
+
+	ConnectionPool()
+		: _multiplexer(NULL), _http_request_observers(), _pending_request(), _running_cgis(), _global_config(NULL) { }
 
 	RequestBuilder *_findPending(SocketConnection *conn)
 	{
@@ -79,9 +85,9 @@ private:
 		return NULL;
 	}
 
-	std::list<CgiProcess*>::iterator _findCgiByPipe(FileDescriptor *pipe_socket)
+	std::set<CgiProcess*>::iterator _findCgiByPipe(FileDescriptor *pipe_socket)
 	{
-		for (std::list<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
+		for (std::set<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 		{
 			if ((*it)->stdinPipe()  == pipe_socket
 			|| (*it)->stdoutPipe() == pipe_socket)
@@ -90,9 +96,9 @@ private:
 		return _running_cgis.end();
 	}
 
-	std::list<CgiProcess*>::iterator _findCgiByClient(SocketConnection *conn)
+	std::set<CgiProcess*>::iterator _findCgiByClient(SocketConnection *conn)
 	{
-		for (std::list<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
+		for (std::set<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 		{
 			if ((*it)->clientConn() == conn)
 				return it;
@@ -102,7 +108,7 @@ private:
 
 	bool _isConnectionOwnedByCgi(SocketConnection *conn) const
 	{
-		for (std::list<CgiProcess*>::const_iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
+		for (std::set<CgiProcess*>::const_iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 		{
 			if ((*it)->clientConn() == conn)
 				return true;
@@ -137,11 +143,7 @@ private:
 		}
 		if (req_builder.hasError())
 		{
-			HttpResponse res(req_builder.connection);
-			res.statusCode(req_builder.errorStatus(), req_builder.errorMessage());
-			res.headers.connection("close");
-			res.body(req_builder.errorMessage() + "\n");
-			res.send(ResponseHTTPVersion::HTTP_1_1);
+			req_builder.sendBadRequest(_global_config);
 			return true;
 		}
 
@@ -151,55 +153,9 @@ private:
 		return is_request_complete;
 	}
 
-	enum CgiCleanupReason
+	void	_setGlobalConfig(WebServerConfig *config)
 	{
-		CGI_NORMAL,
-		CGI_INTERNAL_ERROR,
-		CGI_CLIENT_GONE,
-		CGI_TIMEOUT
-	};
-
-	void _cleanupCgi(std::list<CgiProcess*>::iterator it, CgiCleanupReason reason)
-	{
-		LOG_TRACE("_cleanupCgi");
-		CgiProcess *cgi = *it;
-		SocketConnection *conn = cgi->clientConn();
-		pid_t pid = cgi->pid();
-
-		if (reason == CGI_NORMAL)
-		{
-			cgi->buildAndSendResponse();
-		}
-		else if (reason == CGI_INTERNAL_ERROR)
-		{
-			HttpResponse res(conn);
-			res.statusCode(502, "Bad Gateway");
-			res.body("Bad Gateway\n");
-			res.send(ResponseHTTPVersion::HTTP_1_1);
-		}
-		else if (reason == CGI_TIMEOUT)
-		{
-			HttpResponse res(conn);
-			res.statusCode(504, "Gateway Timeout");
-			res.body("Gateway Timeout\n");
-			res.send(ResponseHTTPVersion::HTTP_1_1);
-		}
-
-		::kill(pid, SIGKILL);
-		waitpid(pid, NULL, 0);
-
-		if (!cgi->isStdinClosed())
-			_multiplexer->remove(cgi->stdinPipe());
-		_multiplexer->remove(cgi->stdoutPipe());
-
-		_running_cgis.erase(it);
-		delete cgi;
-
-		if (reason == CGI_CLIENT_GONE)
-			return;
-		_removePending(conn);
-        if (!conn->hasPendingWrite())
-            _multiplexer->remove(conn);
+		_global_config = config;
 	}
 
 	void _setMultiplexer(IMultiplexer *multiplexer)
@@ -233,11 +189,15 @@ private:
 		if (!cgi) return;
 		_multiplexer->add(cgi->stdinPipe());
 		_multiplexer->add(cgi->stdoutPipe());
-		_running_cgis.push_back(cgi);
+		_running_cgis.insert(cgi);
+	}
+
+	void _removeCgi(CgiProcess *cgi)
+	{
+		_running_cgis.erase(cgi);
 	}
 
 public:
-	ConnectionPool(): _multiplexer(NULL) { }
 	~ConnectionPool() {}
 
 	static void	multiplexer(IMultiplexer *multiplexer)
@@ -262,7 +222,7 @@ public:
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
 		instance._getMultiplexer()->remove(file_descriptor);
-		delete file_descriptor;
+		// delete file_descriptor;
 	}
 
 	static void untrackFileDescriptor(FileDescriptor *file_descriptor)
@@ -277,29 +237,29 @@ public:
 		instance._addCgi(cgi);
 	}
 
-	// static void removeCgi(CgiProcess *cgi)
-	// {
-	// 	ConnectionPool	&instance = ConnectionPool::getInstance();
-	// 	instance._getMultiplexer()->remove(file_descriptor);
-	// 	delete file_descriptor;
-	// }
+	static void removeCgi(CgiProcess *cgi)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._removeCgi(cgi);
+	}
 
 	void	waitConnections()
 	{
 		std::cout << "Waitting for connections!\n";
 		while (!g_stop)
 		{
-			
+
 			time_t now = time(NULL);
-			std::list<CgiProcess*>::iterator cit = _running_cgis.begin();
+			std::set<CgiProcess*>::iterator cit = _running_cgis.begin();
 			while (cit != _running_cgis.end())
 			{
 				if ((*cit)->isExpired(now, 30))
 				{
 					LOG_TRACE("CGI expired");
-					std::list<CgiProcess*>::iterator victim = cit;
+					std::set<CgiProcess*>::iterator victim = cit;
 					++cit;
-					_cleanupCgi(victim, CGI_TIMEOUT);
+					(*victim)->timeoutResponse();
+					// _cleanupCgi(victim, CGI_TIMEOUT);
 				}
 				else
 					++cit;
@@ -319,7 +279,7 @@ public:
 					if (!event.error.empty())
 					{
 						std::cerr << event.error << std::endl;
-						_multiplexer->remove(event.file_descriptor);
+						ConnectionPool::removeFileDescriptor(event.file_descriptor);
 						continue;
 					}
 					SocketConnection	*connection = new SocketConnection(static_cast<Socket*>(event.file_descriptor));
@@ -332,11 +292,13 @@ public:
 					SocketConnection	*conn = static_cast<SocketConnection*>(event.file_descriptor);
 					if (!event.error.empty() || event.eof)
 					{
-						std::list<CgiProcess*>::iterator cit = _findCgiByClient(conn);
+						std::set<CgiProcess*>::iterator cit = _findCgiByClient(conn);
 						if (cit != _running_cgis.end())
-							_cleanupCgi(cit, CGI_CLIENT_GONE);
+							// _cleanupCgi(cit, CGI_CLIENT_GONE);
+							delete *cit;
 
-						_multiplexer->remove(conn);
+						if (!_isConnectionOwnedByCgi(conn))
+							ConnectionPool::removeFileDescriptor(conn);
 						continue;
 					}
 
@@ -348,8 +310,8 @@ public:
 					{
 						if (event.writable)
 							conn->flushWrite();
-						if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
-							_multiplexer->remove(conn);
+						if (!conn->hasPendingWrite())
+							ConnectionPool::removeFileDescriptor(conn);
 						continue;
 					}
 
@@ -360,7 +322,7 @@ public:
 						{
 							_removePending(conn);
 							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
-        						_multiplexer->remove(conn);
+        						ConnectionPool::removeFileDescriptor(conn);
 						}
 					}
 					else
@@ -372,17 +334,17 @@ public:
 						{
 							_pending_request.pop_back();
 							if (!conn->hasPendingWrite() && !_isConnectionOwnedByCgi(conn))
-        						_multiplexer->remove(conn);
+        						ConnectionPool::removeFileDescriptor(conn);
 						}
 					}
 				}
 				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_READ)
 				{
-					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
+					std::set<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
 					if (cit == _running_cgis.end())
 					{
 						LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
-						_multiplexer->remove(event.file_descriptor);
+						ConnectionPool::removeFileDescriptor(event.file_descriptor);
 						continue;
 					}
 					LOG_TRACE("PIPE_READ: " << event);
@@ -390,15 +352,16 @@ public:
 						(*cit)->onStdoutReadable();
 
 					if ((*cit)->isDone())
-						_cleanupCgi(cit, CGI_NORMAL);
+						// _cleanupCgi(cit, CGI_NORMAL);
+						(*cit)->buildAndSendResponse();
 				}
 				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_WRITE)
 				{
-					std::list<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
+					std::set<CgiProcess*>::iterator cit = _findCgiByPipe(event.file_descriptor);
 					if (cit == _running_cgis.end())
 					{
 						LOG_TRACE("CGI pipe write not found: " << event.file_descriptor->fd());
-						_multiplexer->remove(event.file_descriptor);
+						ConnectionPool::removeFileDescriptor(event.file_descriptor);
 						continue;
 					}
 					LOG_TRACE("PIPE_WRITE: " << event);
@@ -407,7 +370,7 @@ public:
 					if (!(*cit)->isStdinClosed() && (*cit)->stdinWriteFinished())
 					{
 						LOG_TRACE("CGI write finished. Closing.");
-						_multiplexer->remove((*cit)->stdinPipe()); // fecha o fd -> EOF pro filho
+						ConnectionPool::removeFileDescriptor((*cit)->stdinPipe()); // fecha o fd -> EOF pro filho
 						(*cit)->markStdinClosed();
 					}
 				}

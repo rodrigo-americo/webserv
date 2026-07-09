@@ -1,10 +1,12 @@
 #include "HttpRequestBuilder.hpp"
+#include "HttpResponse.hpp"
+#include "Router.hpp"
 
 void RequestBuilder::_processHeader(size_t header_end){
 	if (!_is_request_line_processed){
 		_cursor = _buffer.find_first_of(' ');
 		if (_cursor == std::string::npos)
-		{ 
+		{
 			_has_error = true;
 			return;
 		}
@@ -61,9 +63,9 @@ void RequestBuilder::_processHeader(size_t header_end){
 }
 
 void RequestBuilder::_verifyCompletion(){
-	
+
 	if (_body_start == 0 || _has_error) return;
-	
+
 	if (_is_chunked)
 		_decodeChunkedBody();
 	else if (_req.method != RequestMethod::GET){
@@ -213,4 +215,12 @@ bool	RequestBuilder::_decodeChunkTrailer()
 	_is_complete = true;
 	return false;
 }
+
+void				RequestBuilder::sendBadRequest(WebServerConfig *global_config) const
+	{
+			HttpRequest req = build();
+			HttpResponse res(connection);
+			Router router(_req, res, global_config);
+			router.error.badRequest();
+	}
 

@@ -82,6 +82,7 @@ public:
 	bool				hasError() const { return _has_error; }
 	int					errorStatus() const { return _error_status; }
 	const std::string	&errorMessage() const { return _error_message; }
+	void				sendBadRequest(WebServerConfig *global_config) const;
 };
 
 
