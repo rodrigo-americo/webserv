@@ -17,10 +17,24 @@ void HttpRequestBuilder::_processHeader(size_t header_end){
 			_req.method = RequestMethod::POST;
 		else if (line_method == "DELETE")
 			_req.method = RequestMethod::DELETE;
+		else
+			_req.method = RequestMethod::UNKNOWN;
 		_cursor = _buffer.find_first_not_of(' ', _cursor);
+		size_t line_end = _buffer.find_first_of('\r', _cursor);
 		size_t path_end = _buffer.find_first_of(' ', _cursor);
+		if (_cursor == std::string::npos || path_end == std::string::npos
+			|| line_end == std::string::npos || path_end > line_end)
+		{
+			_has_error = true;
+			return;
+		}
 		_req.path = Path(_buffer.substr(_cursor, path_end - _cursor));
 		_cursor = _buffer.find_first_not_of(' ', path_end);
+		if (_cursor == std::string::npos || _cursor > line_end)
+		{
+			_has_error = true;
+			return;
+		}
 		size_t ver_end = _buffer.find_first_of('\r', _cursor);
 		_req.http_version = _buffer.substr(_cursor, ver_end - _cursor);
 		_cursor = ver_end + 2;
@@ -218,7 +232,10 @@ void				HttpRequestBuilder::sendBadRequest() const
 	{
 			HttpRequest req = build();
 			HttpResponse res(connection);
-			Router router(_req, res);
-			router.error.badRequest();
+			Router router(_req, res, global_config);
+			if (_error_status == 413)
+				router.error.contentLarge(_error_message);
+			else
+				router.error.badRequest(_error_message);
 	}
 

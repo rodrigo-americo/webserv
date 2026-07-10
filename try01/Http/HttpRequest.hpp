@@ -14,14 +14,16 @@ struct RequestMethod
 	{
 		GET,
 		POST,
-		DELETE
+		DELETE,
+		UNKNOWN
 	};
 };
 
 static const char *RequestMethodStr[] = {
 	"GET",
 	"POST",
-	"DELETE"
+	"DELETE",
+	"UNKNOWN"
 };
 
 inline std::ostream	&operator<<(std::ostream &os, RequestMethod::type req)

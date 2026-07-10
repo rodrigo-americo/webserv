@@ -21,3 +21,4 @@ core
 
 #OUTFILE
 out
+__pycache__

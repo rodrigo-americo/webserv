@@ -84,9 +84,9 @@ void	HttpRequestsManager::buildRequest(HttpRequestBuilder &req_builder)
 		bytes_read = conn->read(buffer_size, chunk);
 	}
 	if (req_builder.hasError())
-	{
-		_removePending(conn);
+	{		
 		req_builder.sendBadRequest();
+    _removePending(conn);
 		return ;
 	}
 
