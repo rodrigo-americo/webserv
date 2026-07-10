@@ -198,7 +198,7 @@ e2e: $(NAME) $(VENV)
 		$(PYTEST) $(E2E_DIR) -m "not slow and not stress"
 
 # tudo, inclusive os timeouts reais de 30s
-e2e-full: $(NAME)
+e2e-full: $(NAME) $(VENV)
 	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
 		$(PYTEST) $(E2E_DIR) -m "not stress"
 
