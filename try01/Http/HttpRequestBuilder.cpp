@@ -1,6 +1,8 @@
 #include "HttpRequestBuilder.hpp"
+#include "HttpResponse.hpp"
+#include "Router.hpp"
 
-void RequestBuilder::_processHeader(size_t header_end){
+void HttpRequestBuilder::_processHeader(size_t header_end){
 	if (!_is_request_line_processed){
 		_cursor = _buffer.find_first_of(' ');
 		if (_cursor == std::string::npos)
@@ -60,7 +62,7 @@ void RequestBuilder::_processHeader(size_t header_end){
 	_verifyCompletion();
 }
 
-void RequestBuilder::_verifyCompletion(){
+void HttpRequestBuilder::_verifyCompletion(){
 
 	if (_body_start == 0 || _has_error) return;
 
@@ -86,7 +88,7 @@ void RequestBuilder::_verifyCompletion(){
 		_is_complete = true;
 }
 
-void	RequestBuilder::_decodeChunkedBody()
+void	HttpRequestBuilder::_decodeChunkedBody()
 {
 	bool progressed = true;
 	while (progressed && !_is_complete && !_has_error)
@@ -102,7 +104,7 @@ void	RequestBuilder::_decodeChunkedBody()
 	}
 }
 
-bool	RequestBuilder::_decodeChunkSize()
+bool	HttpRequestBuilder::_decodeChunkSize()
 {
 	// linha "hex[;ext]\r\n" — se não achar o \r\n ainda, espera mais bytes
 	size_t line_end = _buffer.find("\r\n", _chunk_cursor);
@@ -148,7 +150,7 @@ bool	RequestBuilder::_decodeChunkSize()
 	return true;
 }
 
-bool	RequestBuilder::_decodeChunkData()
+bool	HttpRequestBuilder::_decodeChunkData()
 {
 	size_t available = _buffer.size() - _chunk_cursor;
 	if (available == 0)
@@ -174,7 +176,7 @@ bool	RequestBuilder::_decodeChunkData()
 	return true;
 }
 
-bool	RequestBuilder::_decodeChunkDataCrlf()
+bool	HttpRequestBuilder::_decodeChunkDataCrlf()
 {
 	if (_buffer.size() - _chunk_cursor < 2)
 		return false;   // CRLF final do chunk ainda não chegou completo
@@ -188,7 +190,7 @@ bool	RequestBuilder::_decodeChunkDataCrlf()
 	return true;
 }
 
-bool	RequestBuilder::_decodeChunkTrailer()
+bool	HttpRequestBuilder::_decodeChunkTrailer()
 {
 	if (_buffer.size() - _chunk_cursor > MAX_TRAILER_SIZE)
 	{
@@ -213,4 +215,12 @@ bool	RequestBuilder::_decodeChunkTrailer()
 	_is_complete = true;
 	return false;
 }
+
+void				HttpRequestBuilder::sendBadRequest(WebServerConfig *global_config) const
+	{
+			HttpRequest req = build();
+			HttpResponse res(connection);
+			Router router(_req, res, global_config);
+			router.error.badRequest();
+	}
 

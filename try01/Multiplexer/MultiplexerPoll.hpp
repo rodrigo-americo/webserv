@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerPoll.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/08 11:28:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/09 20:30:50 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,11 @@ class MultiplexerPoll: public IMultiplexer
 	public:
 		MultiplexerPoll(): _sockets(), _pollfds(), _timeout_ms(-1) {};
 		void setTimeout(int timeout_ms) { _timeout_ms = timeout_ms; }
-		~MultiplexerPoll() {};
+		~MultiplexerPoll()
+		{
+			for (file_descriptors::iterator it = _sockets.begin(); it < _sockets.end(); ++it)
+				delete *it;
+		};
 
 		void add(FileDescriptor *file_descriptor)
 		{
@@ -63,6 +67,7 @@ class MultiplexerPoll: public IMultiplexer
 				return;
 			size_t	idx = it - _sockets.begin();
 			_pending_deletion.push_back(*it);
+			std::cout << "scheduling deletion of: " << *it << "\n";
 			_sockets.erase(it);
 			_pollfds.erase(_pollfds.begin() + idx);
 		}

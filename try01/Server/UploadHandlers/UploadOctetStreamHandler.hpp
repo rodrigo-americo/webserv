@@ -3,7 +3,7 @@
 
 # include "UploadFactoyry.hpp"
 
-class UploadOctetStreamHandler: public UploadHandler, public UploadFactoyryRegister<UploadOctetStreamHandler>
+class UploadOctetStreamHandler: public UploadHandler, public patterns::factory_register<UploadOctetStreamHandler, UploadFactoyry>
 {
 private:
 

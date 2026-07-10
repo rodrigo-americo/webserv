@@ -6,7 +6,7 @@
 /*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/10 12:12:02 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/09 19:32:34 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ WebServer::WebServer() : _multiplexer(NULL) {}
 
 WebServer::~WebServer()
 {
-	for (size_t i = 0; i < _listeners.size(); i++)
-		delete _listeners[i];
+	// for (size_t i = 0; i < _listeners.size(); i++)
+	// 	delete _listeners[i];
 	for (size_t i = 0; i < _servers.size(); i++)
 		delete _servers[i];
 	delete _multiplexer;

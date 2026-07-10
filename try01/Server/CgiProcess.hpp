@@ -48,6 +48,7 @@ public:
     pid_t            pid()        const { return _child_pid; }
     SocketConnection *clientConn() const { return _client_conn; }
     void buildAndSendResponse();
+	void	timeoutResponse();
 };
 
 

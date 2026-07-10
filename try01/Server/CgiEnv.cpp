@@ -6,7 +6,7 @@ CgiEnv::CgiEnv(const Router &router, utils::str script_path): _router(router), _
 CgiEnv::~CgiEnv()
 {
 	for (size_t i = 0; i < _data.size(); i++)
-		delete _data[i];
+		delete[] _data[i];
 };
 
 char* CgiEnv::_envEntry(const utils::str& key, const utils::str& value)

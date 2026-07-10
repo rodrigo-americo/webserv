@@ -6,6 +6,7 @@
 # include <map>
 # include "str.hpp"
 # include "singleton.hpp"
+# include "factory.hpp"
 
 
 class Router;
@@ -16,8 +17,8 @@ class UploadHandler
 		utils::str	_media_type;
 		const Router *_router;
 
-		bool _saveFile(const utils::str &path, const utils::str &data);
-		utils::str				_uploadPath(const utils::str &filename) const;
+		bool		_saveFile(const utils::str &path, const utils::str &data);
+		utils::str	_uploadPath(const utils::str &filename) const;
 
 	public:
 		UploadHandler(utils::str media_type, const Router *router);
@@ -30,12 +31,11 @@ class UploadHandler
 
 };
 
-class UploadFactoyry: public patterns::singleton<UploadFactoyry>
+class UploadFactoyry: public patterns::factory<UploadFactoyry, utils::str, UploadHandler, const Router *>
 {
 	friend class patterns::singleton<UploadFactoyry>;
+	friend class patterns::factory<UploadFactoyry, utils::str, UploadHandler, const Router *>;
 	private:
-		typedef std::map<utils::str, UploadHandler*>::iterator	iterator;
-		std::map<utils::str, UploadHandler*>	items;
 
 		UploadFactoyry();
 		UploadFactoyry(const UploadFactoyry &);
@@ -45,29 +45,6 @@ class UploadFactoyry: public patterns::singleton<UploadFactoyry>
 		void	_addItem(UploadHandler *item);
 		static utils::str	_getMediaType(const Router *router);
 		UploadHandler	*_create(const Router *router);
-
-	public:
-		static void	registerItem(UploadHandler *item);
-		static UploadHandler	*create(const Router *router);
 };
-
-template <typename T>
-class UploadFactoyryRegister
-{
-	private:
-		static bool	_register;
-	public:
-		UploadFactoyryRegister() { (void)_register; }
-};
-
-template <typename Derived>
-bool	registerFuntion()
-{
-	UploadFactoyry::registerItem(new Derived());
-	return true;
-}
-
-template <typename Derived>
-bool	UploadFactoyryRegister<Derived>::_register = registerFuntion<Derived>();
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeaders.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 21:56:02 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/06 18:34:20 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/09 14:05:35 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class HttpHeaders
 
 		Headers					_headers;
 		std::vector<SetCookie>	_set_cookies;
-		const std::string		_dummy;
+		std::string				_dummy;
 
 	public:
 		HttpHeaders(): _headers(), _dummy() {};

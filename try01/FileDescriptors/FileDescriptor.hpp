@@ -33,7 +33,7 @@ class FileDescriptor: public segregation::has_type<FileDescriptorType::type>
 		FileDescriptor(type _type): has_type(_type), _fd(-1) {}
 		FileDescriptor(type _type, int fd): has_type(_type), _fd(fd) {}
 		FileDescriptor(const FileDescriptor& other): has_type(other._type), _fd(other._fd) {LOG_TRACE("copy contructor Socket called " << other._fd << "\n");};
-		~FileDescriptor() { close(); }
+		virtual ~FileDescriptor() { close(); }
 
 		ssize_t	read(size_t bytes, std::string &buff) const
 		{
@@ -46,7 +46,7 @@ class FileDescriptor: public segregation::has_type<FileDescriptorType::type>
 
 		int	close()
 		{
-			if (isValid())
+			if (_fd > 2)
 			{
 				LOG_TRACE("is closing fd: " << _fd);
 				int status = ::close(_fd);

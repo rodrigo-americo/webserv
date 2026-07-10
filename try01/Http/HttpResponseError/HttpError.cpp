@@ -1,6 +1,7 @@
 #include "HttpError.hpp"
 #include "Router.hpp"
 #include "Logger.hpp"
+#include "ConnectionPool.hpp"
 
 void	HttpError::badRequest(const utils::str &body) const
 {
@@ -45,7 +46,7 @@ void	HttpError::methodNotAllowed(const utils::str &body) const
 
 void	HttpError::timeout(const utils::str &body) const
 {
-	HttpResponseError err = HttpResponseError(_router.res, 408, "Timeot Error", _router.config_server);
+	HttpResponseError err = HttpResponseError(_router.res, 408, "Timeout Error", _router.config_server);
 	if (!body.empty())
 		err.body(body).headers.content_type("text/plain");
 	err.send(ResponseHTTPVersion::HTTP_1_1);
