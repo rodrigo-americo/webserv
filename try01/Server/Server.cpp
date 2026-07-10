@@ -49,8 +49,11 @@ void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 	LOG_INFO("location config ok.");
 	const std::list<HttpMethod>& methods = router.config_location->getMethods();
 	if (!methods.empty() && !_methodAllowed(req.method, methods))
+    {
+        LOG_INFO("method not allowed." << req.method);
 		return router.error.methodNotAllowed();
-	LOG_INFO("methods allowed.");
+    }
+	LOG_INFO("methods allowed." << req.method);
 	size_t max = router.config_server->getClientMaxBodySize();
 	if (max > 0 && req.body.size() > max)
 		return router.error.contentLarge();

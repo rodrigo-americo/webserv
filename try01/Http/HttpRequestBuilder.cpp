@@ -17,6 +17,8 @@ void HttpRequestBuilder::_processHeader(size_t header_end){
 			_req.method = RequestMethod::POST;
 		else if (line_method == "DELETE")
 			_req.method = RequestMethod::DELETE;
+		else
+			_req.method = RequestMethod::UNKNOWN;
 		_cursor = _buffer.find_first_not_of(' ', _cursor);
 		size_t line_end = _buffer.find_first_of('\r', _cursor);
 		size_t path_end = _buffer.find_first_of(' ', _cursor);
