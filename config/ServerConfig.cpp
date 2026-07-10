@@ -28,5 +28,5 @@ const LocationConfig* ServerConfig::match_location(const std::string& uri) const
             best_len = len;
         }
     }
-    return (best);
+    return best ? best : _default_location;
 }

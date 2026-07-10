@@ -160,6 +160,31 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
         case ParserTokenType::PT_ROOT:
             sc->setRoot(Path(d.values[0].getContent()));
             break;
+        case ParserTokenType::PT_AUTOINDEX:
+            sc->setAutoindex(d.values[0].getContent() == "on");
+            break;
+        case ParserTokenType::PT_INDEX:
+            for (size_t i = 0; i < d.values.size(); ++i)
+                sc->addIndex(d.values[i].getContent());
+            break;
+        case ParserTokenType::PT_ALLOW_METHODS:
+            for (size_t i = 0; i < d.values.size(); ++i)
+            {
+                const std::string& m = d.values[i].getContent();
+                if (m == "GET")         sc->addMethod(GET);
+                else if (m == "POST")   sc->addMethod(POST);
+                else if (m == "DELETE") sc->addMethod(DELETE);
+            }
+            break;
+        case ParserTokenType::PT_CGI_EXTENSION:
+            sc->addCgiExtension(std::make_pair(d.values[0].getContent(), d.values[1].getContent()));
+            break;
+        case ParserTokenType::PT_UPLOAD_DIR:
+            sc->setUploadDir(d.values[0].getContent());
+            break;
+        case ParserTokenType::PT_REQUIRE_AUTH:
+            sc->setRequireAuth(d.values[0].getContent() == "on");
+            break;
         default:
             break;
     }
