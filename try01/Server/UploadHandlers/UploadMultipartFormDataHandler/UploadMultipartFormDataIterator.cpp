@@ -19,6 +19,8 @@ void	UploadMultipartFormDataIterator::_nextDelimiter()
 	size_t part_end = _router->req.body.find(_delimitter.string(), _cursor);
 	if (part_end == utils::str::npos)
 		part_end = _router->req.body.find(_end_marker.string(), _cursor);
+	if (part_end != utils::str::npos)
+	 	part_end -= 2;
 	_current_part = UploadMultipartFormDataPart(_router, _cursor, part_end - _cursor);
 }
 
