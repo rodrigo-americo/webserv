@@ -207,7 +207,7 @@ public:
 						if (!cgi->isStdinClosed() && cgi->stdinWriteFinished())
 						{
 							LOG_TRACE("CGI write finished. Closing.");
-							ConnectionPool::removeFileDescriptor(cgi->stdinPipe()); // fecha o fd -> EOF pro filho
+							ConnectionPool::removeFileDescriptor(cgi->stdinPipe());
 							cgi->markStdinClosed();
 						}
 					}

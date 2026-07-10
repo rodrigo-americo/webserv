@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MultiplexerPoll.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/09 20:30:50 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/10 14:34:53 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ class MultiplexerPoll: public IMultiplexer
 				return;
 			size_t	idx = it - _sockets.begin();
 			_pending_deletion.push_back(*it);
-			std::cout << "scheduling deletion of: " << *it << "\n";
 			_sockets.erase(it);
 			_pollfds.erase(_pollfds.begin() + idx);
 		}

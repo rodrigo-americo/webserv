@@ -190,10 +190,10 @@ valrind: re
 
 E2E_DIR   = tests/e2e
 E2E_MUX  ?= poll
-PYTEST    = python3 -m pytest
+PYTEST    = $(VENV)/bin/python3 -m pytest
 
 # suite rapida (exclui timeouts longos e carga pesada)
-e2e: $(NAME)
+e2e: $(NAME) $(VENV)
 	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
 		$(PYTEST) $(E2E_DIR) -m "not slow and not stress"
 

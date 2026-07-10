@@ -32,8 +32,8 @@ class Cgi
 {
 private:
 	const Router	&_router;
-	Pipe			_pipe_in;
-	Pipe			_pipe_out;
+	Pipe			*_pipe_in;
+	Pipe			*_pipe_out;
 	FileSystem		_script_path;
 	CgiEnv			_env;
 	utils::str		_interpreter;
