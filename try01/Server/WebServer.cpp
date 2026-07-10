@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/09 16:51:41 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/10 12:12:02 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,15 +80,23 @@ void WebServer::start(WebServerConfig* config)
 				: (lit->address + ":" + utils::to_string(lit->port));
 			if (!created_listens.insert(key).second)
 			{
-				std::cerr << "Listen duplicado ignorado: " << key << std::endl;
+				std::cerr << "Duplicated listen ignored: " << key << std::endl;
 				continue;
 			}
 
 			SocketListenner* sock = new SocketListenner(*lit, worker_connections);
-			if (sock->hasErrors()) { delete sock; continue; }
+			if (sock->hasErrors()) { 
+				created_listens.erase(key);
+				delete sock; 
+				continue; }
 			// _listeners.push_back(sock);
 			pool.addListenner(sock, srv);
 		}
+	if (created_listens.size() == 0)
+	{
+		std::cerr << "No active listenners. Shutting server down.\n";
+		return;
+	}
 	}
 	pool.waitConnections();
 }

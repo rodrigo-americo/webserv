@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketListenner.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:37:04 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/09 16:48:56 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/10 12:14:35 by ighannam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,18 +80,17 @@ class SocketListenner: public Socket
 			LOG_TRACE("_addr.ptr()->sa_data: " << ip_str);
 			if (bind(fd(), _addr.ptr(), _addr.size()) < 0)
 			{
-				_errors.push_back(std::string("Error on bind: ") + strerror(errno));
+				_errors.push_back(std::string("Error on bind ") + _addr.ip() + ":" + utils::to_string(_addr.port()) + ": " + strerror(errno));
 				printErrors();
-				std::cerr << std::endl;
 				return;
 			}
 			if (listen(fd(), worker_connections) < 0)
 			{
-				_errors.push_back(std::string("Error on linten: ") + strerror(errno));
+				_errors.push_back(std::string("Error on linten: ") + _addr.ip() + ":" + utils::to_string(_addr.port()) + ": " + strerror(errno));
 				printErrors();
-				std::cerr << std::endl;
 				return;
 			}
+			std::cout << "Server listenning on " << _addr.ip() << ":" << _addr.port() << "..." << std::endl;
 		}
 
 	public:
@@ -115,7 +114,7 @@ class SocketListenner: public Socket
 				return;
 			}
 			_bind_and_listen(worker_connections);
-			std::cout << "Server listenning on " << _addr.ip() << ":" << _addr.port() << "..." << std::endl;
+			
 		};
 		~SocketListenner() {};
 };
