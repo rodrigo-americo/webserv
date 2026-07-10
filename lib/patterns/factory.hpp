@@ -26,10 +26,10 @@ namespace patterns
 				Derived	&instance = Derived::getInstance();
 				instance._addItem(item);
 			}
-			static Item	*create(CreateInput router)
+			static Item	*create(CreateInput item)
 			{
 				Derived	&instance = Derived::getInstance();
-				return instance._create(router);
+				return instance._create(item);
 			}
 	};
 

@@ -102,6 +102,9 @@ void	HttpRequestsManager::buildRequest(HttpRequestBuilder &req_builder)
 
 void	HttpRequestsManager::buildRequest(SocketConnection *conn)
 {
+	HttpRequestBuilder *existing = findPending(conn);
+	if (existing)
+		return buildRequest(*existing);
 	Server *server = _findServer(conn->listenner());
 	const WebServerConfig *config = server ? server->getConfig() : NULL;
 	HttpRequestBuilder	*builder = new HttpRequestBuilder(conn, config);
@@ -114,7 +117,8 @@ CgiProcess	*HttpRequestsManager::findCgiByConnectionEvent(const ConnectionEvent 
 	for (std::set<CgiProcess*>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 	{
 		if ((*it)->stdinPipe()  == event.file_descriptor
-		|| (*it)->stdoutPipe() == event.file_descriptor)
+		|| (*it)->stdoutPipe() == event.file_descriptor
+		|| (*it)->clientConn() == event.file_descriptor)
 			return *it;
 	}
 	ConnectionPool::removeFileDescriptor(event.file_descriptor);

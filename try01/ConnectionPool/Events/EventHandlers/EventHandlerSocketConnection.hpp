@@ -3,9 +3,9 @@
 
 # include "EventHandler.hpp"
 
-struct EventHandlerSocketListenner: public EventHandler, public patterns::factory_register<EventHandlerSocketListenner, EventHandlerFactory>
+struct EventHandlerSocketConnection: public EventHandler, public patterns::factory_register<EventHandlerSocketConnection, EventHandlerFactory>
 {
-	EventHandlerSocketListenner();
+	EventHandlerSocketConnection();
 	void			handle(const ConnectionEvent &event);
 	EventHandler	*copy();
 };

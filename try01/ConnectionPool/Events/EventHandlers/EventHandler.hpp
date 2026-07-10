@@ -8,6 +8,7 @@
 
 struct EventHandler: public segregation::has_type<FileDescriptorType::type>
 {
+	EventHandler(FileDescriptorType::type type);
 	virtual ~EventHandler() {};
 	virtual EventHandler	*copy() = 0;
 	virtual void			handle(const ConnectionEvent &event) = 0;
@@ -16,7 +17,7 @@ struct EventHandler: public segregation::has_type<FileDescriptorType::type>
 class EventHandlerFactory: public patterns::factory<EventHandlerFactory, FileDescriptorType::type, EventHandler, const ConnectionEvent&>
 {
 	friend class patterns::singleton<EventHandlerFactory>;
-	friend class patterns::factory<EventHandlerFactory, FileDescriptorType::type, EventHandler, ConnectionEvent>;
+	friend class patterns::factory<EventHandlerFactory, FileDescriptorType::type, EventHandler, const ConnectionEvent&>;
 
 	EventHandlerFactory();
 	~EventHandlerFactory();
