@@ -220,4 +220,9 @@ stress: $(NAME)
 	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
 		$(PYTEST) $(E2E_DIR) -m stress
 
+# roda so os testes cujo nome casa com F=<padrao>, ex: make e2e-focus F=test_k
+e2e-focus: $(NAME) $(VENV)
+	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
+		$(PYTEST) $(E2E_DIR) -k "$(F)" -m "not slow and not stress"
+
 .PHONY: tests all clean fclean re e2e e2e-full e2e-all-mux leaks stress

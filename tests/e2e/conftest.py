@@ -154,6 +154,7 @@ class ServerInstance(object):
         _write(os.path.join(cgi, "sleep.py"), CGI_SLEEP, executable=True)
         _write(os.path.join(cgi, "loop.py"), CGI_LOOP, executable=True)
         _write(os.path.join(cgi, "noread.py"), CGI_NOREAD, executable=True)
+        _write(os.path.join(cgi, "env.py"), CGI_ENV, executable=True)
 
     def _wait_ready(self, timeout=15.0):
         deadline = time.time() + timeout
@@ -243,3 +244,12 @@ def server_limited(binary):
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: testes que esperam timeouts reais (30s+)")
     config.addinivalue_line("markers", "stress: testes de carga pesada")
+
+CGI_ENV = """#!/usr/bin/env python3
+import os, sys
+body = "QUERY_STRING=%s\\nREQUEST_METHOD=%s\\n" % (
+    os.environ.get("QUERY_STRING", ""), os.environ.get("REQUEST_METHOD", ""))
+sys.stdout.write("Content-Type: text/plain\\r\\n")
+sys.stdout.write("Content-Length: %d\\r\\n\\r\\n" % len(body))
+sys.stdout.write(body)
+"""

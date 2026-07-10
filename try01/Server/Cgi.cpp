@@ -76,7 +76,6 @@ void	Cgi::_execute() const
 		LOG_ERROR("CHILD_PROCESS: execute CGI dup2 Error on " << *_pipe_in->write << " to " << STDOUT_FILENO);
 		_exit(1);
 	}
-
 	LOG_TRACE("CHILD_PROCESS: execute CGI CD to " << _script_path.path().getLastDir());
 	if (chdir(_script_path.path().getLastDir().c_str()) == -1)
 	{
@@ -89,6 +88,8 @@ void	Cgi::_execute() const
 	argv.push_back(const_cast<char *>(_router.req.path.getFilename().c_str()));
 	argv.push_back(NULL);
 	// LOG_TRACE("execve CGI child process.");
+	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & ~O_NONBLOCK);
+	fcntl(STDOUT_FILENO, F_SETFL, fcntl(STDOUT_FILENO, F_GETFL) & ~O_NONBLOCK);
 	execve(_interpreter.c_str(), &argv[0], &_env.data()[0]);
 	// LOG_ERROR("execve CGI Error.");
 	_exit(1);
