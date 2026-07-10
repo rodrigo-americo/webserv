@@ -23,7 +23,7 @@ class Socket: public FileDescriptor
 		Socket(type _type): FileDescriptor(_type), _addr() {};
 		Socket(type _type, int fd): FileDescriptor(_type, fd), _addr() {};
 		Socket(const FileDescriptor &fd): FileDescriptor(fd), _addr() {};
-		~Socket() {};
+		virtual ~Socket() {};
 
 		const SocketAddress	&addr() const { return _addr; }
 		SocketAddress	&addr() { return _addr; }

@@ -6,7 +6,7 @@
 /*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 17:06:31 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/09 19:32:06 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/09 20:30:50 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ class MultiplexerPoll: public IMultiplexer
 				return;
 			size_t	idx = it - _sockets.begin();
 			_pending_deletion.push_back(*it);
+			std::cout << "scheduling deletion of: " << *it << "\n";
 			_sockets.erase(it);
 			_pollfds.erase(_pollfds.begin() + idx);
 		}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketAddress.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 15:21:20 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/08 16:58:24 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/09 20:44:45 by bruno-valer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class SocketAddress
 
 		struct addrinfo *resolveAddrInfo(const std::string &ip, int family)
 		{
-		
+
 			std::string _ip = ip.empty() ? "127.0.0.1" : ip;
 			struct addrinfo hints;
 			struct addrinfo *result;
@@ -60,9 +60,11 @@ class SocketAddress
 			_storage.ss_family = AF_INET;
 			sockaddr_in	*ipv4 = reinterpret_cast<sockaddr_in *>(&_storage);
 			ipv4->sin_port = htons(port);
-			
-			struct sockaddr_in *addr_in = reinterpret_cast<sockaddr_in *>(resolveAddrInfo(ip, _storage.ss_family)->ai_addr);
+
+			struct addrinfo *result = resolveAddrInfo(ip, _storage.ss_family);
+			struct sockaddr_in *addr_in = reinterpret_cast<sockaddr_in *>(result->ai_addr);
 			ipv4->sin_addr.s_addr = addr_in->sin_addr.s_addr;
+			freeaddrinfo(result);
 			recalculate();
 		}
 
@@ -71,8 +73,11 @@ class SocketAddress
 			_storage.ss_family = AF_INET6;
 			sockaddr_in6	*ipv6 = reinterpret_cast<sockaddr_in6 *>(&_storage);
 			ipv6->sin6_port = htons(port);
-			struct sockaddr_in6 *addr_in = reinterpret_cast<sockaddr_in6 *>(resolveAddrInfo(ip, _storage.ss_family)->ai_addr);
+
+			struct addrinfo *result = resolveAddrInfo(ip, _storage.ss_family);
+			struct sockaddr_in6 *addr_in = reinterpret_cast<sockaddr_in6 *>(result->ai_addr);
 			ipv6->sin6_addr = addr_in->sin6_addr;
+			freeaddrinfo(result);
 			recalculate();
 		}
 
