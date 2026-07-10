@@ -14,8 +14,6 @@ class Router
 {
 private:
 
-	const WebServerConfig	*_config_global;
-
 public:
 	const HttpRequest		&req;
 	HttpResponse			&res;
@@ -23,14 +21,12 @@ public:
 	const LocationConfig	*config_location;
 	HttpError	error;
 	Cgi			cgi;
-	Router(const HttpRequest &req, HttpResponse &res, const WebServerConfig *config)
-		: _config_global(config), req(req), res(res),
-		config_server(config->match_server(req)),
+	Router(const HttpRequest &req, HttpResponse &res)
+		: req(req), res(res),
+		config_server(WebServerConfig::match_server(req)),
 		config_location(config_server ? config_server->match_location(req.path.getCleanPath().string()) : NULL),
 		error(*this), cgi(*this)
-		{
-			(void)_config_global;
-		};
+		{};
 	~Router() {};
 
 

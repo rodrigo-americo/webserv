@@ -39,19 +39,9 @@ private:
 	ConnectionPool()
 		: _multiplexer(NULL), _requests() {}
 
-	void	_setGlobalConfig(WebServerConfig *config)
-	{
-		_requests.setGlobalConfig(config);
-	}
-
 	void _setMultiplexer(IMultiplexer *multiplexer)
 	{
 		_multiplexer = multiplexer;
-	}
-
-	IMultiplexer	*_getMultiplexer()
-	{
-		return _multiplexer;
 	}
 
 	bool	_addListenner(Socket *socket, Server *server)
@@ -68,6 +58,13 @@ private:
 			return false;
 		_multiplexer->add(file_descriptor);
 		return true;
+	}
+
+	void	_removeFileDescriptor(FileDescriptor *file_descriptor)
+	{
+		_multiplexer->remove(file_descriptor);
+		if (file_descriptor->getType() == FileDescriptorType::SOCKET_CONNECTION)
+			_requests.removeActiveConnection(dynamic_cast<SocketConnection*>(file_descriptor));
 	}
 
 	void _addCgi(CgiProcess *cgi)
@@ -124,8 +121,7 @@ public:
 	static void removeFileDescriptor(FileDescriptor *file_descriptor)
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
-		instance._getMultiplexer()->remove(file_descriptor);
-		// delete file_descriptor;
+		instance._removeFileDescriptor(file_descriptor);
 	}
 
 	static void addCgi(CgiProcess *cgi)
@@ -169,7 +165,10 @@ public:
 			ConnectionEventList	events;
 			std::string error = _multiplexer->wait(events);
 			if (!error.empty())
-				std::cerr << error << std::endl;
+			{
+				LOG_FATAL(error);
+				g_stop = 1;
+			}
 			if (events.empty()) continue;
 			for (size_t i = 0; i < events.size(); i++)
 			{

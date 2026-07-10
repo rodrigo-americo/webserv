@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/09 19:32:34 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/10 17:43:13 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,10 @@ WebServer::~WebServer()
 	delete _multiplexer;
 }
 
-IMultiplexer* WebServer::_createMultiplexer(const WebServerConfig* config)
+IMultiplexer* WebServer::_createMultiplexer()
 {
-	const GlobalConfig* global = config->getGlobal();
+	WebServerConfig	&config = WebServerConfig::getInstance();
+	const GlobalConfig* global = config.getGlobal();
 	const EventsConfig* events = global ? global->getEvents() : NULL;
 	IOMultiplexer type = events ? events->getUse() : IO_EPOLL;
 
@@ -56,20 +57,21 @@ IMultiplexer* WebServer::_createMultiplexer(const WebServerConfig* config)
 	return mx;
 }
 
-void WebServer::start(WebServerConfig* config)
+void WebServer::start()
 {
-	size_t worker_connections = config->getWorkerConnections();
-	_multiplexer = _createMultiplexer(config);
+	WebServerConfig &config = WebServerConfig::getInstance();
+	size_t worker_connections = config.getWorkerConnections();
+	_multiplexer = _createMultiplexer();
 
 	ConnectionPool& pool = ConnectionPool::getInstance();
 	ConnectionPool::multiplexer(_multiplexer);
 
-	Server* srv = new Server(config);
+	Server* srv = new Server();
 	_servers.push_back(srv);
 
 	std::set<std::string> created_listens;
 
-	const std::list<ServerConfig*>& servers = config->getServers();
+	const std::list<ServerConfig*>& servers = config.getServers();
 	for (std::list<ServerConfig*>::const_iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		const std::list<ConfigServerListen>& listens = (*it)->getListen();
@@ -85,11 +87,10 @@ void WebServer::start(WebServerConfig* config)
 			}
 
 			SocketListenner* sock = new SocketListenner(*lit, worker_connections);
-			if (sock->hasErrors()) { 
+			if (sock->hasErrors()) {
 				created_listens.erase(key);
-				delete sock; 
+				delete sock;
 				continue; }
-			// _listeners.push_back(sock);
 			pool.addListenner(sock, srv);
 		}
 	if (created_listens.size() == 0)

@@ -27,7 +27,7 @@ void	HttpRequestsManager::_removePending(SocketConnection *conn)
 	}
 }
 
-HttpRequestsManager::HttpRequestsManager(): _pending(), _observers(), _running_cgis(), _global_config(NULL) {};
+HttpRequestsManager::HttpRequestsManager(): _pending(), _observers(), _running_cgis() {};
 HttpRequestsManager::~HttpRequestsManager()
 {
 	for (std::map<const Socket *, HttpRequestBuilder *>::iterator it = _pending.begin(); it != _pending.end(); ++it)
@@ -35,12 +35,6 @@ HttpRequestsManager::~HttpRequestsManager()
 	for (std::set<CgiProcess *>::iterator it = _running_cgis.begin(); it != _running_cgis.end(); ++it)
 		delete *it;
 };
-
-
-void	HttpRequestsManager::setGlobalConfig(WebServerConfig *config)
-{
-	_global_config = config;
-}
 
 void	HttpRequestsManager::observeSocket(const Socket *socket, Server *server)
 {
@@ -55,6 +49,11 @@ void		HttpRequestsManager::addCgi(CgiProcess *cgi)
 void		HttpRequestsManager::removeCgi(CgiProcess *cgi)
 {
 	_running_cgis.erase(cgi);
+}
+
+void		HttpRequestsManager::removeActiveConnection(SocketConnection *conn)
+{
+	_active_connections.erase(conn);
 }
 
 void	HttpRequestsManager::notifyRequest(HttpRequestBuilder &req_builder)
@@ -87,7 +86,7 @@ void	HttpRequestsManager::buildRequest(HttpRequestBuilder &req_builder)
 	if (req_builder.hasError())
 	{
 		_removePending(conn);
-		req_builder.sendBadRequest(_global_config);
+		req_builder.sendBadRequest();
 		return ;
 	}
 
@@ -105,9 +104,8 @@ void	HttpRequestsManager::buildRequest(SocketConnection *conn)
 	HttpRequestBuilder *existing = findPending(conn);
 	if (existing)
 		return buildRequest(*existing);
-	Server *server = _findServer(conn->listenner());
-	const WebServerConfig *config = server ? server->getConfig() : NULL;
-	HttpRequestBuilder	*builder = new HttpRequestBuilder(conn, config);
+	_active_connections.insert(conn);
+	HttpRequestBuilder	*builder = new HttpRequestBuilder(conn);
 	_pending[conn] = builder;
 	buildRequest(*builder);
 }
@@ -155,9 +153,25 @@ void				HttpRequestsManager::checkTimeout()
 			std::set<CgiProcess*>::iterator victim = cit;
 			++cit;
 			(*victim)->timeoutResponse();
-			// _cleanupCgi(victim, CGI_TIMEOUT);
 		}
 		else
 			++cit;
 	}
+
+	for (std::set<SocketConnection *>::iterator it = _active_connections.begin(); it != _active_connections.end();)
+	{
+		if ((*it)->expired())
+		{
+			HttpResponse	res(*it);
+			HttpResponseError error(res, 408, "Timeout Error", NULL);
+			res.headers.content_type("text/plain");
+			res.send(ResponseHTTPVersion::HTTP_1_1);
+			std::set<SocketConnection *>::iterator temp = it;
+			++it;
+			_active_connections.erase(temp);
+		}
+		else
+			++it;
+	}
+
 }

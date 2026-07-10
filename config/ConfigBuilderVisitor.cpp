@@ -9,10 +9,11 @@ ConfigBuilderVisitor::~ConfigBuilderVisitor() {}
 
 void ConfigBuilderVisitor::_addError(const std::string& msg)
 {
-    if (_result)
-        _result->addError(msg);
-    else
-        _pendingErrors.push_back(msg);
+	WebServerConfig::appendError(msg);
+    // if (_result)
+    //     _result->addError(msg);
+    // else
+    //     _pendingErrors.push_back(msg);
 }
 
 void ConfigBuilderVisitor::visit(Block& block)
@@ -23,12 +24,12 @@ void ConfigBuilderVisitor::visit(Block& block)
     {
         case ParserTokenType::PT_MAIN:
         {
-            WebServerConfig* ws = new WebServerConfig();
+            // WebServerConfig* ws = new WebServerConfig();
             GlobalConfig* gc = new GlobalConfig();
-            ws->addChild(gc);
-            _result = ws;
+            WebServerConfig::appendChild(gc);
+            // _result = ws;
             for (size_t i = 0; i < _pendingErrors.size(); ++i)
-                _result->addError(_pendingErrors[i]);
+                WebServerConfig::appendError(_pendingErrors[i]);
             _pendingErrors.clear();
             node = gc;
             break;
@@ -147,7 +148,7 @@ void ConfigBuilderVisitor::_handleServerDirective(Directive& d, ServerConfig* sc
         }
         case ParserTokenType::PT_ERROR_PAGE:
             if (d.values.size() >= 2)
-                sc->addErrorPage(std::atoi(d.values[0].getContent().c_str()), 
+                sc->addErrorPage(std::atoi(d.values[0].getContent().c_str()),
                                d.values[1].getContent());
             break;
         case ParserTokenType::PT_CLIENT_MAX_BODY_SIZE:
@@ -205,7 +206,7 @@ void ConfigBuilderVisitor::_handleLocationDirective(Directive& d, LocationConfig
                 lc->addIndex(d.values[i].getContent());
             break;
         case ParserTokenType::PT_CGI_EXTENSION:
-            lc->addCgiExtension(std::make_pair(d.values[0].getContent(), 
+            lc->addCgiExtension(std::make_pair(d.values[0].getContent(),
                                         d.values[1].getContent()));
             break;
 		case ParserTokenType::PT_RETURN:

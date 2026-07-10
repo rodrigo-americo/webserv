@@ -14,7 +14,6 @@
 class Server
 {
     private:
-        const WebServerConfig* _config;
 
         bool _methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed);
         void _dispatch(Router &router);
@@ -28,10 +27,9 @@ class Server
         std::vector<std::string> _buildCgiEnv(const HttpRequest &req, const ServerConfig &server, const std::string &script_path, const std::string &clean_path, const std::string &query_string);
 
     public:
-        Server(const WebServerConfig* config) : _config(config) {}
+        Server() {}
         ~Server() {}
 
-		const WebServerConfig *getConfig() const { return _config; }
         void handleRequest(const HttpRequest &req, HttpResponse &res);
 
 };

@@ -10,7 +10,7 @@ private:
     static void resolveServer(ServerConfig* server);
     static void resolveLocation(LocationConfig* location, const ServerConfig* server);
 public:
-    static void resolve(WebServerConfig* config);
+    static void resolve();
 };
 
 #endif

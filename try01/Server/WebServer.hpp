@@ -14,12 +14,12 @@ private:
 	std::vector<Server*> _servers;
 	std::vector<Socket*> _listeners;
 
-	IMultiplexer* _createMultiplexer(const WebServerConfig* config);
+	IMultiplexer* _createMultiplexer();
 
 public:
 	WebServer();
 	~WebServer();
-	void start(WebServerConfig* config);
+	void start();
 	void clean_up(){std::cout << "limpando!! \n";};
 };
 

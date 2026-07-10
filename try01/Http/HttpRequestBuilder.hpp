@@ -39,7 +39,6 @@ private:
 	size_t					_chunk_cursor;
 	size_t					_chunk_remaining;
 	ChunkState				_chunk_state;
-	const WebServerConfig	*_config;
 	size_t					_max_body_size;
 
 	void	_processHeader(size_t header_end);
@@ -53,11 +52,10 @@ private:
 public:
 	SocketConnection *connection;
 
-	HttpRequestBuilder(SocketConnection *conn, const WebServerConfig *config = NULL)
+	HttpRequestBuilder(SocketConnection *conn)
 		: _req(conn), _buffer(), _body_start(0), _is_request_line_processed(false), _is_complete(false), _cursor(0),
 		  _is_chunked(false), _has_error(false), _error_status(400), _error_message("Bad Request"),
-		  _chunk_cursor(0), _chunk_remaining(0), _chunk_state(CHUNK_SIZE),
-		  _config(config), _max_body_size(0),
+		  _chunk_cursor(0), _chunk_remaining(0), _chunk_state(CHUNK_SIZE), _max_body_size(0),
 		  connection(conn) {}
 	~HttpRequestBuilder() {}
 
@@ -82,7 +80,7 @@ public:
 	bool				hasError() const { return _has_error; }
 	int					errorStatus() const { return _error_status; }
 	const std::string	&errorMessage() const { return _error_message; }
-	void				sendBadRequest(WebServerConfig *global_config) const;
+	void				sendBadRequest() const;
 };
 
 

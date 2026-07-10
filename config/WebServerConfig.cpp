@@ -11,7 +11,7 @@ void WebServerConfig::addChild(ConfigNode* child)
 }
 
 
-const ServerConfig* WebServerConfig::match_server(const HttpRequest& req) const{
+const ServerConfig* WebServerConfig::_match_server(const HttpRequest& req) const{
 	size_t colon = req.headers.host().find(':');
 	std::string host = (colon != std::string::npos) ? req.headers.host().substr(0, colon) : req.headers.host();
 	ServerConfig* fallback = NULL;

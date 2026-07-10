@@ -36,7 +36,7 @@ void Server::_dispatch(Router &router)
 void Server::handleRequest(const HttpRequest &req, HttpResponse &res)
 {
 	LOG_INFO("route handler.");
-	Router	router(req, res, _config);
+	Router	router(req, res);
 
 	if (!router.config_server)
 		return router.error.internalServerError();
