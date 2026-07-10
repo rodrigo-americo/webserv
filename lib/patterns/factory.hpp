@@ -18,7 +18,10 @@ namespace patterns
 			factory() {};
 			factory(const factory &);
 			factory	&operator=(const factory &);
-			~factory() {};
+			~factory() { 
+				for (iterator i = _items.begin(); i != _items.end() ; ++i)
+					delete i->second;
+			 };
 
 		public:
 			static void	registerItem(Item *item)

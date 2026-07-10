@@ -37,12 +37,7 @@ utils::str				UploadHandler::_uploadPath(const utils::str &filename) const
 // Factory
 
 UploadFactoyry::UploadFactoyry() {};
-UploadFactoyry::~UploadFactoyry()
-{
-	for (iterator it = _items.begin(); it != _items.end(); ++it)
-		delete it->second;
-
-};
+UploadFactoyry::~UploadFactoyry() {};
 void	UploadFactoyry::_addItem(UploadHandler *item)
 {
 	if (item->mediaType().empty()) return;
