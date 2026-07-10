@@ -182,4 +182,42 @@ re: fclean all
 valrind: re
 	valgrind --track-origins=yes --show-leak-kinds=all --leak-check=full ./$(NAME)
 
-.PHONY: tests all clean fclean re
+# ****************************************************************************
+# ****************************** Testes E2E **********************************
+# ****************************************************************************
+# Suite de sistema (python + pytest) que sobe o servidor e o ataca via
+# sockets crus. Ver tests/e2e/README.md e docs/test_plan.md.
+
+E2E_DIR   = tests/e2e
+E2E_MUX  ?= poll
+PYTEST    = python3 -m pytest
+
+# suite rapida (exclui timeouts longos e carga pesada)
+e2e: $(NAME)
+	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
+		$(PYTEST) $(E2E_DIR) -m "not slow and not stress"
+
+# tudo, inclusive os timeouts reais de 30s
+e2e-full: $(NAME)
+	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
+		$(PYTEST) $(E2E_DIR) -m "not stress"
+
+# roda a suite nos tres multiplexers
+e2e-all-mux: $(NAME)
+	@for mux in select poll epoll; do \
+		echo "==== MUX=$$mux ===="; \
+		WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$$mux \
+			$(PYTEST) $(E2E_DIR) -m "not slow and not stress" || exit 1; \
+	done
+
+# servidor sob valgrind (leaks de memoria + fds)
+leaks: $(NAME)
+	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) WEBSERV_VALGRIND=1 \
+		$(PYTEST) $(E2E_DIR) -m "not slow and not stress" -x
+
+# carga (siege). Requer siege instalado.
+stress: $(NAME)
+	@WEBSERV_BIN=$(PWD)/$(NAME) WEBSERV_MUX=$(E2E_MUX) \
+		$(PYTEST) $(E2E_DIR) -m stress
+
+.PHONY: tests all clean fclean re e2e e2e-full e2e-all-mux leaks stress
