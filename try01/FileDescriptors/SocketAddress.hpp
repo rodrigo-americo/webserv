@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketAddress.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 15:21:20 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/09 20:44:45 by bruno-valer      ###   ########.fr       */
+/*   Updated: 2026/07/10 13:27:50 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,6 @@ class SocketAddress
 
 		struct addrinfo *resolveAddrInfo(int family)
 		{
-
-			std::string _ip = ip.empty() ? "127.0.0.1" : ip;
 			struct addrinfo hints;
 			struct addrinfo *result;
 
@@ -66,7 +64,7 @@ class SocketAddress
 			sockaddr_in	*ipv4 = reinterpret_cast<sockaddr_in *>(&_storage);
 			ipv4->sin_port = htons(port);
 
-			struct addrinfo *result = resolveAddrInfo(ip, _storage.ss_family);
+			struct addrinfo *result = resolveAddrInfo(_storage.ss_family);
 			struct sockaddr_in *addr_in = reinterpret_cast<sockaddr_in *>(result->ai_addr);
 			ipv4->sin_addr.s_addr = addr_in->sin_addr.s_addr;
 			freeaddrinfo(result);
@@ -80,7 +78,7 @@ class SocketAddress
 			sockaddr_in6	*ipv6 = reinterpret_cast<sockaddr_in6 *>(&_storage);
 			ipv6->sin6_port = htons(port);
 
-			struct addrinfo *result = resolveAddrInfo(ip, _storage.ss_family);
+			struct addrinfo *result = resolveAddrInfo(_storage.ss_family);
 			struct sockaddr_in6 *addr_in = reinterpret_cast<sockaddr_in6 *>(result->ai_addr);
 			ipv6->sin6_addr = addr_in->sin6_addr;
 			freeaddrinfo(result);
