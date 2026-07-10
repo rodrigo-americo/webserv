@@ -1,6 +1,8 @@
 #include "EventHandlerSocketListenner.hpp"
 #include "ConnectionPool.hpp"
 
+EventHandlerSocketListenner::EventHandlerSocketListenner(): EventHandler(FileDescriptorType::SOCKET_LISTENNER) {};
+
 EventHandler	*EventHandlerSocketListenner::copy()
 {
 	return new EventHandlerSocketListenner();

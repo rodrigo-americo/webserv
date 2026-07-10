@@ -1,5 +1,10 @@
 #include "EventHandler.hpp"
 
+EventHandler::EventHandler(FileDescriptorType::type type): segregation::has_type<FileDescriptorType::type>(type) {};
+
+
+EventHandlerFactory::EventHandlerFactory() {};
+EventHandlerFactory::~EventHandlerFactory() {};
 
 void			EventHandlerFactory::_addItem(EventHandler *handler)
 {

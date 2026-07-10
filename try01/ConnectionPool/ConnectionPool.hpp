@@ -20,6 +20,7 @@
 #include "SocketPipeWrite.hpp"
 #include "Logger.hpp"
 # include "HttpRequestsManager.hpp"
+#include "EventHandler.hpp"
 
 
 /**
@@ -82,6 +83,21 @@ private:
 		_requests.removeCgi(cgi);
 	}
 
+	CgiProcess * _findCgiByConnection(SocketConnection *conn)
+	{
+		return _requests.findCgiByConnection(conn);
+	}
+
+	CgiProcess * _findCgiByConnectionEvent(const ConnectionEvent &event)
+	{
+		return _requests.findCgiByConnectionEvent(event);
+	}
+
+	void _buildRequest(SocketConnection *conn)
+	{
+		_requests.buildRequest(conn);
+	}
+
 public:
 	~ConnectionPool() {}
 
@@ -124,6 +140,24 @@ public:
 		instance._removeCgi(cgi);
 	}
 
+	static CgiProcess * findCgiByConnection(SocketConnection *conn)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		return instance._findCgiByConnection(conn);
+	}
+
+	static CgiProcess * findCgiByConnectionEvent(const ConnectionEvent &event)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		return instance._findCgiByConnectionEvent(event);
+	}
+
+	static void buildRequest(SocketConnection *conn)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._buildRequest(conn);
+	}
+
 	void	waitConnections()
 	{
 		std::cout << "Waitting for connections!\n";
@@ -140,83 +174,10 @@ public:
 			for (size_t i = 0; i < events.size(); i++)
 			{
 				ConnectionEvent	event = events[i];
-
-				if (event.file_descriptor->getType() == FileDescriptorType::SOCKET_LISTENNER)
-				{
-					if (!event.error.empty())
-					{
-						std::cerr << event.error << std::endl;
-						ConnectionPool::removeFileDescriptor(event.file_descriptor);
-						continue;
-					}
-					SocketConnection	*connection = new SocketConnection(static_cast<Socket*>(event.file_descriptor));
-					if (!connection->isValid()) { delete connection; continue; }
-					ConnectionPool::addFileDescriptor(connection);
-					continue;
-				}
-				else if (event.file_descriptor->getType() == FileDescriptorType::SOCKET_CONNECTION)
-				{
-					SocketConnection	*conn = static_cast<SocketConnection*>(event.file_descriptor);
-					if (!event.error.empty() || event.eof)
-					{
-						CgiProcess *cgi = _requests.findCgiByConnection(conn);
-						delete cgi;
-						ConnectionPool::removeFileDescriptor(conn);
-						continue;
-					}
-
-					// ha uma resposta (headers e/ou arquivo) ainda sendo drenada pro
-					// socket. so tenta escrever de novo quando o multiplexer avisar
-					// que o fd esta gravavel; nao mistura com leitura de novo request
-					// enquanto a resposta atual nao terminou de sair.
-					if (conn->hasPendingWrite())
-					{
-						if (event.writable)
-							conn->flushWrite();
-						if (!conn->hasPendingWrite())
-							ConnectionPool::removeFileDescriptor(conn);
-						continue;
-					}
-
-					HttpRequestBuilder *existing = _requests.findPending(conn);
-					if (existing)
-						_requests.buildRequest(*existing);
-					else
-						_requests.buildRequest(conn);
-				}
-				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_READ)
-				{
-					CgiProcess	*cgi = _requests.findCgiByConnectionEvent(event);
-					if (cgi)
-					{
-						if (event.readable || event.eof)
-							cgi->onStdoutReadable();
-						if (cgi->isDone())
-							cgi->buildAndSendResponse();
-					}
-					LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
-				}
-				else if (event.file_descriptor->getType() == FileDescriptorType::PIPE_WRITE)
-				{
-					CgiProcess	*cgi = _requests.findCgiByConnectionEvent(event);
-					if (cgi)
-					{
-						LOG_TRACE("PIPE_WRITE: " << event);
-						if (event.writable)
-							cgi->onStdinWritable();
-						if (!cgi->isStdinClosed() && cgi->stdinWriteFinished())
-						{
-							LOG_TRACE("CGI write finished. Closing.");
-							ConnectionPool::removeFileDescriptor(cgi->stdinPipe()); // fecha o fd -> EOF pro filho
-							cgi->markStdinClosed();
-						}
-					}
-					LOG_TRACE("CGI pipe read not found: " << event.file_descriptor->fd());
-				}
-				else
-				{
-					std::cerr << "unknown socket type " << event.file_descriptor->getType() << "\n";
-				}
+				EventHandler	*handler = EventHandlerFactory::create(event);
+				if (!handler) { std::cerr << "unknown socket type " << event.file_descriptor->getType() << "\n"; continue; }
+				handler->handle(event);
+				delete handler;
 			}
 			_multiplexer->flushRemovals();
 		}
