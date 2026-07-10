@@ -64,6 +64,8 @@ private:
 	{
 		if (!file_descriptor) return;
 		_multiplexer->remove(file_descriptor);
+		if (!file_descriptor)
+			return;
 		if (file_descriptor->getType() == FileDescriptorType::SOCKET_CONNECTION)
 			_requests.removeActiveConnection(dynamic_cast<SocketConnection*>(file_descriptor));
 	}

@@ -63,6 +63,7 @@ public:
 
 	void	addToBuffer(const std::string &buff)
 	{
+		_req.connection()->resetTimeout();
 		if (_is_complete) return;
 		_buffer += buff;
 		if (buff.size() > 0)

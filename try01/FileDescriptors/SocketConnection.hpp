@@ -6,7 +6,7 @@
 /*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/10 18:10:43 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/07/10 20:27:44 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ class SocketConnection: public Socket
 		void	resetTimeout()
 		{
 			_timeout = std::time(NULL);
+			std::cout << "resetting timout: " << _timeout << "\n";
 		}
 
 		bool	expired()
@@ -74,6 +75,10 @@ class SocketConnection: public Socket
 			time_t	now = std::time(NULL);
 			WebServerConfig	&config = WebServerConfig::getInstance();
 			time_t timeout =  config.getGlobal()->getHttp()->getKeepaliveTimeout();
+			timeout = timeout <= 0 ? 1000 : timeout * 1000;
+			// std::cout << "now: " << now << " _timeout: " << _timeout << "\n";
+			// std::cout << "expired diff: " << now - _timeout << " timeout: " << timeout << "\n";
+			// std::cout << "expired: " << ((now - _timeout) > timeout ) << "\n";
 			return ((now - _timeout) > timeout );
 		}
 
