@@ -50,9 +50,9 @@ private:
 		if (!fs.exists())
 			return _errorMessage();
 
-		std::vector<FileSystem> children = fs.ls();
-		LOG_DEBUG("children size " << children.size());
-		if (children.empty())
+		std::vector<FileSystem> folder_items = fs.ls();
+		LOG_DEBUG("folder_items size " << folder_items.size());
+		if (folder_items.empty())
 			return _errorMessage();
 		utils::str error_page;
 		if (fs.hasChild((error_page = _errorPagePath())))

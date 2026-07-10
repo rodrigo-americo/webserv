@@ -6,7 +6,7 @@
 /*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
-/*   Updated: 2026/07/10 17:43:13 by brunofer         ###   ########.fr       */
+/*   Updated: 2026/07/10 19:23:02 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ void WebServer::start()
 
 	ConnectionPool& pool = ConnectionPool::getInstance();
 	ConnectionPool::multiplexer(_multiplexer);
-	ConnectionPool::setGlobalConfig(config);
 
 	Server* srv = new Server();
 	_servers.push_back(srv);
