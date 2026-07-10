@@ -3,6 +3,7 @@
 #include "config/ConfigBuilderVisitor.hpp"
 #include "signal.hpp"
 #include "WebServer.hpp"
+#include "ConfigInheritanceResolver.hpp"
 #include "Logger.hpp"
 # include "LoggerDestineFile.hpp"
 # include "LoggerDestineOstream.hpp"
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
     ast.applyVisitor(visitor);
 
     WebServerConfig* config = visitor.getResult();
+    ConfigInheritanceResolver::resolve(config);
     if (!config)
     {
         std::cerr << "Erro: configuração inválida" << std::endl;

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno-valero <bruno-valero@student.42.f    +#+  +:+       +#+        */
+/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/28 19:42:37 by ighannam          #+#    #+#             */
 /*   Updated: 2026/07/09 19:32:34 by bruno-valer      ###   ########.fr       */
@@ -20,8 +20,10 @@
 #include "GlobalConfig.hpp"
 #include "HttpConfig.hpp"
 #include "ServerConfig.hpp"
+#include "utils.hpp"
 
 #include <unistd.h>
+#include <set>
 #include "SocketPipeRead.hpp"
 
 WebServer::WebServer() : _multiplexer(NULL) {}
@@ -65,17 +67,36 @@ void WebServer::start(WebServerConfig* config)
 	Server* srv = new Server(config);
 	_servers.push_back(srv);
 
+	std::set<std::string> created_listens;
+
 	const std::list<ServerConfig*>& servers = config->getServers();
 	for (std::list<ServerConfig*>::const_iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		const std::list<ConfigServerListen>& listens = (*it)->getListen();
 		for (std::list<ConfigServerListen>::const_iterator lit = listens.begin(); lit != listens.end(); lit++)
 		{
+			std::string key = lit->is_unix
+				? ("unix:" + lit->address)
+				: (lit->address + ":" + utils::to_string(lit->port));
+			if (!created_listens.insert(key).second)
+			{
+				std::cerr << "Duplicated listen ignored: " << key << std::endl;
+				continue;
+			}
+
 			SocketListenner* sock = new SocketListenner(*lit, worker_connections);
-			if (sock->hasErrors()) { delete sock; continue; }
-			_listeners.push_back(sock);
+			if (sock->hasErrors()) { 
+				created_listens.erase(key);
+				delete sock; 
+				continue; }
+			// _listeners.push_back(sock);
 			pool.addListenner(sock, srv);
 		}
+	if (created_listens.size() == 0)
+	{
+		std::cerr << "No active listenners. Shutting server down.\n";
+		return;
+	}
 	}
 	pool.waitConnections();
 }

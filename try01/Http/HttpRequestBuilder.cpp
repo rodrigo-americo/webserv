@@ -40,7 +40,7 @@ void HttpRequestBuilder::_processHeader(size_t header_end){
 		_cursor = val_end + 2;
 	}
 	if (_config){
-		const ServerConfig *server = _config->match_server(_req.port, _req.headers.host());
+		const ServerConfig *server = _config->match_server(_req);
 		if (server)
 			_max_body_size = server->getClientMaxBodySize();
 	}

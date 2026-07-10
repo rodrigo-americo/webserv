@@ -19,6 +19,8 @@
 # include <sys/un.h>
 # include <string>
 
+# include "Logger.hpp"
+
 class SocketAddress
 {
 	private:
@@ -26,17 +28,18 @@ class SocketAddress
 		socklen_t			_length;
 		unsigned short		_port;
 		sockaddr			*_ptr;
+		std::string			_ip;
 
 	public:
 		SocketAddress(sockaddr_storage &storage)
-			: _storage(storage), _length(sizeof(sockaddr_storage)), _port(0), _ptr(reinterpret_cast<sockaddr *>(&_storage))
+			: _storage(storage), _length(sizeof(sockaddr_storage)), _port(0), _ptr(reinterpret_cast<sockaddr *>(&_storage)), _ip()
 				{ recalculate(); }
 		SocketAddress()
-			: _storage(), _length(sizeof(sockaddr_storage)), _port(0), _ptr(reinterpret_cast<sockaddr *>(&_storage))
+			: _storage(), _length(sizeof(sockaddr_storage)), _port(0), _ptr(reinterpret_cast<sockaddr *>(&_storage)), _ip()
 				{}
 		~SocketAddress() {};
 
-		struct addrinfo *resolveAddrInfo(const std::string &ip, int family)
+		struct addrinfo *resolveAddrInfo(int family)
 		{
 
 			std::string _ip = ip.empty() ? "127.0.0.1" : ip;
@@ -57,6 +60,8 @@ class SocketAddress
 
 		void	toIpv4(unsigned short port, const std::string &ip)
 		{
+			_ip = ip.empty() ? "127.0.0.1" : ip;
+			LOG_TRACE("Setting ipv4: " << _ip << ":" << port);
 			_storage.ss_family = AF_INET;
 			sockaddr_in	*ipv4 = reinterpret_cast<sockaddr_in *>(&_storage);
 			ipv4->sin_port = htons(port);
@@ -70,6 +75,7 @@ class SocketAddress
 
 		void	toIpv6(unsigned short port, const std::string &ip)
 		{
+			_ip = ip.empty() ? "127.0.0.1" : ip;
 			_storage.ss_family = AF_INET6;
 			sockaddr_in6	*ipv6 = reinterpret_cast<sockaddr_in6 *>(&_storage);
 			ipv6->sin6_port = htons(port);
@@ -105,16 +111,17 @@ class SocketAddress
 				_length = sizeof(sockaddr_un);
 		}
 
-		bool			isIpv4() const { return _storage.ss_family == AF_INET; }
-		bool			isIpv6() const { return _storage.ss_family == AF_INET6; }
-		bool			isUnix() const { return _storage.ss_family == AF_UNIX; }
+		bool				isIpv4() const { return _storage.ss_family == AF_INET; }
+		bool				isIpv6() const { return _storage.ss_family == AF_INET6; }
+		bool				isUnix() const { return _storage.ss_family == AF_UNIX; }
+		const std::string	&ip() const { return _ip; }
 
-		unsigned short	port() const { return _port; }
+		unsigned short		port() const { return _port; }
 
-		sockaddr	*ptr() { return _ptr; }
-		const sockaddr	*ptr() const { return _ptr; }
+		sockaddr			*ptr() { return _ptr; }
+		const sockaddr		*ptr() const { return _ptr; }
 
-		socklen_t	size() const { return _length; }
+		socklen_t			size() const { return _length; }
 };
 
 #endif

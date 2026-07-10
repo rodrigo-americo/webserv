@@ -26,7 +26,7 @@ class Socket: public FileDescriptor
 		virtual ~Socket() {};
 
 		const SocketAddress	&addr() const { return _addr; }
-		SocketAddress	&addr() { return _addr; }
+		SocketAddress		&addr() { return _addr; }
 		static bool usesGetSockOpt(FileDescriptorType::type t)
 		{
 			return t == FileDescriptorType::SOCKET_LISTENNER || t == FileDescriptorType::SOCKET_CONNECTION;
