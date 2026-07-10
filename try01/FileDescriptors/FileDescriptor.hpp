@@ -64,7 +64,7 @@ class FileDescriptor: public segregation::has_type<FileDescriptorType::type>
 		int dup2(int _fd)
 		{
 			int status = ::dup2(fd(), _fd);
-			if (status != -1)
+			if (status != -1 && fd() != _fd)
 				close();
 			return status;
 		}

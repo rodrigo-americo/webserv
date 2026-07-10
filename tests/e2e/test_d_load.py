@@ -5,6 +5,7 @@ import threading
 
 import helpers
 import pytest
+import json
 
 pytestmark = pytest.mark.stress
 
@@ -20,7 +21,13 @@ def test_d1_siege_static(server):
     report = out.stdout + out.stderr
     assert server.is_alive(), "servidor caiu sob carga do siege"
     # siege reporta "Availability: 100.00 %"
-    assert "Availability" in report, report[:500]
+    start = report.find("{")
+    end = report.rfind("}")
+    assert start != -1 and end != -1, f"sem bloco JSON no output:\n{report[:500]}"
+    stats = json.loads(report[start:end + 1])
+
+    assert stats["availability"] == 100.00, f"disponibilidade < 100%: {stats['availability']}"
+    assert stats["failed_transactions"] == 0, f"transacoes falhas: {stats['failed_transactions']}"
 
 
 def test_d2_mixed_load_no_leak(server):
