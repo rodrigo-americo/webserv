@@ -62,6 +62,7 @@ private:
 
 	void	_removeFileDescriptor(FileDescriptor *file_descriptor)
 	{
+		if (!file_descriptor) return;
 		_multiplexer->remove(file_descriptor);
 		if (file_descriptor->getType() == FileDescriptorType::SOCKET_CONNECTION)
 			_requests.removeActiveConnection(dynamic_cast<SocketConnection*>(file_descriptor));
@@ -95,6 +96,11 @@ private:
 		_requests.buildRequest(conn);
 	}
 
+	void _updateWriteInterest(FileDescriptor *file_descriptor, bool want_write)
+	{
+		_multiplexer->updateInterest(file_descriptor, want_write);
+	}
+
 public:
 	~ConnectionPool() {}
 
@@ -104,12 +110,6 @@ public:
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
 		instance._setMultiplexer(multiplexer);
-	}
-
-	static void	setGlobalConfig(WebServerConfig *config)
-	{
-		ConnectionPool	&instance = ConnectionPool::getInstance();
-		instance._setGlobalConfig(config);
 	}
 
 	static void	addListenner(Socket *socket, Server *server)
@@ -128,6 +128,12 @@ public:
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
 		instance._removeFileDescriptor(file_descriptor);
+	}
+
+	static void removePending(SocketConnection *conn)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._requests.removePending(conn);
 	}
 
 	static void addCgi(CgiProcess *cgi)
@@ -158,6 +164,12 @@ public:
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();
 		instance._buildRequest(conn);
+	}
+
+	static void updateWriteInterest(FileDescriptor *file_descriptor, bool want_write)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._updateWriteInterest(file_descriptor, want_write);
 	}
 
 	void	waitConnections()

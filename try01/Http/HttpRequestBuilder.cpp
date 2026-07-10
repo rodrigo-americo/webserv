@@ -232,7 +232,7 @@ void				HttpRequestBuilder::sendBadRequest() const
 	{
 			HttpRequest req = build();
 			HttpResponse res(connection);
-			Router router(_req, res, global_config);
+			Router router(req, res);
 			if (_error_status == 413)
 				router.error.contentLarge(_error_message);
 			else

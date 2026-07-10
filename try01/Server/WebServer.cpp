@@ -65,7 +65,6 @@ void WebServer::start()
 
 	ConnectionPool& pool = ConnectionPool::getInstance();
 	ConnectionPool::multiplexer(_multiplexer);
-	ConnectionPool::setGlobalConfig(config);
 
 	Server* srv = new Server();
 	_servers.push_back(srv);

@@ -34,6 +34,7 @@ void	CgiProcess::timeoutResponse()
 	res.statusCode(504, "Gateway Timeout");
 	res.body("Gateway Timeout\n");
 	res.send(ResponseHTTPVersion::HTTP_1_1);
+	ConnectionPool::updateWriteInterest(_client_conn, _client_conn->hasPendingWrite());
 	delete this;
 }
 
@@ -123,11 +124,13 @@ void CgiProcess::buildAndSendResponse()
         res.statusCode(502, "Bad Gateway");
         res.body("CGI output malformed\n");
         res.send(ResponseHTTPVersion::HTTP_1_1);
+        ConnectionPool::updateWriteInterest(_client_conn, _client_conn->hasPendingWrite());
         return;
     }
     res.statusCode(parsed.getStatusCode(), parsed.getStatusMsg());
     applyCgiHeaders(res, parsed);
     res.body(parsed.getBody());
     res.send(ResponseHTTPVersion::HTTP_1_1);
+	ConnectionPool::updateWriteInterest(_client_conn, _client_conn->hasPendingWrite());
 	delete this;
 }

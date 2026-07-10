@@ -48,14 +48,32 @@ class MultiplexerPoll: public IMultiplexer
 
 			pollfd	poll_fd;
 
+			// conexoes de cliente comecam sem POLLOUT: so tem algo pra escrever
+			// depois que uma resposta for enfileirada (queueWrite/queueFile).
+			// Pedir POLLOUT sem necessidade faz o poll() nunca bloquear (o buffer
+			// de envio quase sempre tem espaco livre), girando o loop a toa.
+			short	base_events = POLLIN | POLLERR | POLLHUP | POLLNVAL;
+			bool	starts_writable = file_descriptor->getType() != FileDescriptorType::SOCKET_CONNECTION;
+
 			poll_fd.fd		= file_descriptor->fd();
-			poll_fd.events	= POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL;
+			poll_fd.events	= starts_writable ? (base_events | POLLOUT) : base_events;
 			poll_fd.revents	= 0;
 
 			file_descriptors::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), file_descriptor);
 			size_t	idx = it - _sockets.begin();
 			_sockets.insert(it, file_descriptor);
 			_pollfds.insert(_pollfds.begin() + idx, poll_fd);
+		}
+
+		void updateInterest(FileDescriptor *file_descriptor, bool want_write)
+		{
+			if (!file_descriptor) return;
+			file_descriptors::iterator	it = std::lower_bound(_sockets.begin(), _sockets.end(), file_descriptor);
+			if (it == _sockets.end() || *it != file_descriptor)
+				return;
+			size_t	idx = it - _sockets.begin();
+			short	base_events = POLLIN | POLLERR | POLLHUP | POLLNVAL;
+			_pollfds[idx].events = want_write ? (base_events | POLLOUT) : base_events;
 		}
 
 		void remove(FileDescriptor *file_descriptor)

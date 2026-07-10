@@ -46,7 +46,11 @@ class MultiplexerEpoll: public IMultiplexer
 
 			epoll_event	event;
 
-			event.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+			// ver comentario equivalente em MultiplexerPoll::add: conexoes de
+			// cliente comecam sem EPOLLOUT, so ligado quando houver escrita pendente.
+			event.events = EPOLLIN | EPOLLERR | EPOLLHUP;
+			if (file_descriptor->getType() != FileDescriptorType::SOCKET_CONNECTION)
+				event.events |= EPOLLOUT;
 			event.data.ptr = file_descriptor;
 			epoll_ctl(_epollfd, EPOLL_CTL_ADD, file_descriptor->fd(), &event);
 		}
@@ -56,6 +60,18 @@ class MultiplexerEpoll: public IMultiplexer
 			if (!file_descriptor) return;
 			epoll_ctl(_epollfd, EPOLL_CTL_DEL, file_descriptor->fd(), NULL);
 			_pending_deletion.push_back(file_descriptor);
+		}
+
+		void		updateInterest(FileDescriptor *file_descriptor, bool want_write)
+		{
+			if (!file_descriptor) return;
+			epoll_event	event;
+
+			event.events = EPOLLIN | EPOLLERR | EPOLLHUP;
+			if (want_write)
+				event.events |= EPOLLOUT;
+			event.data.ptr = file_descriptor;
+			epoll_ctl(_epollfd, EPOLL_CTL_MOD, file_descriptor->fd(), &event);
 		}
 
 		void flushRemovals()

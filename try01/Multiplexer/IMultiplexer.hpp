@@ -34,6 +34,7 @@ struct IMultiplexer
 	virtual ~IMultiplexer() {};
 	virtual void		add(FileDescriptor *file_descriptor) = 0;
 	virtual void		remove(FileDescriptor *file_descriptor) = 0;
+	virtual void		updateInterest(FileDescriptor *file_descriptor, bool want_write) = 0;
 	virtual std::string	wait(ConnectionEventList &events) = 0;
 	virtual void		setTimeout(int timeout_ms) = 0;
 	virtual void flushRemovals() = 0;
