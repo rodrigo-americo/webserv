@@ -15,7 +15,8 @@ class ConfigNode: public segregation::has_name, public segregation::has_errors{
         void addError(const std::string& msg) { _collect(segregation::error("", msg)); }
 };
 
-class ConfigContainer : public ConfigNode{
+class ConfigContainer : public ConfigNode
+{
     private:
         ConfigContainer(const ConfigContainer &other);
         ConfigContainer &operator=(const ConfigContainer &other);

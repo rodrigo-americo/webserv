@@ -53,11 +53,9 @@ void HttpRequestBuilder::_processHeader(size_t header_end){
 		_req.headers[key] = value;
 		_cursor = val_end + 2;
 	}
-	if (_config){
-		const ServerConfig *server = _config->match_server(_req);
-		if (server)
-			_max_body_size = server->getClientMaxBodySize();
-	}
+	const ServerConfig *server = WebServerConfig::match_server(_req);
+	if (server)
+		_max_body_size = server->getClientMaxBodySize();
 	if (_req.method != RequestMethod::GET){
 		const std::string &te = _req.headers.transfer_encoding();
 		if (!te.empty()){
@@ -230,7 +228,7 @@ bool	HttpRequestBuilder::_decodeChunkTrailer()
 	return false;
 }
 
-void				HttpRequestBuilder::sendBadRequest(WebServerConfig *global_config) const
+void				HttpRequestBuilder::sendBadRequest() const
 	{
 			HttpRequest req = build();
 			HttpResponse res(connection);

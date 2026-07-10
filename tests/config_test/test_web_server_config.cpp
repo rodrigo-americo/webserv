@@ -16,7 +16,7 @@ static ConfigServerListen makeListen(size_t port) {
 // Monta WebServerConfig → GlobalConfig → HttpConfig → ServerConfig
 // O caller é responsável por criar os objetos; addChild transfere ownership.
 static WebServerConfig* buildConfig(ServerConfig** out_servers, size_t count) {
-    WebServerConfig* wsc = new WebServerConfig();
+    // WebServerConfig* wsc = new WebServerConfig();
     GlobalConfig* global = new GlobalConfig();
     HttpConfig* http = new HttpConfig();
 
@@ -24,8 +24,8 @@ static WebServerConfig* buildConfig(ServerConfig** out_servers, size_t count) {
         http->addChild(out_servers[i]);
 
     global->addChild(http);
-    wsc->addChild(global);
-    return wsc;
+    WebServerConfig::appendChild(global);
+    return NULL;
 }
 
 // match_server: match exato por server_name
@@ -37,9 +37,9 @@ int test_match_by_server_name() {
     ServerConfig* servers[] = { s1 };
     WebServerConfig* wsc = buildConfig(servers, 1);
 
-    const ServerConfig* result = wsc->match_server(80, "api.com");
+    const ServerConfig* result = WebServerConfig::match_server(80, "api.com");
     int r = assert_true(result == s1, "match por server_name", LINE_DATA());
-    delete wsc;
+    // delete wsc;
     return r;
 }
 

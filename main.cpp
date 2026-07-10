@@ -34,23 +34,16 @@ int main(int argc, char* argv[])
     ConfigBuilderVisitor visitor;
     ast.applyVisitor(visitor);
 
-    WebServerConfig* config = visitor.getResult();
-    ConfigInheritanceResolver::resolve(config);
-    if (!config)
-    {
-        std::cerr << "Erro: configuração inválida" << std::endl;
-        return 1;
-    }
+    WebServerConfig &config = WebServerConfig::getInstance();
+    ConfigInheritanceResolver::resolve();
 
-    if (config->hasErrors())
+    if (config.hasErrors())
     {
-        std::cerr << config->formatErrors();
-        delete config;
+        std::cerr << config.formatErrors();
         return 1;
     }
 	WebServer webServer;
-	webServer.start(config);
-    delete config;
+	webServer.start();
     webServer.clean_up();
     return 0;
 }

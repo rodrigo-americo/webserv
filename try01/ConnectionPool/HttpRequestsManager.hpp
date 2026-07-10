@@ -17,7 +17,7 @@ private:
 	std::map<const Socket *, HttpRequestBuilder*>	_pending;
 	std::map<const Socket*, Server*>				_observers;
 	std::set<CgiProcess*>							_running_cgis;
-	WebServerConfig									*_global_config;
+	std::set<SocketConnection *>					_active_connections;
 
 	Server	*_findServer(const Socket *listener) const;
 	bool	_isOwnedByCgi(SocketConnection *conn) const;
@@ -27,10 +27,10 @@ public:
 	HttpRequestsManager();
 	~HttpRequestsManager();
 
-	void		setGlobalConfig(WebServerConfig *config);
 	void		observeSocket(const Socket *socket, Server *server);
 	void		addCgi(CgiProcess *cgi);
 	void		removeCgi(CgiProcess *cgi);
+	void		removeActiveConnection(SocketConnection *conn);
 	void		notifyRequest(HttpRequestBuilder &req_builder);
 	void		buildRequest(HttpRequestBuilder &req_builder);
 	void		buildRequest(SocketConnection *conn);

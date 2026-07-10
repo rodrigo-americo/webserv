@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketConnection.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ighannam <ighannam@student.42.fr>          +#+  +:+       +#+        */
+/*   By: brunofer <brunofer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/10 01:17:51 by bruno-valer       #+#    #+#             */
-/*   Updated: 2026/07/08 11:15:23 by ighannam         ###   ########.fr       */
+/*   Updated: 2026/07/10 18:10:43 by brunofer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,25 @@
 # include <errno.h>
 # include <fcntl.h>
 # include <unistd.h>
-# include "FileChunkSource.hpp"
+# include <ctime>
 
+# include "WebServerConfig.hpp"
+# include "FileChunkSource.hpp"
 # include "str.hpp"
 # include "Socket.hpp"
 
 class SocketConnection: public Socket
 {
 	private:
-		const Socket *_listenner;
-		std::string _out_headers;
-		size_t _out_headers_off;
-		FileChunkSource _out_file;
+		const Socket	*_listenner;
+		std::string		_out_headers;
+		size_t			_out_headers_off;
+		FileChunkSource	_out_file;
+		time_t			_timeout;
 
 	public:
 		SocketConnection(const Socket *listenner): Socket(FileDescriptorType::SOCKET_CONNECTION), _listenner(listenner),
-			_out_headers(), _out_headers_off(0)
+			_out_headers(), _out_headers_off(0), _out_file(), _timeout(std::time(NULL))
 		{
 			socklen_t	len = _addr.size();
 			fd(accept(_listenner->fd(), _addr.ptr(), &len));
@@ -61,6 +64,18 @@ class SocketConnection: public Socket
 
 		const Socket	*listenner() const { return _listenner; }
 
+		void	resetTimeout()
+		{
+			_timeout = std::time(NULL);
+		}
+
+		bool	expired()
+		{
+			time_t	now = std::time(NULL);
+			WebServerConfig	&config = WebServerConfig::getInstance();
+			time_t timeout =  config.getGlobal()->getHttp()->getKeepaliveTimeout();
+			return ((now - _timeout) > timeout );
+		}
 
 		bool	hasPendingWrite() const
 		{
