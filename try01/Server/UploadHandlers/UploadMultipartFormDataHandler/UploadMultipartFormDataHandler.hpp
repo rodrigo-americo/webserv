@@ -8,7 +8,7 @@
 
 class Router;
 
-class UploadMultipartFormDataHandler: public UploadHandler, public UploadFactoyryRegister<UploadMultipartFormDataHandler>
+class UploadMultipartFormDataHandler: public UploadHandler, public patterns::factory_register<UploadMultipartFormDataHandler, UploadFactoyry>
 {
 	private:
 

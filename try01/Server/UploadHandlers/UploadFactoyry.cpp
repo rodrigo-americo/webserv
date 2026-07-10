@@ -39,20 +39,16 @@ utils::str				UploadHandler::_uploadPath(const utils::str &filename) const
 UploadFactoyry::UploadFactoyry() {};
 UploadFactoyry::~UploadFactoyry()
 {
-	for (iterator it = items.begin(); it != items.end(); ++it)
+	for (iterator it = _items.begin(); it != _items.end(); ++it)
 		delete it->second;
 
 };
 void	UploadFactoyry::_addItem(UploadHandler *item)
 {
 	if (item->mediaType().empty()) return;
-	iterator	it = items.find(item->mediaType());
-	if (it == items.end())
-	{
-		items[item->mediaType()] = item;
-		return;
-	}
-	delete item;
+	std::pair<iterator, bool> result = _items.insert(std::make_pair(item->mediaType(), item));
+	if (!result.second)
+		delete item;
 }
 
 utils::str	UploadFactoyry::_getMediaType(const Router *router)
@@ -66,20 +62,8 @@ utils::str	UploadFactoyry::_getMediaType(const Router *router)
 UploadHandler	*UploadFactoyry::_create(const Router *router)
 {
 	const utils::str	&media_type = _getMediaType(router);
-	iterator	it = items.find(media_type);
-	if (it != items.end())
-		return items[media_type]->copy(router);
+	iterator	it = _items.find(media_type);
+	if (it != _items.end())
+		return it->second->copy(router);
 	return NULL;
-}
-
-void	UploadFactoyry::registerItem(UploadHandler *item)
-{
-	UploadFactoyry	&instance = UploadFactoyry::getInstance();
-	instance._addItem(item);
-}
-
-UploadHandler	*UploadFactoyry::create(const Router *router)
-{
-	UploadFactoyry	&instance = UploadFactoyry::getInstance();
-	return instance._create(router);
 }
