@@ -230,7 +230,6 @@ bool	HttpRequestBuilder::_decodeChunkTrailer()
 
 void				HttpRequestBuilder::sendBadRequest() const
 	{
-			HttpRequest req = build();
 			HttpResponse res(connection);
 			Router router(_req, res);
 			if (_error_status == 413)

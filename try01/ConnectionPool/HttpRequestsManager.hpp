@@ -21,12 +21,13 @@ private:
 
 	Server	*_findServer(const Socket *listener) const;
 	bool	_isOwnedByCgi(SocketConnection *conn) const;
-	void	_removePending(SocketConnection *conn);
+	void	_drainSocket(SocketConnection *conn) const;
 
 public:
 	HttpRequestsManager();
 	~HttpRequestsManager();
 
+	void		removePending(SocketConnection *conn);
 	void		observeSocket(const Socket *socket, Server *server);
 	void		addCgi(CgiProcess *cgi);
 	void		removeCgi(CgiProcess *cgi);

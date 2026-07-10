@@ -42,7 +42,10 @@ class MultiplexerSelect: public IMultiplexer
 			if (!file_descriptor) return;
 
 			FD_SET(file_descriptor->fd(), &_main_read_set);
-			FD_SET(file_descriptor->fd(), &_main_write_set);
+			// ver comentario equivalente em MultiplexerPoll::add: conexoes de
+			// cliente comecam fora do write_set, so entram quando houver escrita pendente.
+			if (file_descriptor->getType() != FileDescriptorType::SOCKET_CONNECTION)
+				FD_SET(file_descriptor->fd(), &_main_write_set);
 			FD_SET(file_descriptor->fd(), &_main_error_set);
 			_sockets[file_descriptor->fd()] = file_descriptor;
 			if (file_descriptor->fd() > _max_fd)
@@ -60,6 +63,17 @@ class MultiplexerSelect: public IMultiplexer
 			FD_CLR(it->first, &_main_error_set);
 			_pending_deletion[it->first] = it->second;
 			_sockets.erase(it);
+		}
+
+		void updateInterest(FileDescriptor *file_descriptor, bool want_write)
+		{
+			if (!file_descriptor) return;
+			file_descriptors::iterator	it = _sockets.find(file_descriptor->fd());
+			if (it == _sockets.end()) return;
+			if (want_write)
+				FD_SET(it->first, &_main_write_set);
+			else
+				FD_CLR(it->first, &_main_write_set);
 		}
 
 		void flushRemovals()

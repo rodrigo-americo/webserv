@@ -49,10 +49,14 @@ IMultiplexer* WebServer::_createMultiplexer()
 	else if (type == IO_EPOLL) mx = new MultiplexerEpoll();
 	else mx = new MultiplexerSelect();
 
-	const HttpConfig* http = global ? global->getHttp() : NULL;
-	size_t keepalive = http ? http->getKeepaliveTimeout() : 0;
-	if (keepalive > 1000 || keepalive < 0)
-		mx->setTimeout(static_cast<int>(1000));
+	// O timeout do multiplexer eh a granularidade do event loop para
+	// checkTimeout() (expiracao de CGI e de conexao) rodar periodicamente;
+	// eh independente da duracao configurada de keepalive_timeout (essa eh
+	// aplicada separadamente em SocketConnection::expired()). Sem um valor
+	// aqui, poll()/select()/epoll_wait() bloqueiam indefinidamente quando
+	// nao ha atividade de I/O, e os timeouts de 30s do CGI so sao percebidos
+	// quando algum outro evento acorda o loop.
+	mx->setTimeout(1000);
 
 	return mx;
 }

@@ -15,6 +15,7 @@ void			EventHandlerSocketConnection::handle(const ConnectionEvent &event)
 	{
 		CgiProcess *cgi = ConnectionPool::findCgiByConnection(conn);
 		delete cgi;
+		ConnectionPool::removePending(conn);
 		ConnectionPool::removeFileDescriptor(conn);
 		return;
 	}

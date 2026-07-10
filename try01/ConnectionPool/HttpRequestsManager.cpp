@@ -17,7 +17,7 @@ bool HttpRequestsManager::_isOwnedByCgi(SocketConnection *conn) const
 	return false;
 }
 
-void	HttpRequestsManager::_removePending(SocketConnection *conn)
+void	HttpRequestsManager::removePending(SocketConnection *conn)
 {
 	std::map<const Socket *, HttpRequestBuilder*>::iterator	it = _pending.find(conn);
 	if (it != _pending.end())
@@ -25,6 +25,21 @@ void	HttpRequestsManager::_removePending(SocketConnection *conn)
 		delete it->second;
 		_pending.erase(it);
 	}
+}
+
+// esvazia o que ja chegou no buffer de recepcao do kernel antes de fechar a
+// conexao: fechar um socket com dados nao lidos pendentes faz o kernel
+// mandar RST em vez de FIN, e o cliente ve "connection reset" no lugar da
+// resposta de erro que acabamos de enfileirar.
+void	HttpRequestsManager::_drainSocket(SocketConnection *conn) const
+{
+	static const size_t buffer_size = 4096;
+	std::string discard;
+	ssize_t bytes_read;
+	do {
+		discard.clear();
+		bytes_read = conn->read(buffer_size, discard);
+	} while (bytes_read > 0);
 }
 
 HttpRequestsManager::HttpRequestsManager(): _pending(), _observers(), _running_cgis() {};
@@ -84,18 +99,29 @@ void	HttpRequestsManager::buildRequest(HttpRequestBuilder &req_builder)
 		bytes_read = conn->read(buffer_size, chunk);
 	}
 	if (req_builder.hasError())
-	{		
+	{
 		req_builder.sendBadRequest();
-    _removePending(conn);
+		_drainSocket(conn);
+		removePending(conn);
+		ConnectionPool::updateWriteInterest(conn, conn->hasPendingWrite());
 		return ;
 	}
 
 	if (req_builder.isComplete())
 	{
 		notifyRequest(req_builder);
-		_removePending(conn);
+		removePending(conn);
 		if (!conn->hasPendingWrite() && !_isOwnedByCgi(conn))
 			ConnectionPool::removeFileDescriptor(conn);
+		else
+			// enquanto o CGI ainda esta rodando, nada foi enfileirado pra esse
+			// conn ainda: fica so com POLLIN (sem POLLOUT) ate a resposta
+			// chegar via CgiProcess::buildAndSendResponse().
+			ConnectionPool::updateWriteInterest(conn, conn->hasPendingWrite());
+	}
+	if (bytes_read == 0 || (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK)){
+		removePending(conn);
+		ConnectionPool::removeFileDescriptor(conn);
 	}
 }
 
