@@ -109,6 +109,12 @@ public:
 		instance._setMultiplexer(multiplexer);
 	}
 
+	static void	setGlobalConfig(WebServerConfig *config)
+	{
+		ConnectionPool	&instance = ConnectionPool::getInstance();
+		instance._setGlobalConfig(config);
+	}
+
 	static void	addListenner(Socket *socket, Server *server)
 	{
 		ConnectionPool	&instance = ConnectionPool::getInstance();

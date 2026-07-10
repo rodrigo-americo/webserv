@@ -86,8 +86,8 @@ void	HttpRequestsManager::buildRequest(HttpRequestBuilder &req_builder)
 	}
 	if (req_builder.hasError())
 	{
-		_removePending(conn);
 		req_builder.sendBadRequest(_global_config);
+		_removePending(conn);
 		return ;
 	}
 

@@ -18,9 +18,21 @@ void HttpRequestBuilder::_processHeader(size_t header_end){
 		else if (line_method == "DELETE")
 			_req.method = RequestMethod::DELETE;
 		_cursor = _buffer.find_first_not_of(' ', _cursor);
+		size_t line_end = _buffer.find_first_of('\r', _cursor);
 		size_t path_end = _buffer.find_first_of(' ', _cursor);
+		if (_cursor == std::string::npos || path_end == std::string::npos
+			|| line_end == std::string::npos || path_end > line_end)
+		{
+			_has_error = true;
+			return;
+		}
 		_req.path = Path(_buffer.substr(_cursor, path_end - _cursor));
 		_cursor = _buffer.find_first_not_of(' ', path_end);
+		if (_cursor == std::string::npos || _cursor > line_end)
+		{
+			_has_error = true;
+			return;
+		}
 		size_t ver_end = _buffer.find_first_of('\r', _cursor);
 		_req.http_version = _buffer.substr(_cursor, ver_end - _cursor);
 		_cursor = ver_end + 2;
@@ -221,6 +233,9 @@ void				HttpRequestBuilder::sendBadRequest(WebServerConfig *global_config) const
 			HttpRequest req = build();
 			HttpResponse res(connection);
 			Router router(_req, res, global_config);
-			router.error.badRequest();
+			if (_error_status == 413)
+				router.error.contentLarge(_error_message);
+			else
+				router.error.badRequest(_error_message);
 	}
 

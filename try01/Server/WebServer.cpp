@@ -50,8 +50,8 @@ IMultiplexer* WebServer::_createMultiplexer(const WebServerConfig* config)
 
 	const HttpConfig* http = global ? global->getHttp() : NULL;
 	size_t keepalive = http ? http->getKeepaliveTimeout() : 0;
-	if (keepalive > 0)
-		mx->setTimeout(static_cast<int>(keepalive * 1000));
+	if (keepalive > 1000 || keepalive < 0)
+		mx->setTimeout(static_cast<int>(1000));
 
 	return mx;
 }
@@ -63,6 +63,7 @@ void WebServer::start(WebServerConfig* config)
 
 	ConnectionPool& pool = ConnectionPool::getInstance();
 	ConnectionPool::multiplexer(_multiplexer);
+	ConnectionPool::setGlobalConfig(config);
 
 	Server* srv = new Server(config);
 	_servers.push_back(srv);
