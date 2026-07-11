@@ -17,10 +17,8 @@ class Server
 
         bool _methodAllowed(HttpRequest::Method method, const std::list<HttpMethod>& allowed);
         void _dispatch(Router &router);
-        void _serveCgi(const Router &router);
-		void _serveCgi2(Router &router);
+		void _serveCgi(Router &router);
         void _serveUpload(const Router &router);
-		void _serveUpload2(const Router &router);
         void _serveDelete(const Router &router);
         void _serveStatic(const Router &router);
         void _serveAutoIndex(const Router &router, const FileSystem &fs);

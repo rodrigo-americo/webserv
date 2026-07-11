@@ -76,3 +76,4 @@ void	HttpError::internalServerError(const utils::str &body) const
 	err.send(ResponseHTTPVersion::HTTP_1_1);
 }
 
+

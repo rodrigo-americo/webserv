@@ -6,7 +6,6 @@
 
 void ConfigInheritanceResolver::resolve()
 {
-    // const std::list<ServerConfig*>& servers = config->getServers();
 	const std::list<ServerConfig*>& servers = WebServerConfig::getServers();
     for (std::list<ServerConfig*>::const_iterator it = servers.begin(); it != servers.end(); ++it)
         resolveServer(*it);

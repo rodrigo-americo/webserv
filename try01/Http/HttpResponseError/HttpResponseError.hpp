@@ -37,7 +37,7 @@ private:
 			ss << file.rdbuf();
 			body(ss.str());
 			headers.content_type("text/html");
-			LOG_DEBUG("_addFileContent::body_error: ");
+			LOG_DEBUG("_addFileContent::body_error: " << body());
 		}
 
 	}

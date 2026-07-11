@@ -10,10 +10,6 @@ ConfigBuilderVisitor::~ConfigBuilderVisitor() {}
 void ConfigBuilderVisitor::_addError(const std::string& msg)
 {
 	WebServerConfig::appendError(msg);
-    // if (_result)
-    //     _result->addError(msg);
-    // else
-    //     _pendingErrors.push_back(msg);
 }
 
 void ConfigBuilderVisitor::visit(Block& block)
@@ -24,10 +20,8 @@ void ConfigBuilderVisitor::visit(Block& block)
     {
         case ParserTokenType::PT_MAIN:
         {
-            // WebServerConfig* ws = new WebServerConfig();
             GlobalConfig* gc = new GlobalConfig();
             WebServerConfig::appendChild(gc);
-            // _result = ws;
             for (size_t i = 0; i < _pendingErrors.size(); ++i)
                 WebServerConfig::appendError(_pendingErrors[i]);
             _pendingErrors.clear();

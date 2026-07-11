@@ -190,7 +190,7 @@ void				HttpRequestsManager::checkTimeout()
 		{
 			HttpResponse	res(*it);
 			HttpResponseError error(res, 408, "Timeout Error", NULL);
-			res.headers.content_type("text/plain");
+			res.headers.content_type("text/html");
 			res.send(ResponseHTTPVersion::HTTP_1_1);
 			std::set<SocketConnection *>::iterator temp = it;
 			++it;

@@ -24,10 +24,10 @@ void Server::_dispatch(Router &router)
     if (!cgi_ext.empty())
     {
         if (cgi_ext.count(router.req.path.getExtension().string()))
-            return _serveCgi2(router);
+            return _serveCgi(router);
     }
     if (router.req.method == RequestMethod::POST && !router.config_location->getUploadDir().empty())
-        return _serveUpload2(router);
+        return _serveUpload(router);
     if (router.req.method == RequestMethod::DELETE && !router.config_location->getUploadDir().empty())
         return _serveDelete(router);
     _serveStatic(router);

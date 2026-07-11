@@ -31,9 +31,9 @@ CgiProcess::~CgiProcess()
 void	CgiProcess::timeoutResponse()
 {
 	HttpResponse res(_client_conn);
-	res.statusCode(504, "Gateway Timeout");
-	res.body("Gateway Timeout\n");
-	res.send(ResponseHTTPVersion::HTTP_1_1);
+    HttpResponseError err(res, 504, "Gateway Timeout", NULL);
+    err.headers.content_type("text/html");
+	err.send(ResponseHTTPVersion::HTTP_1_1);
 	ConnectionPool::updateWriteInterest(_client_conn, _client_conn->hasPendingWrite());
 	delete this;
 }
