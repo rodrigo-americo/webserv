@@ -21,7 +21,6 @@ class UploadMultipartFormDataHandler: public UploadHandler, public patterns::fac
 
 		UploadHandler	*copy(const Router *router);
 		void			saveFile();
-		void			saveFile2();
 };
 
 #endif

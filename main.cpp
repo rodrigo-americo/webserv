@@ -8,11 +8,12 @@
 # include "LoggerDestineFile.hpp"
 # include "LoggerDestineOstream.hpp"
 
+void	settupLogger();
+
 int main(int argc, char* argv[])
 {
-    Logger	&logger = Logger::getInstance();
-    LoggerDestineFile *cgi_log = new LoggerDestineFile("cgi.log", LoggerLevel::TRACE, LoggerLevel::FATAL);
-    logger.addDestine(cgi_log);
+	settupLogger();
+
 
     if (argc != 2)
     {
@@ -46,4 +47,15 @@ int main(int argc, char* argv[])
 	webServer.start();
     webServer.clean_up();
     return 0;
+}
+
+void	settupLogger()
+{
+	Logger	&logger = Logger::getInstance();
+    LoggerDestineFile *traces = new LoggerDestineFile("log_traces.log", LoggerLevel::TRACE, LoggerLevel::DEBUG);
+	LoggerDestineFile *info = new LoggerDestineFile("log_info.log", LoggerLevel::INFO, LoggerLevel::WARN);
+	LoggerDestineFile *error = new LoggerDestineFile("log_error.log", LoggerLevel::ERROR, LoggerLevel::FATAL);
+    logger.addDestine(traces);
+	logger.addDestine(info);
+	logger.addDestine(error);
 }

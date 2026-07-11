@@ -45,7 +45,7 @@ TEST_SETTUP_OBJ = $(TEST_SETTUP_SRC:%.cpp=%.test_o)
 # TEST_SCHEMA_SRC = $(shell find tests/schema_test -name "*.cpp")
 
 SRC = main.cpp \
-	$(shell find config try01 -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
+	$(shell find src -name "main.cpp" -prune -o -name "*.cpp" -print | tr "\n" " ")
 
 LIB = lib/lib
 LIB_SRC = $(shell find lib -name "main.cpp" -prune -o -type f -name "*.cpp" -print | tr "\n" " ")

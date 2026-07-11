@@ -16,77 +16,6 @@ UploadHandler	*UploadMultipartFormDataHandler::copy(const Router *router)
 };
 void			UploadMultipartFormDataHandler::saveFile()
 {
-	saveFile2();
-	// utils::str boundary = _getBoundary();
-	// const std::string &body = _router->req.body;
-	// std::string delimiter = boundary.string() + "\r\n";
-	// utils::str end_marker = boundary + "--";
-
-	// size_t pos = body.find(delimiter);
-	// if (pos == utils::str::npos)
-	// 	return; // corpo malformado, mas já validado antes
-
-	// int saved = 0;
-	// /*
-	// 	while (it)
-	// 	{
-	// 		UploadMultipartFormDataPart value = *it;
-	// 		value.fileName();
-	// 	}
-	// */
-	// while (pos != utils::str::npos)
-	// {
-	// 	pos += delimiter.size();
-
-	// 	// parsear headers da parte
-	// 	size_t header_end = body.find("\r\n\r\n", pos);
-	// 	if (header_end == utils::str::npos)
-	// 		break;
-	// 	utils::str part_headers = body.substr(pos, header_end - pos);
-	// 	pos = header_end + 4;
-
-	// 	// encontrar próximo boundary
-	// 	size_t next = body.find("\r\n" + boundary, pos);
-	// 	if (next == utils::str::npos)
-	// 		break;
-	// 	utils::str part_data = body.substr(pos, next - pos);
-
-	// 	// extrair filename do Content-Disposition
-	// 	size_t disp_pos = part_headers.find("Content-Disposition:");
-	// 	if (disp_pos == utils::str::npos)
-	// 	{
-	// 		pos = body.find(delimiter, next);
-	// 		continue;
-	// 	}
-	// 	size_t disp_end = part_headers.find("\r\n", disp_pos);
-	// 	utils::str disposition = part_headers.substr(disp_pos, disp_end - disp_pos);
-	// 	utils::str filename = Path(disposition).getFilename().string();
-
-	// 	if (filename.empty())
-	// 	{
-	// 		// parte sem arquivo (campo de texto), pular
-	// 		pos = body.find(delimiter, next);
-	// 		continue;
-	// 	}
-
-	// 	LOG_TRACE("saving file: " << filename);
-	// 	utils::str upload_path = _uploadPath(filename);
-	// 	if (!_saveFile(upload_path, part_data))
-	// 		return _router->error.internalServerError();
-	// 	saved++;
-	// 	pos = body.find(delimiter, next);
-	// }
-
-	// if (saved == 0)
-	// 	return _router->error.badRequest();
-
-	// _router->res.statusCode(201, "Created");
-	// _router->res.body("Upload OK\n");
-	// _router->res.send(ResponseHTTPVersion::HTTP_1_1);
-};
-
-void			UploadMultipartFormDataHandler::saveFile2()
-{
 	LOG_TRACE("saveFile2...");
 	LOG_INFO("saveFile2::info: ");
 	std::vector<std::pair<utils::str, utils::str> >	_parts;
@@ -130,4 +59,4 @@ void			UploadMultipartFormDataHandler::saveFile2()
 	_router->res.statusCode(201, "Created");
 	_router->res.body("Upload OK\n");
 	_router->res.send(ResponseHTTPVersion::HTTP_1_1);
-}
+};
