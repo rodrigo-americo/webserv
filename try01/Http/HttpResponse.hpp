@@ -67,6 +67,10 @@ class HttpResponse
 		{
 			utils::str	response;
 			HttpResponseConversor	*consersor = NULL;
+			// servidor sempre fecha a conexao apos responder; sem isso um
+			// cliente HTTP/1.1 assumiria persistencia por padrao (RFC 9112).
+			if (headers.connection().empty())
+				headers.connection("close");
 			// convert headers and body to a http version
 			switch (http_version)
 			{
@@ -99,6 +103,8 @@ class HttpResponse
 				return false;
 
 			headers.content_length(utils::to_string(fs.size()));
+			if (headers.connection().empty())
+				headers.connection("close");
 			utils::str	response;
 			HttpResponseConversor	*consersor = NULL;
 			switch (http_version)
