@@ -2,7 +2,7 @@
 
 Este projeto inclui um framework de testes leve, integrado ao sistema de build e projetado para facilitar a criação, execução e manutenção de testes automatizados.
 
-[READEME.md](../README.md)
+[README.md](../README.md)
 
 ## Principais Recursos
 

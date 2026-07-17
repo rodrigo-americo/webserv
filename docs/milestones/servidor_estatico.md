@@ -2,7 +2,7 @@
 
 Entrega um servidor HTTP estático completamente funcional. Cobre **roteamento de requisições**, **serviço de arquivos estáticos**, **listagem de diretórios**, **páginas de erro** (400, 403, 404, 405, 500...), **tratamento de métodos HTTP** (GET, POST, DELETE), **virtual hosts** e **blocos de localização** configuráveis. Ao final deste milestone, o servidor pode ser apontado para um diretório e utilizado.
 
-[READEME.md](../../README.md)
+[README.md](../../README.md)
 
 ## Da Infraestrutura ao Comportamento
 
